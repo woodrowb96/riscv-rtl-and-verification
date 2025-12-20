@@ -24,25 +24,33 @@ Output:
             1 if result == 0, else 0
 */
 module alu(
-  input logic [3:0] alu_op,
+  //control
+  input logic [3:0] alu_op,     //alu control signal
 
+  //input
   input logic [31:0] in_a,
   input logic [31:0] in_b,
 
+  //output
   output logic [31:0] result,
-  output logic zero
+  output logic zero             // 1 if result == 0, else 0
 );
+  
+  assign zero = result == 'b0 ? 1'b1 : 1'b0;
 
-  // always_comb begin
-  //   unique case(alu_op)
-  //     4'b0000:
-  //       result = in_a & in_b;
-  //     4'b0001:
-  //       result = in_a | in_b;
-  //     4'b0010:
-  //       result = in_a + in_b;
-  //     4'b0110:
-  //       result = in_a - in_b;
-  // end
+  always_comb begin
+    case(alu_op)
+      4'b0000:
+        result = in_a & in_b;
+      4'b0001:
+        result = in_a | in_b;
+      4'b0010:
+        result = in_a + in_b;
+      4'b0110:
+        result = in_a - in_b;
+      default:
+        result = 'd0;
+    endcase
+  end
 
 endmodule
