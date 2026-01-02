@@ -8,8 +8,7 @@ SCRIPT_NAME="$(basename "${BASH_SOURCE[0]}")"
 #make sure script is run only from the projects root directory
 if [ "$(pwd)" != "$PROJECT_ROOT_DIR" ] ; then
   echo "Error: please run script from project root directory (where the script is located)"
-  echo "Usage: "
-  echo "        cd $PROJECT_ROOT_DIR"
+  echo "Usage   cd $PROJECT_ROOT_DIR"
   echo "        ./$SCRIPT_NAME <path-to-file>"
   exit 1
 fi
