@@ -8,22 +8,21 @@ SCRIPT_NAME="$(basename "${BASH_SOURCE[0]}")"
 #make sure script is run only from the projects root directory
 if [ "$(pwd)" != "$PROJECT_ROOT_DIR" ] ; then
   echo "Error: please run script from project root directory (where the script is located)"
-  echo "Usage   cd $PROJECT_ROOT_DIR"
-  echo "        ./$SCRIPT_NAME <path-to-file>"
+  echo "Usage: run from $PROJECT_ROOT_DIR"
   exit 1
 fi
 
 #check for too many arguments
 if [ $# -gt 1 ] ; then
   echo 'Error: too many arguments'
-  echo "Usage: ./$SCRIPT_NAME <path-to-file>"
+  echo "Usage: $SCRIPT_NAME <path-to-file>"
   exit 1
 fi
 
 #check if file to be compiled was given, then compile it
 if [ -z "$1" ] ; then
   echo 'Error: no file specified'
-  echo "Usage: ./$SCRIPT_NAME <path-to-file>"
+  echo "Usage: $SCRIPT_NAME <path-to-file>"
   exit 1
 fi
 
