@@ -58,6 +58,14 @@ module tb_alu();
     num_tests++;
   endtask
 
+  task print_test_results();
+    $display("----------------");
+    $display("Test results:");
+    $display("Total tests ran: %d", num_tests);
+    $display("Total tests failed: %d", num_fails);
+    $display("----------------");
+  endtask
+
   alu dut(.*);
 
   initial begin
@@ -232,13 +240,7 @@ module tb_alu();
     score_test(32'd0);     //result should be 0
     #49
 
-    $display("----------------");
-    $display("Test results:");
-    $display("Total tests ran: %d", num_tests);
-    $display("Total tests failed: %d", num_fails);
-    $display("----------------");
-
-
+    print_test_results();
 
     $stop(1);
 
