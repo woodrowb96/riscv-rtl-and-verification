@@ -30,8 +30,7 @@ module tb_register_file();
   //assertion to make sure x0 in the expected reg file doesnt get changed
   always_comb begin
     exp_x0_check:
-      assert(expected[0] === 0)
-      else begin
+      assert(expected[0] === 0) else begin
         $fatal("ERROR: expected x0 != 0");
       end
   end
