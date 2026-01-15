@@ -156,7 +156,11 @@ cd xsim || exit 1
 
 echo "COMPILING RTL FILES:"
 echo $'\n'
-xvlog -sv "$PROJECT_ROOT_DIR"/rtl/*.sv
+for RTL_FILE in "$PROJECT_ROOT_DIR"/rtl/*.sv ; do
+  [ -f "$RTL_FILE" ] || break
+  xvlog -sv "$RTL_FILE"
+  echo $'\n'
+done
 echo $'\n'
 
 #-------------------- compile test_bench ------------------------------
