@@ -126,8 +126,8 @@ TEST_BENCH=${TEST_BENCH%.*}   #strip .sv from TEST_BENCH
 
 #get do file
 if [[ ! -n "$DO_FILE" ]] ; then   #if a do file was not set by the -d flag
-  if [[ -f "$PROJECT_ROOT_DIR/tcl/$TEST_BENCH.tcl" ]] ; then  #if default do file exists
-    DO_FILE="$PROJECT_ROOT_DIR/tcl/$TEST_BENCH.tcl"   #get abs path to do file
+  if [[ -f "$PROJECT_ROOT_DIR/waves/modelsim/$TEST_BENCH.tcl" ]] ; then  #if default do file exists
+    DO_FILE="$PROJECT_ROOT_DIR/waves/modelsim/$TEST_BENCH.tcl"   #get abs path to do file
   fi
 fi
 
