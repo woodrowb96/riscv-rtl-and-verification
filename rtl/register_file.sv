@@ -35,7 +35,6 @@ module register_file (
   output logic [31:0] rd_data_1,
   output logic [31:0] rd_data_2
 );
-
   //32 x 32'b registers
   logic [31:0] reg_file [0:31];
 
@@ -52,25 +51,4 @@ module register_file (
     rd_data_1 = (rd_reg_1 == '0) ? '0 : reg_file[rd_reg_1];
     rd_data_2 = (rd_reg_2 == '0) ? '0 : reg_file[rd_reg_2];
   end
-
-  //assertions for reading from x0
-  //inside of always_comb block so that they are contantly asserted
-  always_comb begin
-    //ensure rd_reg_1 always reads 0 from x0
-    x0_read_check_1:
-      if(rd_reg_1 == '0) begin
-        assert(rd_data_1 == '0) else begin
-          $fatal("ERROR: Read non zero x0 val from rd_reg_1");
-        end
-      end
-
-    //ensure rd_reg_2 always reads 0 from x0
-    x0_read_check_2:
-      if(rd_reg_2 == '0) begin
-        assert(rd_data_2 == '0) else begin
-          $fatal("ERROR: Read non zero x0 val from rd_reg_2");
-        end
-      end
-  end
-
 endmodule

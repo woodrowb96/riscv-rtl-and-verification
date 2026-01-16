@@ -117,6 +117,9 @@ module tb_register_file();
   //dut
   register_file dut(.*);
 
+  //bind assertions to dut
+  bind tb_register_file.dut register_file_assert dut_assert(.*);
+
   initial begin
 
     //drive initial values

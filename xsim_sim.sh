@@ -131,7 +131,6 @@ if [[ ! -n "$TCL_FILE" ]] ; then   #if a tcl file was not set by the -t flag
   fi
 fi
 
-
 #-------------------- ensure sim directory exists      ------------------------------
 
 #Check if sim directory exists at project root, if not the create it
@@ -163,6 +162,17 @@ for RTL_FILE in "$PROJECT_ROOT_DIR"/rtl/*.sv ; do
 done
 echo $'\n'
 
+#-------------------- compile all assertions files ------------------------------
+
+echo "COMPILING ASSERT FILES:"
+echo $'\n'
+for ASSERT_FILE in "$PROJECT_ROOT_DIR"/assert/*.sv ; do
+  [ -f "$ASSERT_FILE" ] || break
+  xvlog -sv "$ASSERT_FILE"
+  echo $'\n'
+done
+echo $'\n'
+
 #-------------------- compile test_bench ------------------------------
 
 echo "COMPILING TEST BENCH: $TEST_BENCH"
@@ -176,8 +186,8 @@ echo "ELABORATING TEST BENCH: $TEST_BENCH"
 echo $'\n'
 xelab $TEST_BENCH -debug typical
 echo $'\n'
-
-#-------------------- run the simulation    ------------------------------
+#
+# #-------------------- run the simulation    ------------------------------
 
 echo "SIMULATING TEST BENCH: $TEST_BENCH"
 echo $'\n'
@@ -189,7 +199,6 @@ if [[ ! -n "$TCL" ]] ; then  #but if there is none, then just run -all
   echo "          Running sim with no tcl file"
   echo $'\n'
 fi
-
 
 if [ "$CLI_MODE" = "true" ] ; then        #if we are in cli mode 
   if [ -n "$TCL" ] ; then
