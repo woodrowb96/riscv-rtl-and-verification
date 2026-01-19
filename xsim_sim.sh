@@ -173,6 +173,17 @@ for ASSERT_FILE in "$PROJECT_ROOT_DIR"/assert/*.sv ; do
 done
 echo $'\n'
 
+#-------------------- compile all coverage files ------------------------------
+
+echo "COMPILING COVERAGE FILES:"
+echo $'\n'
+for COVERAGE_FILE in "$PROJECT_ROOT_DIR"/coverage/*.sv ; do
+  [ -f "$COVERAGE_FILE" ] || break
+  xvlog -sv "$COVERAGE_FILE"
+  echo $'\n'
+done
+echo $'\n'
+
 #-------------------- compile test_bench ------------------------------
 
 echo "COMPILING TEST BENCH: $TEST_BENCH"
