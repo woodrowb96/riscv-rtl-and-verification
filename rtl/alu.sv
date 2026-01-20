@@ -37,7 +37,7 @@ module alu(
 );
 
   //zero flag set when result is all 0s
-  assign zero = (result == '0) ? 1'b1 : 1'b0;
+  assign zero = (result == '0);
 
   always_comb begin
     case(alu_op)
