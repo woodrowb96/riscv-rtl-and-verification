@@ -68,6 +68,9 @@ module tb_alu();
 
   alu dut(.*);
 
+  //bind assertions to the dut
+  bind tb_alu.dut alu_assert dut_assert(.*);
+
   initial begin
 
     /*************  TEST AND ***************/
