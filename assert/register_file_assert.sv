@@ -21,7 +21,7 @@ module register_file_assert(
     x0_read_check_1:
       if(rd_reg_1 == '0) begin
         assert(rd_data_1 == '0) else begin
-          $fatal("ERROR: Read non zero x0 val from rd_reg_1");
+          $fatal("ERROR REG FILE: Read non zero x0 val from rd_reg_1");
         end
       end
 
@@ -29,7 +29,7 @@ module register_file_assert(
     x0_read_check_2:
       if(rd_reg_2 == '0) begin
         assert(rd_data_2 == '0) else begin
-          $fatal("ERROR: Read non zero x0 val from rd_reg_2");
+          $fatal("ERROR REG FILE: Read non zero x0 val from rd_reg_2");
         end
       end
   end
