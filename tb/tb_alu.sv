@@ -71,6 +71,9 @@ module tb_alu();
   //bind assertions to the dut
   bind tb_alu.dut alu_assert dut_assert(.*);
 
+  //bind coverages into tb
+  bind tb_alu tb_alu_coverage cov(.*);
+
   initial begin
 
     /*************  TEST AND ***************/
@@ -79,13 +82,15 @@ module tb_alu();
     in_a = 32'hffffffff;
     in_b = 32'h00000000;
     #1
+    cov.cov_alu.sample();
     score_test(32'h00000000);
     #49
-
+    
     alu_op = 4'b0000;
     in_a = 32'hffffffff;
     in_b = 32'h00ff00ff;
     #1
+    cov.cov_alu.sample();
     score_test(32'h00ff00ff);
     #49
 
@@ -94,6 +99,7 @@ module tb_alu();
     in_a = 32'hffffffff;
     in_b = 32'h00000000;
     #1
+    cov.cov_alu.sample();
     score_test(32'hffffffff);
     #49
 
@@ -101,6 +107,7 @@ module tb_alu();
     in_a = 32'h0f0f0f0f;
     in_b = 32'hffff0000;
     #1
+    cov.cov_alu.sample();
     score_test(32'hffff0f0f);
     #49
 
@@ -108,6 +115,7 @@ module tb_alu();
     in_a = 32'h00000000;
     in_b = 32'h00000000;
     #1
+    cov.cov_alu.sample();
     score_test(32'h00000000);
     #49
 
@@ -116,6 +124,7 @@ module tb_alu();
     in_a = 32'd5;
     in_b = 32'd6;
     #1
+    cov.cov_alu.sample();
     score_test(32'd11);
     #49
 
@@ -123,6 +132,7 @@ module tb_alu();
     in_a = 32'd0;
     in_b = 32'd0;
     #1
+    cov.cov_alu.sample();
     score_test(32'd0);
     #49
     
@@ -130,27 +140,39 @@ module tb_alu();
     in_a = 32'hffffffff;
     in_b = 32'd1;
     #1
+    cov.cov_alu.sample();
     score_test(32'd0);    //result should overflow back to 0
     #49
-    
+
     alu_op = 4'b0010;     //test overflow
     in_a = 32'hffffffff;
     in_b = 32'd400;
     #1
+    cov.cov_alu.sample();
     score_test(32'd399);    //result should overflow to 399
     #49
-    
+
     alu_op = 4'b0010;         //test overflow
     in_a = 32'hffffffff;
     in_b = 32'hffffffff;
     #1
+    cov.cov_alu.sample();
     score_test(32'hfffffffe); //result should overflow to 1 less than max
+    #49
+
+    alu_op = 4'b0010;     //test overflow
+    in_a = 32'h8000_0000;
+    in_b = 32'h8000_0000;
+    #1
+    cov.cov_alu.sample();
+    score_test(32'd0);    //result should overflow back to 0
     #49
 
     alu_op = 4'b0010;         //test adding 0
     in_a = 32'hffffffff;
     in_b = 32'd0;
     #1
+    cov.cov_alu.sample();
     score_test(32'hffffffff); //shouldnt overflow
     #49
 
@@ -160,6 +182,7 @@ module tb_alu();
     in_a = 32'd5;
     in_b = 32'd3;
     #1
+    cov.cov_alu.sample();
     score_test(32'd2);
     #49
     
@@ -167,6 +190,7 @@ module tb_alu();
     in_a = 32'd5;
     in_b = 32'd6;
     #1
+    cov.cov_alu.sample();
     score_test(-32'd1);
     #49
     
@@ -174,6 +198,7 @@ module tb_alu();
     in_a = -32'd5;
     in_b = 32'd6;
     #1
+    cov.cov_alu.sample();
     score_test(-32'd11);
     #49
     
@@ -181,6 +206,7 @@ module tb_alu();
     in_a = -32'd15;
     in_b = -32'd9;
     #1
+    cov.cov_alu.sample();
     score_test(-32'd6);       //result should still be neg
     #49
     
@@ -188,6 +214,7 @@ module tb_alu();
     in_a = -32'd53512;
     in_b = -32'd53513;
     #1
+    cov.cov_alu.sample();
     score_test(32'd1);       //result should now be positive
     #49
 
@@ -195,6 +222,7 @@ module tb_alu();
     in_a = 32'd0;
     in_b = 32'd500;
     #1
+    cov.cov_alu.sample();
     score_test(-32'd500);
     #49
     
@@ -202,6 +230,7 @@ module tb_alu();
     in_a = 32'h80000000;      //in_a = max neg number
     in_b = 32'd0;             //in_b = 0
     #1
+    cov.cov_alu.sample();
     score_test(32'h80000000);   //result should still be max neg number
     #49
     
@@ -209,6 +238,7 @@ module tb_alu();
     in_a = 32'hffffffff;      //in_a = -1 in 2s compl
     in_b = 32'hffffffff;      //in_b = -1
     #1
+    cov.cov_alu.sample();
     score_test(32'd0);        //result = -1 - -1 = 0
     #49
     
@@ -216,14 +246,15 @@ module tb_alu();
     in_a = 32'h80000000;      //in_a = max neg number
     in_b = 32'd1;             //in_b = 1
     #1
+    cov.cov_alu.sample();
     score_test(32'h7fffffff);  //result should overflow to max pos num
     #49
-
 
     alu_op = 4'b0110;         //test overflow (max_pos - (-1) => overflow)
     in_a = 32'h7fffffff;      //in_a = max positive number
     in_b = -32'd1;            //in_b = -1
     #1
+    cov.cov_alu.sample();
     score_test(32'h80000000);  //result should overflow to max neg
     #49
 
@@ -231,6 +262,7 @@ module tb_alu();
     in_a = 32'd555121;
     in_b = 32'd555121;
     #1
+    cov.cov_alu.sample();
     score_test(-32'd0);     //zero flag should be set
     #49
     
@@ -240,6 +272,7 @@ module tb_alu();
     in_a = 32'd5;
     in_b = 32'd2222;
     #1
+    cov.cov_alu.sample();
     score_test(32'd0);     //result should be 0
     #49
 
