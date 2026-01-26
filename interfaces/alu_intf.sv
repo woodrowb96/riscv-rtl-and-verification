@@ -6,7 +6,7 @@ interface alu_intf;
   logic zero;
 
   modport coverage(input alu_op, in_a, in_b, result, zero);
-  modport dut(input alu_op, in_a, in_b, output result, zero);
+  modport assertion(input alu_op, in_a, in_b, result, zero);
 
   task print_state(string msg = "");
     $display("-----------------------");

@@ -5,8 +5,6 @@ module tb_alu();
 
   alu_intf intf();
 
-  tb_alu_coverage coverage = new(intf.coverage);
-
   int num_tests = 0;
   int num_fails = 0;
 
@@ -47,9 +45,11 @@ module tb_alu();
           .zero(intf.zero)
           );
 
-  //bind assertions to the dut
-  // bind tb_alu.dut alu_assert dut_assert(.*);
+  //create coverage
+  tb_alu_coverage coverage = new(intf.coverage);
 
+  //bind assertions to the dut
+  bind tb_alu.dut alu_assert dut_assert(intf.assertion);
 
   initial begin
 
