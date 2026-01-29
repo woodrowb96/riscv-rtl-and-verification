@@ -70,68 +70,106 @@ class tb_alu_coverage;
     }
 
     //We want to cover all combos of corner cases for each logical op
-    cross_inputs_and: cross cov_in_a_log_op, cov_in_b_log_op iff (vif.alu_op == 4'b0000);
-    cross_inputs_or: cross cov_in_a_log_op, cov_in_b_log_op iff (vif.alu_op == 4'b0001);
+    cross_inputs_and: cross cov_in_a_log_op, cov_in_b_log_op
+      iff (vif.alu_op == 4'b0000);
 
+    cross_inputs_or: cross cov_in_a_log_op, cov_in_b_log_op
+      iff (vif.alu_op == 4'b0001);
+
+    //We want to collect a wide range of density of 1s for logical ops
+    cov_in_a_log_op_density: coverpoint $countones(vif.in_a)
+      iff (vif.alu_op inside {4'b0000,4'b0001}) {
+        bins none = {0};
+        bins low = {[1:8]};
+        bins medium_low = {[9:16]};
+        bins medium_high = {[17:24]};
+        bins high = {[25:31]};
+        bins all = {32};
+      }
+    cov_in_b_log_op_density: coverpoint $countones(vif.in_b)
+      iff (vif.alu_op inside {4'b0000,4'b0001}) {
+        bins none = {0};
+        bins low = {[1:8]};
+        bins medium_low = {[9:16]};
+        bins medium_high = {[17:24]};
+        bins high = {[25:31]};
+        bins all = {32};
+      }
+
+    //We want to cover all combos of densities for each logical op
+    cross_density_and: cross cov_in_a_log_op_density, cov_in_b_log_op_density
+      iff (vif.alu_op == 4'b0000);
+
+    cross_density_or: cross cov_in_a_log_op_density, cov_in_b_log_op_density
+      iff (vif.alu_op == 4'b0001);
 
     /********** ADD OPERATION COVERAGE ************/
     //input corner cases to ADD operations
     cov_in_a_ADD_op: coverpoint vif.in_a
-    iff (vif.alu_op == 4'b0010) {
-      bins zero = {32'h0000_0000};
-      bins one = {32'h0000_0001};
-      bins max_unsigned = {32'hffff_ffff};
-      bins non_corners = {[32'h0000_0002 : 32'hffff_fffe]};
-    }
+      iff (vif.alu_op == 4'b0010) {
+        bins zero = {32'h0000_0000};
+        bins one = {32'h0000_0001};
+        bins max_unsigned = {32'hffff_ffff};
+        bins non_corners_low = {[32'h0000_0002 : 32'h5555_5555]};
+        bins non_corners_med = {[32'h5555_5556 : 32'haaaa_aaaa]};
+        bins non_corners_high = {[32'haaaa_aaab : 32'hffff_fffe]};
+      }
     cov_in_b_ADD_op: coverpoint vif.in_b
-    iff (vif.alu_op == 4'b0010) {
-      bins zero = {32'h0000_0000};
-      bins one = {32'h0000_0001};
-      bins max_unsigned = {32'hffff_ffff};
-      bins non_corners = {[32'h0000_0002 : 32'hffff_fffe]};
-    }
+      iff (vif.alu_op == 4'b0010) {
+        bins zero = {32'h0000_0000};
+        bins one = {32'h0000_0001};
+        bins max_unsigned = {32'hffff_ffff};
+        bins non_corners = {[32'h0000_0002 : 32'hffff_fffe]};
+        bins non_corners_low = {[32'h0000_0002 : 32'h5555_5555]};
+        bins non_corners_med = {[32'h5555_5556 : 32'haaaa_aaaa]};
+        bins non_corners_high = {[32'haaaa_aaab : 32'hffff_fffe]};
+      }
 
     //we want to cover all combos of corner cases for ADD operation
-    cross_inputs_ADD: cross cov_in_a_ADD_op, cov_in_b_ADD_op iff (vif.alu_op == 4'b0010);
+    cross_inputs_ADD: cross cov_in_a_ADD_op, cov_in_b_ADD_op 
+      iff (vif.alu_op == 4'b0010);
 
     //we want to cover overflowing and not overflowing the addition operation
-    cov_ADD_overflow: coverpoint add_overflow(vif.in_a, vif.in_b) iff (vif.alu_op == 4'b0010){
-        bins yes = {1};
-        bins no = {0};
-    }
+    cov_ADD_overflow: coverpoint add_overflow(vif.in_a, vif.in_b) 
+      iff (vif.alu_op == 4'b0010){
+          bins yes = {1};
+          bins no = {0};
+      }
 
 
     /********** SUB OPERATION COVERAGE ************/
     //corner inputs we want to cover with the sub operation
     cov_in_a_SUB_op: coverpoint vif.in_a
-    iff (vif.alu_op == 4'b0110) {
-      bins zero = {32'h0000_0000};            //these numbers are signes 2s compliment
-      bins signed_pos_one = {32'h0000_0001};
-      bins signed_neg_one = {32'hffff_ffff};
-      bins max_signed_pos = {32'h7fff_ffff};
-      bins min_signed_neg = {32'h8000_0000};
-      bins non_corners_pos = {[32'h0000_0002 : 32'h7fff_fffe]};
-      bins non_corners_neg = {[32'h8000_0001 : 32'hffff_fffe]};
-    }
+      iff (vif.alu_op == 4'b0110) {
+        bins zero = {32'h0000_0000};            //these numbers are signes 2s compliment
+        bins signed_pos_one = {32'h0000_0001};
+        bins signed_neg_one = {32'hffff_ffff};
+        bins max_signed_pos = {32'h7fff_ffff};
+        bins min_signed_neg = {32'h8000_0000};
+        bins non_corners_pos = {[32'h0000_0002 : 32'h7fff_fffe]};
+        bins non_corners_neg = {[32'h8000_0001 : 32'hffff_fffe]};
+      }
     cov_in_b_SUB_op: coverpoint vif.in_b
-    iff (vif.alu_op == 4'b0110) {
-      bins zero = {32'h0000_0000};
-      bins one = {32'h0000_0001};
-      bins neg_one = {32'hffff_ffff};
-      bins max_signed_pos = {32'h7fff_ffff};
-      bins min_signed_neg = {32'h8000_0000};
-      bins non_corners_pos = {[32'h0000_0002 : 32'h7fff_fffe]};
-      bins non_corners_neg = {[32'h8000_0001 : 32'hffff_fffe]};
-    }
+      iff (vif.alu_op == 4'b0110) {
+        bins zero = {32'h0000_0000};
+        bins one = {32'h0000_0001};
+        bins neg_one = {32'hffff_ffff};
+        bins max_signed_pos = {32'h7fff_ffff};
+        bins min_signed_neg = {32'h8000_0000};
+        bins non_corners_pos = {[32'h0000_0002 : 32'h7fff_fffe]};
+        bins non_corners_neg = {[32'h8000_0001 : 32'hffff_fffe]};
+      }
 
     //cross the corners for the sub operation
-    cross_inputs_SUB: cross cov_in_a_SUB_op, cov_in_b_SUB_op iff (vif.alu_op == 4'b0110);
+    cross_inputs_SUB: cross cov_in_a_SUB_op, cov_in_b_SUB_op
+      iff (vif.alu_op == 4'b0110);
 
     //we want to cover overflowing during sub operations
-    cov_SUB_overflow: coverpoint sub_overflow(vif.in_a, vif.in_b) iff (vif.alu_op == 4'b0110){
-        bins yes = {1};
-        bins no = {0};
-    }
+    cov_SUB_overflow: coverpoint sub_overflow(vif.in_a, vif.in_b)
+      iff (vif.alu_op == 4'b0110){
+          bins yes = {1};
+          bins no = {0};
+      }
   endgroup
 
   function new(virtual alu_intf.coverage vif);
