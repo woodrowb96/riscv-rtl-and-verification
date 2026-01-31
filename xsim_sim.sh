@@ -162,6 +162,16 @@ for RTL_FILE in "$PROJECT_ROOT_DIR"/rtl/*.sv ; do
 done
 echo $'\n'
 
+#-------------------- compile all interface files ------------------------------
+
+echo "COMPILING INTERFACE FILES:"
+echo $'\n'
+for INTERFACE_FILE in "$PROJECT_ROOT_DIR"/interfaces/*.sv ; do
+  [ -f "$INTERFACE_FILE" ] || break
+  xvlog -sv "$INTERFACE_FILE"
+  echo $'\n'
+done
+echo $'\n'
 #-------------------- compile all assertions files ------------------------------
 
 echo "COMPILING ASSERT FILES:"
