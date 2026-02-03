@@ -1,4 +1,4 @@
-`include "../coverage/tb_alu_coverage.sv"
+import tb_alu_coverage_pkg::*;
 import tb_alu_stimulus_pkg::*;
 import alu_ref_model_pkg::*;
 // `timescale 1ns / 1ns
@@ -6,26 +6,14 @@ import alu_ref_model_pkg::*;
 module tb_alu();
   alu_intf intf();
 
-  //connect the dut to interface
-  alu dut(.alu_op(intf.alu_op),
-          .in_a(intf.in_a),
-          .in_b(intf.in_b),
-          .result(intf.result),
-          .zero(intf.zero)
-          );
-
-  //bind assertions to the dut
-  bind tb_alu.dut alu_assert dut_assert(intf.assertion);
-
-  //coverage
-  tb_alu_coverage coverage;
-
+  //Drive transaction into dut
   task drive(general_trans trans);
     intf.alu_op = trans.alu_op;
     intf.in_a = trans.in_a;
     intf.in_b = trans.in_b;
   endtask
 
+  //Score the test
   int num_tests = 0;
   int num_fails = 0;
 
@@ -61,6 +49,20 @@ module tb_alu();
     $display("Total tests failed: %d", num_fails);
     $display("----------------");
   endtask
+
+  //connect the dut to interface
+  alu dut(.alu_op(intf.alu_op),
+          .in_a(intf.in_a),
+          .in_b(intf.in_b),
+          .result(intf.result),
+          .zero(intf.zero)
+          );
+
+  //bind assertions to the dut
+  bind tb_alu.dut alu_assert dut_assert(intf.assertion);
+
+  //coverage
+  tb_alu_coverage coverage;
 
   //we are going to need these kinds of transactions for our tests
   logical_op_trans logical_trans;
