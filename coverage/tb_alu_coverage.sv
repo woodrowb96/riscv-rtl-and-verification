@@ -29,7 +29,7 @@ class tb_alu_coverage;
   endfunction
 
   covergroup cg_alu;
-    cov_op: coverpoint vif.alu_op {
+  cov_op: coverpoint vif.alu_op {
       bins op_and = {4'b0000};
       bins op_or = {4'b0001};
       bins op_add = {4'b0010};
