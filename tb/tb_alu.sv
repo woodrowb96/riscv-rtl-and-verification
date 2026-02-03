@@ -2,165 +2,132 @@
 // `timescale 1ns / 1ns
 
 module tb_alu();
-
   alu_intf intf();
 
-  class general_transaction;
+  //connect the dut to interface
+  alu dut(.alu_op(intf.alu_op),
+          .in_a(intf.in_a),
+          .in_b(intf.in_b),
+          .result(intf.result),
+          .zero(intf.zero)
+          );
+
+  //bind assertions to the dut
+  bind tb_alu.dut alu_assert dut_assert(intf.assertion);
+
+  //coverage
+  tb_alu_coverage coverage;
+
+  //A general transaction 
+  typedef enum {TRUE, FALSE} include_invalid_ops;
+  class general_trans;
     rand logic [3:0] alu_op;
     rand logic [31:0] in_a;
     rand logic [31:0] in_b;
 
-    constraint valid_ops { alu_op inside {4'b0000, 4'b0001, 4'b0010, 4'b0110}; }
+    include_invalid_ops inc_inv_ops = FALSE;
 
-    task print(string msg = "");
-    $display("-----------------------");
-    $display("TRANSACTION:%s\n",msg);
-    $display("time: %t", $time);
-    $display("-----------------------");
-    $display("alu_op: %b", alu_op);
-    $display("-----------------------");
-    $display("in_a: %h", in_a);
-    $display("in_b: %h", in_b);
-    $display("-----------------------");
-    endtask
-  endclass
-
-  typedef enum {ONLY_CORNERS, ONLY_NON_CORNERS, MIXED} corner_mode;
-
-  virtual class alu_op_specific_transaction extends general_transaction;
-    typedef enum {CORNER, NON_CORNER} input_catagory;
-    rand input_catagory in_a_cat;
-    rand input_catagory in_b_cat;
-
-    corner_mode in_a_mode = MIXED;
-    corner_mode in_b_mode = MIXED;
-
-    constraint input_catagories {
-      if(in_a_mode == ONLY_CORNERS)
-          in_a_cat == CORNER;
-      else if(in_a_mode == ONLY_NON_CORNERS)
-          in_a_cat == NON_CORNER;
-      else if(in_a_mode == MIXED)
-        in_a_cat dist {CORNER := 1, NON_CORNER := 100};
-
-      if(in_b_mode == ONLY_CORNERS)
-          in_b_cat == CORNER;
-      else if(in_b_mode == ONLY_NON_CORNERS)
-          in_b_cat == NON_CORNER;
-      else if(in_b_mode == MIXED)
-        in_b_cat dist {CORNER := 1, NON_CORNER := 100};
-    }
-  endclass
-
-  class logical_op_transaction extends alu_op_specific_transaction;
-    typedef enum {LOW, MED, HIGH} bit_density_level;
-
-    rand bit_density_level density_a;
-    rand bit_density_level density_b;
-
-    constraint density_weights {
-      density_a dist {LOW := 5, MED := 1, HIGH := 10};
-      density_b dist {LOW := 5, MED := 1, HIGH := 10};
+    constraint valid_ops {
+      (inc_inv_ops == FALSE) -> (alu_op inside {4'b0000, 4'b0001, 4'b0010, 4'b0110});
     }
 
+    function void print(string msg = "");
+      $display("-----------------------");
+      $display("transaction:%s\n",msg);
+      $display("time: %t", $time);
+      $display("-----------------------");
+      $display("alu_op: %b", alu_op);
+      $display("-----------------------");
+      $display("in_a: %h", in_a);
+      $display("in_b: %h", in_b);
+      $display("-----------------------");
+    endfunction
+  endclass
+
+  typedef enum {CORNERS_ONLY, //input constrained to corner cases only
+                FULL_RANGE,   //input comes from the entire range (corners included)
+                WEIGHTED      //input chosen from corner and full_range cats using a dist
+                } input_rand_mode;
+
+  virtual class op_specific_trans extends general_trans;
+    typedef enum {CORNER, FULL} input_catagory;
+
+    input_catagory in_a_cat;
+    input_catagory in_b_cat;
+
+    input_rand_mode in_a_mode = WEIGHTED;
+    input_rand_mode in_b_mode = WEIGHTED;
+
+    function input_catagory cat_select(input_rand_mode input_mode);
+      input_catagory cat;
+      unique case(input_mode)
+        CORNERS_ONLY: begin
+          return CORNER;
+        end
+        FULL_RANGE: begin
+          return FULL;
+        end
+        WEIGHTED: begin
+          randcase
+            2: return CORNER;
+            1: return FULL;
+          endcase
+        end
+      endcase
+    endfunction
+
+    function void pre_randomize();
+      in_a_cat = cat_select(in_a_mode);
+      in_b_cat = cat_select(in_b_mode);
+    endfunction
+  endclass
+
+  class logical_op_trans extends op_specific_trans;
     constraint logical_op_inputs {
-      if(in_a_cat == CORNER)
+      if(in_a_cat == CORNER) {
         in_a inside {
           32'h0000_0000,
           32'h5555_5555,
           32'haaaa_aaaa,
           32'hffff_ffff
         };
-      else {
-        !(in_a inside {
-          32'h0000_0000,
-          32'h5555_5555,
-          32'haaaa_aaaa,
-          32'hffff_ffff
-        });
-
-        // if(density_a == LOW){
-        //   foreach(in_a[i])
-        //     in_a[i] dist {0 := 10, 1 := 1};
-        // } else if (density_a == MED) {
-        //   foreach(in_a[i])
-        //     in_a[i] dist {0 := 1, 1 := 1};
-        // } else {
-        //   foreach(in_a[i])
-        //     in_a[i] dist {0 := 1, 1 := 10};
-        // }
       }
 
-      if(in_b_cat == CORNER)
+      if(in_b_cat == CORNER) {
         in_b inside {
           32'h0000_0000,
           32'h5555_5555,
           32'haaaa_aaaa,
           32'hffff_ffff
-          };
-      else {
-        !(in_b inside {
-          32'h0000_0000,
-          32'h5555_5555,
-          32'haaaa_aaaa,
-          32'hffff_ffff
-        });
-
-        // if(density_b == LOW){
-        //   foreach(in_b[i])
-        //     in_b[i] dist {0 := 100, 1 := 1};
-        // } else if (density_b == MED) {
-        //   foreach(in_b[i])
-        //     in_b[i] dist {0 := 1, 1 := 1};
-        // } else {
-        //   foreach(in_b[i])
-        //     in_b[i] dist {0 := 1, 1 := 100};
-        // }
+        };
       }
     }
   endclass
 
-  class add_op_transaction extends alu_op_specific_transaction;
+  class add_op_trans extends op_specific_trans;
 
     constraint add_op { alu_op == 4'b0010; }
 
     constraint add_op_inputs {
-      if(in_a_cat == CORNER)
+      if(in_a_cat == CORNER) {
         in_a inside {
           32'h0000_0000,
           32'h0000_0001,
           32'hffff_ffff
-          };
-      else {
-        in_a inside {[32'h0000_0000 : 32'hffff_ffff]};
-
-        !(in_a inside {
-          32'h0000_0000,
-          32'h0000_0001,
-          32'hffff_ffff
-        });
+        };
       }
 
-      if(in_b_cat == CORNER)
+      if(in_b_cat == CORNER) {
         in_b inside {
           32'h0000_0000,
           32'h0000_0001,
           32'hffff_ffff
-          };
-      else {
-        in_b inside {[32'h0000_0000 : 32'hffff_ffff]};
-
-        !(in_b inside {
-          32'h0000_0000,
-          32'h0000_0001,
-          32'hffff_ffff
-        });
+        };
       }
     }
   endclass
 
-  class sub_op_transaction extends alu_op_specific_transaction;
-
+  class sub_op_trans extends op_specific_trans;
     constraint sub_op { alu_op == 4'b0110; }
 
     constraint sub_op_inputs {
@@ -171,18 +138,7 @@ module tb_alu();
           32'hffff_ffff,
           32'h7fff_ffff,
           32'h8000_0000
-          };
-          }
-      else {
-        in_a[31] dist { 1'b0 := 1, 1'b1 := 1 };
-
-        !(in_a inside {
-          32'h0000_0000,
-          32'h0000_0001,
-          32'hffff_ffff,
-          32'h7fff_ffff,
-          32'h8000_0000
-        });
+        };
       }
 
       if(in_b_cat == CORNER) {
@@ -192,24 +148,32 @@ module tb_alu();
           32'hffff_ffff,
           32'h7fff_ffff,
           32'h8000_0000
-          };
-      }
-      else {
-        in_b[31] dist { 1'b0 := 1, 1'b1 := 1 };
-
-        !(in_b inside {
-          32'h0000_0000,
-          32'h0000_0001,
-          32'hffff_ffff,
-          32'h7fff_ffff,
-          32'h8000_0000
-        });
+        };
       }
     }
+
+    function void post_randomize();
+      if(in_a_cat == FULL) begin
+        randcase
+          1: in_a[31:30] = 2'b00;
+          1: in_a[31:30] = 2'b01;
+          1: in_a[31:30] = 2'b10;
+          1: in_a[31:30] = 2'b11;
+        endcase
+      end
+
+      if(in_b_cat == FULL) begin
+        randcase
+          1: in_b[31:30] = 2'b00;
+          1: in_b[31:30] = 2'b01;
+          1: in_b[31:30] = 2'b10;
+          1: in_b[31:30] = 2'b11;
+        endcase
+      end
+    endfunction
   endclass
 
-
-  task drive(general_transaction trans);
+  task drive(general_trans trans);
     intf.alu_op = trans.alu_op;
     intf.in_a = trans.in_a;
     intf.in_b = trans.in_b;
@@ -291,92 +255,88 @@ module tb_alu();
     $display("----------------");
   endtask
 
-  alu dut(.alu_op(intf.alu_op),
-          .in_a(intf.in_a),
-          .in_b(intf.in_b),
-          .result(intf.result),
-          .zero(intf.zero)
-          );
-
-
-  //bind assertions to the dut
-  bind tb_alu.dut alu_assert dut_assert(intf.assertion);
-
-  //coverage
-  tb_alu_coverage coverage;
-
-  logical_op_transaction alu_log_trans;
-
-  add_op_transaction alu_add_trans;
-
-  sub_op_transaction alu_sub_trans;
+  //we are going to need these kinds of transactions for our tests
+  logical_op_trans logical_trans;
+  add_op_trans add_trans;
+  sub_op_trans sub_trans;
+  general_trans gen_trans;
 
   initial begin
-
     //create coverage and connect it to the interface
     coverage = new(intf.coverage);
+
+    //create the referance alu
     ref_alu = new();
-    alu_log_trans = new();
-    alu_add_trans = new();
-    alu_sub_trans = new();
+
+    //create our transactions
+    logical_trans = new();
+    add_trans = new();
+    sub_trans = new();
+    gen_trans = new();
 
     /*************  TEST AND ***************/
-
     for(int i = 0; i < 1000; i++) begin
-      alu_log_trans.randomize() with { alu_op == 4'b0000; };
-      drive(alu_log_trans);
+      assert(logical_trans.randomize() with { alu_op == 4'b0000; })
+      drive(logical_trans);
       #1;
       coverage.sample();
       score_test();
       #49;
     end
 
-    // /************   TEST OR *****************/
+    /************   TEST OR *****************/
     for(int i = 0; i < 1000; i++) begin
-      alu_log_trans.randomize() with { alu_op == 4'b0001; };
-      drive(alu_log_trans);
+      assert(logical_trans.randomize() with { alu_op == 4'b0001; });
+      drive(logical_trans);
       #1;
       coverage.sample();
       score_test();
       #49;
     end
 
-    // /*****************  TEST ADD **************/
+    /*****************  TEST ADD **************/
     for(int i = 0; i < 1000; i++) begin
-      alu_add_trans.randomize();
-      drive(alu_add_trans);
+      assert(add_trans.randomize());
+      drive(add_trans);
       #1;
       coverage.sample();
       score_test();
       #49;
     end
 
-    // /************ TEST SUB ****************/
+    /************ TEST SUB ****************/
     for(int i = 0; i < 1000; i++) begin
-      if (! alu_sub_trans.randomize() ) begin
-        $fatal("sub transaction randomization failed");
-      end
-      drive(alu_sub_trans);
+      assert(sub_trans.randomize());
+      drive(sub_trans);
       #1;
       coverage.sample();
       score_test();
       #49;
     end
 
-    // /************ TEST INVALID OP ****************/
-    // 
-    // alu_op = 4'b1110;         //not a valid operation
-    // in_a = 32'd5;
-    // in_b = 32'd2222;
-    // #1
-    // coverage.sample();
-    // score_test(32'd0);     //result should be 0
-    // #49
-    //
+    /************ TEST EVERYTHING WITH COMP RAND ****************/
+    for(int i = 0; i < 1000; i++) begin
+      assert(gen_trans.randomize());
+      drive(gen_trans);
+      #1;
+      coverage.sample();
+      score_test();
+      #49;
+    end
+
+    /************ TEST INVALID OP ****************/
+    gen_trans.inc_inv_ops = TRUE;
+    for(int i = 0; i < 10; i++) begin
+      assert(gen_trans.randomize() with { alu_op inside {4'b1111, 4'b1100, 4'b1010}; });
+      drive(gen_trans);
+      #1;
+      coverage.sample();
+      score_test();
+      #49;
+    end
+
     print_test_results();
 
     $stop(1);
-
   end
-
 endmodule
