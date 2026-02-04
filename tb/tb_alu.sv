@@ -105,39 +105,38 @@ module tb_alu();
     gen_trans = new();
 
     /*************  TEST AND ***************/
-    for(int i = 0; i < 1000; i++) begin
+    repeat(1000) begin
       assert(logical_trans.randomize() with { alu_op == 4'b0000; })
       test(logical_trans);
     end
 
-
     /************   TEST OR *****************/
-    for(int i = 0; i < 1000; i++) begin
+    repeat(1000) begin
       assert(logical_trans.randomize() with { alu_op == 4'b0001; });
       test(logical_trans);
     end
 
     /*****************  TEST ADD **************/
-    for(int i = 0; i < 1000; i++) begin
+    repeat(1000) begin
       assert(add_trans.randomize());
       test(add_trans);
     end
 
     /************ TEST SUB ****************/
-    for(int i = 0; i < 1000; i++) begin
+    repeat(1000) begin
       assert(sub_trans.randomize());
       test(sub_trans);
     end
 
     /************ TEST EVERYTHING COMPLETELY RANDOMIZED ****************/
-    for(int i = 0; i < 1000; i++) begin
+    repeat(1000) begin
       assert(gen_trans.randomize());
       test(gen_trans);
     end
 
     /************ TEST INVALID OP ****************/
     gen_trans.inc_inv_ops = TRUE;
-    for(int i = 0; i < 10; i++) begin
+    repeat(10) begin
       assert(gen_trans.randomize() with { alu_op inside {4'b1111, 4'b1100, 4'b1010}; });
       test(gen_trans);
     end
