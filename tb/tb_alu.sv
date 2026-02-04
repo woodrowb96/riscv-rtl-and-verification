@@ -3,16 +3,18 @@ import tb_alu_stimulus_pkg::*;
 import alu_ref_model_pkg::*;
 
 module tb_alu();
+  /*********** CLK *************/
+  //alu is purely comb, but I use a clk to sync testing
   bit clk;
   initial begin
     clk = 0;
-    forever #5 clk = ~clk;
+    forever #5 clk = ~clk;    //period of #10
   end
 
-  //interface
+  /*********** INTERFACE *************/
   alu_intf intf();
 
-  //dut
+  /*********** DUT *************/
   alu dut(.alu_op(intf.alu_op),
           .in_a(intf.in_a),
           .in_b(intf.in_b),
@@ -20,16 +22,13 @@ module tb_alu();
           .zero(intf.zero) 
           );
 
-  //bind assertions to the dut
+  /*********** BIND ASSERTIONS *************/
   bind tb_alu.dut alu_assert dut_assert(intf.assertion);
 
-  //we will be collecting coverage
+  /*********** COVERAGE *************/
   tb_alu_coverage coverage;
 
-  //reference alu used to score tests
-  alu_ref_model ref_alu;
-
-  //Drive transaction into dut
+  /*********** TASKS *************/
   task drive(general_trans trans);
     intf.alu_op = trans.alu_op;
     intf.in_a = trans.in_a;
@@ -41,25 +40,31 @@ module tb_alu();
     trans.zero = intf.zero;
   endtask
 
-  //keep track of how many tests, and how many failed
+  //reference alu used to score tests
+  alu_ref_model ref_alu;
+
+  //keep track of how many tests weve scored, and how many failed
   int num_tests = 0;
   int num_fails = 0;
 
+  //Use the reference model to score a transaction
   task automatic score(general_trans trans);
-
     bit test_fail = 0;
+
+    //use trans inputs to calc expected values
     expected_output expected = ref_alu.expected(trans.alu_op, trans.in_a, trans.in_b);
 
+    //score out trans outputs
     if(trans.result != expected.result) begin
       $error("FAIL\nIncorect Result\nExpected: %h",expected.result);
       test_fail = 1;
     end
-
     if(trans.zero != expected.zero) begin
       $error("Zero flag incorect\nexpected: %b", expected.zero);
       test_fail = 1;
     end
 
+    //handle failed tests
     if(test_fail) begin
       num_fails++;
       trans.print();
@@ -71,13 +76,15 @@ module tb_alu();
   task test(general_trans trans);
       @(posedge clk);
       drive(trans);
+      //wait for the inputs to propogate to the outputs
       #1;
       monitor(trans);
       score(trans);
+      //collect our coverage
       coverage.sample();
   endtask
 
-  task print_test_results();
+  task print_results();
     $display("----------------");
     $display("Test results:");
     $display("Total tests ran: %d", num_tests);
@@ -85,6 +92,7 @@ module tb_alu();
     $display("----------------");
   endtask
 
+  /**************  TESTING ***************************/
   //we are going to need these kinds of transactions for our tests
   logical_op_trans logical_trans;
   add_op_trans add_trans;
@@ -141,7 +149,7 @@ module tb_alu();
       test(gen_trans);
     end
 
-    print_test_results();
+    print_results();
 
     $stop(1);
   end
