@@ -8,18 +8,18 @@ interface alu_intf;
   modport coverage(input alu_op, in_a, in_b, result, zero);
   modport assertion(input alu_op, in_a, in_b, result, zero);
 
-  task print_state(string msg = "");
+  task print(string msg = "");
     $display("-----------------------");
-    $display("INTERFACE_STATE:%s\n",msg);
+    $display("ALU INTERFACE:%s\n",msg);
     $display("time: %t", $time);
     $display("-----------------------");
-    $display("alu_op: %b", intf.alu_op);
+    $display("alu_op: %b", alu_op);
     $display("-----------------------");
-    $display("in_a: %h", intf.in_a);
-    $display("in_b: %h", intf.in_b);
+    $display("in_a: %h", in_a);
+    $display("in_b: %h", in_b);
     $display("-----------------------");
-    $display("result: %h", intf.result);
-    $display("zero: %b", intf.zero);
+    $display("result: %h", result);
+    $display("zero: %b", zero);
     $display("-----------------------");
   endtask
 endinterface

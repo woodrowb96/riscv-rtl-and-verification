@@ -23,7 +23,7 @@ package tb_alu_stimulus_pkg;
 
     function void print(string msg = "");
       $display("-----------------------");
-      $display("transaction:%s\n",msg);
+      $display("ALU TRANS:%s\n",msg);
       $display("time: %t", $time);
       $display("-----------------------");
       $display("alu_op: %b", alu_op);
