@@ -14,6 +14,12 @@ interface register_file_intf(input clk);
     input wr_en, rd_reg_1, rd_reg_2, wr_reg, wr_data, rd_data_1, rd_data_2
   );
 
+  clocking cb @ (posedge clk);
+    default input #1 output #2;
+    input rd_data_1, rd_data_2;
+    output wr_en, wr_reg, wr_data, rd_reg_1, rd_reg_2;
+  endclocking
+
   function print_state(string msg = "");
     $display("-----------------------");
     $display("REG_FILE_INTF STATE:%s\n",msg);
