@@ -24,20 +24,20 @@ interface register_file_intf(input clk);
     input wr_en, wr_reg, wr_data, rd_reg_1, rd_reg_2, rd_data_1, rd_data_2;
   endclocking
 
-  function print_state(string msg = "");
+  function print(string msg = "");
     $display("-----------------------");
-    $display("REG_FILE_INTF STATE:%s\n",msg);
+    $display("REG_FILE INTERFACE:%s\n",msg);
     $display("time: %t", $time);
     $display("-----------------------");
-    $display("wr_en: %b", intf.wr_en);
+    $display("wr_en: %b", wr_en);
     $display("-----------------------");
-    $display("wr_reg: %d", intf.wr_reg);
-    $display("wr_data: %h", intf.wr_data);
-    $display("rd_reg_1: %d", intf.rd_reg_1);
-    $display("rd_reg_2: %d", intf.rd_reg_2);
+    $display("wr_reg: %d", wr_reg);
+    $display("wr_data: %h", wr_data);
+    $display("rd_reg_1: %d", rd_reg_1);
+    $display("rd_reg_2: %d", rd_reg_2);
     $display("-----------------------");
-    $display("rd_reg_1: %h", intf.rd_data_1);
-    $display("rd_reg_2: %h", intf.rd_data_2);
+    $display("rd_reg_1: %h", rd_data_1);
+    $display("rd_reg_2: %h", rd_data_2);
     $display("-----------------------");
   endfunction
 
