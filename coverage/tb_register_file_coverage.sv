@@ -7,6 +7,28 @@ package tb_register_file_coverage_pkg;
         bins enabled = {1'b1};
         bins disbled = {1'b0};
       }
+      cov_wr_reg: coverpoint vif.wr_reg;
+      cov_rd_reg_1: coverpoint vif.rd_reg_1;
+      cov_rd_reg_2: coverpoint vif.rd_reg_2;
+
+      cov_wr_data: coverpoint vif.wr_data{
+        bins zeros = {32'h0000_0000};
+        bins all_ones = {32'hffff_ffff};
+        bins non_corner = {[32'h0000_0001 : 32'hffff_fffe]};
+      }
+
+      cov_rd_data_1: coverpoint vif.rd_data_1
+        iff(vif.rd_reg_1 != '0) {
+        bins zeros = {32'h0000_0000};
+        bins all_ones = {32'hffff_ffff};
+        bins non_corner = {[32'h0000_0001 : 32'hffff_fffe]};
+      }
+      cov_rd_data_2: coverpoint vif.rd_data_2
+        iff(vif.rd_reg_2 != '0) {
+          bins zeros = {32'h0000_0000};
+          bins all_ones = {32'hffff_ffff};
+          bins non_corner = {[32'h0000_0001 : 32'hffff_fffe]};
+        }
     endgroup
 
     function new(virtual register_file_intf.monitor vif);
