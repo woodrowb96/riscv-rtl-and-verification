@@ -2,7 +2,11 @@ package tb_register_file_coverage_pkg;
   class tb_register_file_coverage;
     virtual register_file_intf.monitor vif;
 
-    covergroup cg_reg_file @(vif.cb_monitor);
+    covergroup cg_reg_file;
+      cov_wr_en: coverpoint vif.wr_en{
+        bins enabled = {1'b1};
+        bins disbled = {1'b0};
+      }
     endgroup
 
     function new(virtual register_file_intf.monitor vif);
