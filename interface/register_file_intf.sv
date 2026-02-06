@@ -7,13 +7,6 @@ interface register_file_intf(input clk);
   logic [31:0] rd_data_1;
   logic [31:0] rd_data_2;
 
-  modport coverage(
-    input wr_en, rd_reg_1, rd_reg_2, wr_reg, wr_data, rd_data_1, rd_data_2
-  );
-  modport assertion(
-    input wr_en, rd_reg_1, rd_reg_2, wr_reg, wr_data, rd_data_1, rd_data_2
-  );
-
   clocking cb_drive @ (posedge clk);
     default output #2;
     output wr_en, wr_reg, wr_data, rd_reg_1, rd_reg_2;
@@ -23,6 +16,10 @@ interface register_file_intf(input clk);
     default input #1;
     input wr_en, wr_reg, wr_data, rd_reg_1, rd_reg_2, rd_data_1, rd_data_2;
   endclocking
+
+  modport monitor(
+    clocking cb_monitor
+  );
 
   function print(string msg = "");
     $display("-----------------------");
