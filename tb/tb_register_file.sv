@@ -1,5 +1,6 @@
 import tb_register_file_stimulus_pkg::*;
 import register_file_ref_model_pkg::*;
+import tb_register_file_coverage_pkg::*;
 // `timescale 1ns / 10ps
 
 module tb_register_file();
@@ -28,7 +29,7 @@ module tb_register_file();
   bind tb_register_file.dut register_file_assert dut_assert(intf.monitor);
 
   /************  COVERAGE ************/
- //  bind tb_register_file tb_register_file_coverage cov(.*);
+  tb_register_file_coverage coverage;
 
   /************  TASKS ************/
 
@@ -108,6 +109,7 @@ module tb_register_file();
 
   initial begin
 
+    coverage = new(intf.monitor);
     ref_reg_file = new();
     trans = new();
 
