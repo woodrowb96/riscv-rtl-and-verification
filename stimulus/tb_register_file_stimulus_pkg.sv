@@ -9,6 +9,16 @@ package tb_register_file_stimulus_pkg;
     logic [31:0] rd_data_1;
     logic [31:0] rd_data_2;
 
+    //We want to make sure we hit the corners
+    //but want to hit non_corners most of the time
+    constraint wr_data_corners {
+      wr_data dist {
+        32'h0000_0000 := 1,
+        32'hffff_ffff := 1,
+        [32'h0000_0001 : 32'hffff_fffe] :/ 10
+      };
+    }
+
     function void print(string msg = "");
       $display("-----------------------");
       $display("transaction:%s\n",msg);
