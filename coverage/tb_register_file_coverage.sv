@@ -4,8 +4,8 @@ package tb_register_file_coverage_pkg;
 
     covergroup cg_reg_file;
       cov_wr_en: coverpoint vif.wr_en{
-        bins enabled = {1'b1};
-        bins disbled = {1'b0};
+        bins write = {1'b1};
+        bins dont_write = {1'b0};
       }
       cov_wr_reg: coverpoint vif.wr_reg;
       cov_rd_reg_1: coverpoint vif.rd_reg_1;
@@ -29,6 +29,8 @@ package tb_register_file_coverage_pkg;
           bins all_ones = {32'hffff_ffff};
           bins non_corner = {[32'h0000_0001 : 32'hffff_fffe]};
         }
+
+      cross_wr_en_wr_reg: cross cov_wr_en, cov_wr_reg;
     endgroup
 
     function new(virtual register_file_intf.monitor vif);
