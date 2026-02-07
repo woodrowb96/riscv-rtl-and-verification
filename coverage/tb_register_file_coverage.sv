@@ -30,6 +30,12 @@ package tb_register_file_coverage_pkg;
           bins non_corner = {[32'h0000_0001 : 32'hffff_fffe]};
         }
 
+      cov_read_during_write_reg_1: coverpoint vif.rd_reg_1
+        iff(vif.wr_en && (vif.wr_reg == vif.rd_reg_1));
+
+      cov_read_during_write_reg_2: coverpoint vif.rd_reg_2
+        iff(vif.wr_en && (vif.wr_reg == vif.rd_reg_2));
+
       cross_wr_en_wr_reg: cross cov_wr_en, cov_wr_reg;
     endgroup
 
