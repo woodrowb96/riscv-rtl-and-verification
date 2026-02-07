@@ -1,22 +1,17 @@
 module register_file_assert(
   register_file_intf.assertion intf
 );
-  //immediate assertions inside of always_comb so that they are contantly asserted
-  always_comb begin
-    //ensure rd_reg_1 always reads 0 from x0
-    x0_read_check_1:
-      if(intf.rd_reg_1 == '0) begin
-        assert(intf.rd_data_1 == '0) else begin
-          $error("ERROR REG FILE: Read non zero x0 val from rd_reg_1");
-        end
-      end
+  /*********   x0 READ CHECK **************/
+  property x0_rd_zero_prop(logic [4:0] rd_reg, logic [31:0] rd_data);
+    @(posedge intf.clk)
+    (rd_reg == '0) |-> (rd_data == '0);
+  endproperty
 
-    //ensure rd_reg_2 always reads 0 from x0
-    x0_read_check_2:
-      if(intf.rd_reg_2 == '0) begin
-        assert(intf.rd_data_2 == '0) else begin
-          $error("ERROR REG FILE: Read non zero x0 val from rd_reg_2");
-        end
-      end
-  end
+  x0_rd_zero_rd_reg_1_assert:
+    assert property(x0_rd_zero_prop(intf.rd_reg_1, intf.rd_data_1)) else
+      $error("x0_rd_zero_rd_reg_2_assert: rd_data_2=0x%h", intf.rd_data_2);
+  x0_rd_zero_rd_reg_2_assert:
+    assert property(x0_rd_zero_prop(intf.rd_reg_2, intf.rd_data_2)) else
+      $error("x0_rd_zero_rd_reg_2_assert: rd_data_2=0x%h", intf.rd_data_2);
+
 endmodule
