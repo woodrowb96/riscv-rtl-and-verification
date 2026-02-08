@@ -35,8 +35,9 @@ module register_file (
   output logic [31:0] rd_data_1,
   output logic [31:0] rd_data_2
 );
-  //32 x 32'b registers
+  //32 x 32'b registers, x0 initialized to 0
   logic [31:0] reg_file [0:31];
+  initial reg_file[0] = '0;
 
   //writting into reg file
   always_ff @(posedge clk) begin
