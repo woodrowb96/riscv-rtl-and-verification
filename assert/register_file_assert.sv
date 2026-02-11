@@ -37,21 +37,4 @@ module register_file_assert(
   write_assert:
     assert property(write_prop) else
       $error("write_assert: wr_data was not written into the reg_file");
-
-  // /********  READ CHECKS  ****************/
-  // //we want to make sure we are reading the actual value stored in the reg file
-  // property read_prop(logic [4:0] rd_reg, logic [31:0] rd_data);
-  //   @(posedge intf.clk)
-  //   //reads are immediate and combinatorial, so it should we are not looking
-  //   //forward to the next cycle like we do with writes
-  //   1 |-> rd_data == register_file.reg_file[rd_reg];
-  // endproperty
-  //
-  // read_rd_reg_1_assert: assert property(read_prop(intf.rd_reg_1, intf.rd_data_1)) else
-  //   $error("read_rd_reg_1_assert: actual rd_data: %h, expected: %h", 
-  //           intf.rd_data_1,
-  //           register_file.reg_file[intf.rd_reg_1]
-  //         );
-  //
-
 endmodule
