@@ -1,11 +1,13 @@
+import riscv_32i_defs_pkg::*;
+
 module reg_file_assert(
   reg_file_intf.monitor intf
 );
   /*********   x0 READ CHECK **************/
   //We want to make sure we always read 0 from x0
-  property x0_rd_zero_prop(logic [4:0] rd_reg, logic [31:0] rd_data);
+  property x0_rd_zero_prop(rf_addr_t rd_reg, word_t rd_data);
     @(posedge intf.clk)
-    (rd_reg == '0) |-> (rd_data == '0);
+    (rd_reg == X0) |-> (rd_data == '0);
   endproperty
 
   x0_rd_zero_rd_reg_1_assert:
@@ -19,12 +21,12 @@ module reg_file_assert(
   //x0 should always be zero, it should never be overwritten
   property x0_always_zero_prop;
     @(posedge intf.clk)
-    reg_file.reg_file[0] == '0;
+    reg_file.reg_file[X0] == '0;
   endproperty
 
   x0_always_zero_assert:
     assert property(x0_always_zero_prop) else
-      $error("x0_always_zero_assert: x0=%h", reg_file.reg_file[0]);
+      $error("x0_always_zero_assert: x0=%h", reg_file.reg_file[X0]);
 
   /******* WRITE CHECK *****************/
   //We want to make sure the wr_data is actually written into the reg_file
@@ -32,7 +34,7 @@ module reg_file_assert(
     //if wr_en and we are not writting to x0 |=>
     //then the data should be in the reg_file during the next clk cycle
     @(posedge intf.clk)
-    (intf.wr_en && intf.wr_reg != '0) |=>
+    (intf.wr_en && intf.wr_reg != X0) |=>
       (reg_file.reg_file[$past(intf.wr_reg)] == $past(intf.wr_data));
   endproperty
 
@@ -45,7 +47,7 @@ module reg_file_assert(
   //writting to it
   generate
     //We want to check x1->x32
-    for(genvar index = 1; index < 32; index++) begin
+    for(genvar index = X0 + 1; index < RF_DEPTH; index++) begin
       write_persistance_assert:
         assert property(
           //if we are not writting to this register |=>
@@ -62,12 +64,12 @@ module reg_file_assert(
   //reg_file
   always @(posedge intf.clk) begin
     #0
-    if(intf.rd_reg_1 != '0) begin
+    if(intf.rd_reg_1 != X0) begin
       assert (intf.rd_data_1 === reg_file.reg_file[intf.rd_reg_1]) else
         $error("read_rd_reg_1_assert: expected:%h, actual: %h",
                 reg_file.reg_file[intf.rd_reg_1], intf.rd_data_1);
     end
-    if(intf.rd_reg_2 != '0) begin
+    if(intf.rd_reg_2 != X0) begin
       assert (intf.rd_data_2 === reg_file.reg_file[intf.rd_reg_2]) else
         $error("read_rd_reg_2_assert: expected:%h, actual: %h",
                 reg_file.reg_file[intf.rd_reg_2], intf.rd_data_2);

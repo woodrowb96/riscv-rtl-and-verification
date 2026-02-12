@@ -1,6 +1,7 @@
 import tb_reg_file_stimulus_pkg::*;
 import reg_file_ref_model_pkg::*;
 import tb_reg_file_coverage_pkg::*;
+import riscv_32i_defs_pkg::*;
 // `timescale 1ns / 10ps
 
 module tb_reg_file();
@@ -112,8 +113,8 @@ module tb_reg_file();
 
     //drive initial values
     intf.wr_en <= '0;             //start out not writing
-    intf.wr_reg <= 'd0;           //pointing wr_reg to x0
-    intf.wr_data <= 32'hFFFFFFFF; //driving wr_data to all 1s
+    intf.wr_reg <= X0;           //pointing wr_reg to x0
+    intf.wr_data <= '1; //driving wr_data to all 1s
     intf.rd_reg_1 <= '0;          //reading from x0
     intf.rd_reg_2 <= '0;
 

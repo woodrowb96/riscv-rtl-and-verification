@@ -1,13 +1,15 @@
 package tb_reg_file_stimulus_pkg;
+  import riscv_32i_defs_pkg::*;
+
   class reg_file_trans;
     rand logic wr_en;
-    rand logic [4:0] rd_reg_1;
-    rand logic [4:0] rd_reg_2;
-    rand logic [4:0] wr_reg;
-    rand logic [31:0] wr_data;
+    rand rf_addr_t rd_reg_1;
+    rand rf_addr_t rd_reg_2;
+    rand rf_addr_t wr_reg;
+    rand word_t wr_data;
 
-    logic [31:0] rd_data_1;
-    logic [31:0] rd_data_2;
+    word_t rd_data_1;
+    word_t rd_data_2;
 
     //We want to make sure we hit the corners
     //but want to hit non_corners most of the time

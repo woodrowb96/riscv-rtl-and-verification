@@ -1,4 +1,6 @@
 package tb_reg_file_coverage_pkg;
+  import riscv_32i_defs_pkg::*;
+
   class tb_reg_file_coverage;
     virtual reg_file_intf.monitor vif;
 
@@ -21,7 +23,7 @@ package tb_reg_file_coverage_pkg;
       //we want to actually write this data into the reg file, so
       //ensure write is enabled, and we are not pointing to x0
       cov_wr_data: coverpoint vif.wr_data
-        iff(vif.wr_en && vif.wr_reg != '0) {
+        iff(vif.wr_en && vif.wr_reg != X0) {
           bins zeros = {32'h0000_0000};
           bins all_ones = {32'hffff_ffff};
           bins non_corner = {[32'h0000_0001 : 32'hffff_fffe]};
@@ -31,19 +33,19 @@ package tb_reg_file_coverage_pkg;
       //it will not be written (tb should test that), but
       //we want to make sure we tried at least once
       cov_x0_write: coverpoint vif.wr_data
-        iff(vif.wr_en && vif.wr_reg == '0) {
+        iff(vif.wr_en && vif.wr_reg == X0) {
           bins non_zero = {[32'h0000_0001 : 32'hffff_ffff]};
         }
 
       //We want to cover reading these values out from non x0 read regs
       cov_rd_data_1: coverpoint vif.rd_data_1
-        iff(vif.rd_reg_1 != '0) {
+        iff(vif.rd_reg_1 != X0) {
         bins zeros = {32'h0000_0000};
         bins all_ones = {32'hffff_ffff};
         bins non_corner = {[32'h0000_0001 : 32'hffff_fffe]};
       }
       cov_rd_data_2: coverpoint vif.rd_data_2
-        iff(vif.rd_reg_2 != '0) {
+        iff(vif.rd_reg_2 != X0) {
           bins zeros = {32'h0000_0000};
           bins all_ones = {32'hffff_ffff};
           bins non_corner = {[32'h0000_0001 : 32'hffff_fffe]};
