@@ -17,8 +17,8 @@ package tb_alu_coverage_pkg;
       return result[XLEN];
     endfunction
 
-    //function to determin if two inputs will overflow during subtraction
-    //in_a and in_b are treated as signed 2s compliment numbers
+    //function to determine if two inputs will overflow during subtraction
+    //in_a and in_b are treated as signed 2s complement numbers
     function automatic bit sub_overflow(word_t in_a, word_t in_b);
       word_t result;
 
@@ -26,12 +26,22 @@ package tb_alu_coverage_pkg;
 
       //look at the msb to see the signs
       //we will overflow if
-      //in_a and in_b are oposite signed, and result has a dif sign than in_a
+      //in_a and in_b are opposite signed, and result has a dif sign than in_a
       return (in_a[XLEN-1] != in_b[XLEN-1]) && (result[XLEN-1] != in_a[XLEN-1]);
     endfunction
 
+    //some params, so we can split the unsigned values up into 
+    //lower, middle and upper thirds in the add coverage
+    localparam word_t UNSIGNED_LOWER_THIRD     = WORD_MAX_UNSIGNED / 3;
+    localparam word_t UNSIGNED_LOWER_TWO_THIRD = (WORD_MAX_UNSIGNED / 3) * 2;
+
+    //some params, so we can split the signed values up in the sub coverage
+    //we want the pos and neg nums to be split in half
+    localparam word_t SIGNED_POS_LOWER_HALF = WORD_MAX_SIGNED_POS / 2;
+    localparam word_t SIGNED_NEG_LOWER_HALF = 32'hC000_0000;
+
     covergroup cg_alu;
-    cov_op: coverpoint vif.alu_op {
+      cov_op: coverpoint vif.alu_op {
         bins op_and = {ALU_AND};
         bins op_or = {ALU_OR};
         bins op_add = {ALU_ADD};
@@ -44,7 +54,7 @@ package tb_alu_coverage_pkg;
         bins de_asserted = {1'b0};
       }
 
-      //make sure we assert and deasert zero flag for all ops
+      //make sure we assert and deassert zero flag for all ops
       cross_op_zero_flag: cross cov_op, cov_zero_flag;
 
 
@@ -52,23 +62,23 @@ package tb_alu_coverage_pkg;
       //corner cases we want to cover as inputs to logical operations
       cov_in_a_log_op: coverpoint vif.in_a
         iff (vif.alu_op inside {ALU_AND, ALU_OR}) {
-          bins all_zero = {32'h0000_0000};
-          bins alt_ones_55 = {32'h5555_5555};
-          bins alt_ones_aa = {32'haaaa_aaaa};
-          bins all_one = {32'hffff_ffff};
-          bins non_corners = {[32'h0000_0001 : 32'h5555_5554],
-                              [32'h5555_5556 : 32'haaaa_aaa9],
-                              [32'haaaa_aaab : 32'hffff_fffe]};
+          bins all_zero    = {WORD_ALL_ZEROS};
+          bins alt_ones_55 = {WORD_ALT_ONES_55};
+          bins alt_ones_aa = {WORD_ALT_ONES_AA};
+          bins all_one     = {WORD_ALL_ONES};
+          bins non_corners = {[WORD_ALL_ZEROS + 1   : WORD_ALT_ONES_55 - 1],
+                              [WORD_ALT_ONES_55 + 1 : WORD_ALT_ONES_AA - 1],
+                              [WORD_ALT_ONES_AA + 1 : WORD_ALL_ONES - 1]};
         }
       cov_in_b_log_op: coverpoint vif.in_b
         iff (vif.alu_op inside {ALU_AND, ALU_OR}) {
-          bins all_zero = {32'h0000_0000};
-          bins alt_ones_55 = {32'h5555_5555};
-          bins alt_ones_aa = {32'haaaa_aaaa};
-          bins all_one = {32'hffff_ffff};
-          bins non_corners = {[32'h0000_0001 : 32'h5555_5554],
-                              [32'h5555_5556 : 32'haaaa_aaa9],
-                              [32'haaaa_aaab : 32'hffff_fffe]};
+          bins all_zero    = {WORD_ALL_ZEROS};
+          bins alt_ones_55 = {WORD_ALT_ONES_55};
+          bins alt_ones_aa = {WORD_ALT_ONES_AA};
+          bins all_one     = {WORD_ALL_ONES};
+          bins non_corners = {[WORD_ALL_ZEROS + 1   : WORD_ALT_ONES_55 - 1],
+                              [WORD_ALT_ONES_55 + 1 : WORD_ALT_ONES_AA - 1],
+                              [WORD_ALT_ONES_AA + 1 : WORD_ALL_ONES - 1]};
         }
 
       //We want to cover all combos of corner cases for each logical op
@@ -82,21 +92,25 @@ package tb_alu_coverage_pkg;
       //input corner cases to ADD operations
       cov_in_a_ADD_op: coverpoint vif.in_a
         iff (vif.alu_op == ALU_ADD) {
-          bins zero = {32'h0000_0000};
-          bins one = {32'h0000_0001};
-          bins max_unsigned = {32'hffff_ffff};
-          bins non_corners_low = {[32'h0000_0002 : 32'h5555_5555]};
-          bins non_corners_med = {[32'h5555_5556 : 32'haaaa_aaaa]};
-          bins non_corners_high = {[32'haaaa_aaab : 32'hffff_fffe]};
+          bins zero             = {WORD_UNSIGNED_ZERO};
+          bins one              = {WORD_UNSIGNED_ONE};
+          bins max_unsigned     = {WORD_MAX_UNSIGNED};
+          //We split the range into 3rds, so we cover a good range of
+          //different numbers
+          bins non_corners_low  = {[WORD_UNSIGNED_ZERO + 1       : UNSIGNED_LOWER_THIRD]};
+          bins non_corners_med  = {[UNSIGNED_LOWER_THIRD + 1     : UNSIGNED_LOWER_TWO_THIRD]};
+          bins non_corners_high = {[UNSIGNED_LOWER_TWO_THIRD + 1 : WORD_MAX_UNSIGNED - 1]};
         }
       cov_in_b_ADD_op: coverpoint vif.in_b
         iff (vif.alu_op == ALU_ADD) {
-          bins zero = {32'h0000_0000};
-          bins one = {32'h0000_0001};
-          bins max_unsigned = {32'hffff_ffff};
-          bins non_corners_low = {[32'h0000_0002 : 32'h5555_5555]};
-          bins non_corners_med = {[32'h5555_5556 : 32'haaaa_aaaa]};
-          bins non_corners_high = {[32'haaaa_aaab : 32'hffff_fffe]};
+          bins zero             = {WORD_UNSIGNED_ZERO};
+          bins one              = {WORD_UNSIGNED_ONE};
+          bins max_unsigned     = {WORD_MAX_UNSIGNED};
+          //We split the range into 3rds, so we cover a good range of
+          //different numbers
+          bins non_corners_low  = {[WORD_UNSIGNED_ZERO + 1       : UNSIGNED_LOWER_THIRD]};
+          bins non_corners_med  = {[UNSIGNED_LOWER_THIRD + 1     : UNSIGNED_LOWER_TWO_THIRD]};
+          bins non_corners_high = {[UNSIGNED_LOWER_TWO_THIRD + 1 : WORD_MAX_UNSIGNED - 1]};
         }
 
       //we want to cover all combos of corner cases for ADD operation
@@ -115,27 +129,33 @@ package tb_alu_coverage_pkg;
       //corner inputs we want to cover with the sub operation
       cov_in_a_SUB_op: coverpoint vif.in_a
         iff (vif.alu_op == ALU_SUB) {
-          bins zero = {32'h0000_0000};            //these numbers are signes 2s compliment
-          bins signed_pos_one = {32'h0000_0001};
-          bins signed_neg_one = {32'hffff_ffff};
-          bins max_signed_pos = {32'h7fff_ffff};
-          bins min_signed_neg = {32'h8000_0000};
-          bins non_corners_low_pos = {[32'h0000_0002 : 32'h3fff_ffff]};
-          bins non_corners_high_pos = {[32'h4000_0000 : 32'h7fff_fffe]};
-          bins non_corners_low_neg = {[32'h8000_0001 : 32'hbfff_ffff]};
-          bins non_corners_high_neg = {[32'hc000_0000 : 32'hffff_fffe]};
+          //these numbers are all signed 2s complements
+          bins zero                 = {WORD_SIGNED_ZERO};
+          bins signed_pos_one       = {WORD_SIGNED_POS_ONE};
+          bins signed_neg_one       = {WORD_SIGNED_NEG_ONE};
+          bins max_signed_pos       = {WORD_MAX_SIGNED_POS};
+          bins min_signed_neg       = {WORD_MIN_SIGNED_NEG};
+          //We split the negatives and positives into halfs, so we cover large
+          //and small positive and negative numbers
+          bins non_corners_low_pos  = {[WORD_SIGNED_POS_ONE + 1   : SIGNED_POS_LOWER_HALF]};
+          bins non_corners_high_pos = {[SIGNED_POS_LOWER_HALF + 1 : WORD_MAX_SIGNED_POS - 1]};
+          bins non_corners_high_neg = {[SIGNED_NEG_LOWER_HALF     : WORD_SIGNED_NEG_ONE - 1]};
+          bins non_corners_low_neg  = {[WORD_MIN_SIGNED_NEG + 1   : SIGNED_NEG_LOWER_HALF - 1]};
         }
       cov_in_b_SUB_op: coverpoint vif.in_b
         iff (vif.alu_op == ALU_SUB) {
-          bins zero = {32'h0000_0000};            //these numbers are signes 2s compliment
-          bins signed_pos_one = {32'h0000_0001};
-          bins signed_neg_one = {32'hffff_ffff};
-          bins max_signed_pos = {32'h7fff_ffff};
-          bins min_signed_neg = {32'h8000_0000};
-          bins non_corners_low_pos = {[32'h0000_0002 : 32'h3fff_ffff]};
-          bins non_corners_high_pos = {[32'h4000_0000 : 32'h7fff_fffe]};
-          bins non_corners_low_neg = {[32'h8000_0001 : 32'hbfff_ffff]};
-          bins non_corners_high_neg = {[32'hc000_0000 : 32'hffff_fffe]};
+          //these numbers are all signed 2s complements
+          bins zero                 = {WORD_SIGNED_ZERO};
+          bins signed_pos_one       = {WORD_SIGNED_POS_ONE};
+          bins signed_neg_one       = {WORD_SIGNED_NEG_ONE};
+          bins max_signed_pos       = {WORD_MAX_SIGNED_POS};
+          bins min_signed_neg       = {WORD_MIN_SIGNED_NEG};
+          //We split the negatives and positives into halfs, so we cover large
+          //and small positive and negative numbers
+          bins non_corners_low_pos  = {[WORD_SIGNED_POS_ONE + 1   : SIGNED_POS_LOWER_HALF]};
+          bins non_corners_high_pos = {[SIGNED_POS_LOWER_HALF + 1 : WORD_MAX_SIGNED_POS - 1]};
+          bins non_corners_high_neg = {[SIGNED_NEG_LOWER_HALF     : WORD_SIGNED_NEG_ONE - 1]};
+          bins non_corners_low_neg  = {[WORD_MIN_SIGNED_NEG + 1   : SIGNED_NEG_LOWER_HALF - 1]};
         }
 
       //cross the corners for the sub operation
