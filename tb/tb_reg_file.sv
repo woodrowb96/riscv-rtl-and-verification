@@ -4,11 +4,13 @@ import tb_reg_file_coverage_pkg::*;
 // `timescale 1ns / 10ps
 
 module tb_reg_file();
+  localparam CLK_PERIOD = 10;
+  localparam PROPOGATION_DELAY = 3;
   //clock
   logic clk;
   initial begin
     clk = 0;
-    forever #5 clk = ~clk;
+    forever #(CLK_PERIOD/2) clk = ~clk;
   end
 
   /************  INTERFACE ************/
@@ -33,7 +35,6 @@ module tb_reg_file();
 
   /************  TASKS ************/
 
-  event drive_done;
   task drive(reg_file_trans trans);
     intf.wr_en <= trans.wr_en;
     intf.wr_reg <= trans.wr_reg;
@@ -87,7 +88,7 @@ module tb_reg_file();
   task test(reg_file_trans trans);
     @(posedge clk);
     drive(trans);
-    #3                    //wait so the combinatorial reads can propogate
+    #PROPOGATION_DELAY      //wait so the combinatorial reads can propogate
     monitor(trans);
     score(trans);
     coverage.sample();
