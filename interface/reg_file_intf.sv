@@ -23,8 +23,8 @@ interface reg_file_intf(input clk);
     $display("rd_reg_1: %d", rd_reg_1);
     $display("rd_reg_2: %d", rd_reg_2);
     $display("-----------------------");
-    $display("rd_reg_1: %h", rd_data_1);
-    $display("rd_reg_2: %h", rd_data_2);
+    $display("rd_data_1: %h", rd_data_1);
+    $display("rd_data_2: %h", rd_data_2);
     $display("-----------------------");
   endfunction
 
