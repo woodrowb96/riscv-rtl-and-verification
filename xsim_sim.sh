@@ -150,6 +150,16 @@ if [ ! -d 'xsim' ] ; then
 fi
 
 cd xsim || exit 1
+#-------------------- compile all rtl packages  ------------------------------
+
+echo "COMPILING RTL PACKAGE FILES:"
+echo $'\n'
+for RTL_PACKAGE_FILE in "$PROJECT_ROOT_DIR"/rtl/package/*.sv ; do
+  [ -f "$RTL_PACKAGE_FILE" ] || break
+  xvlog -sv "$RTL_PACKAGE_FILE"
+  echo $'\n'
+done
+echo $'\n'
 
 #-------------------- compile all rtl files ------------------------------
 
