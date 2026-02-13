@@ -30,13 +30,13 @@ module tb_alu();
   tb_alu_coverage coverage;
 
   /*********** TASKS *************/
-  task drive(general_trans trans);
+  task drive(alu_general_trans trans);
     intf.alu_op = trans.alu_op;
     intf.in_a = trans.in_a;
     intf.in_b = trans.in_b;
   endtask
 
-  task monitor(general_trans trans);
+  task monitor(alu_general_trans trans);
     trans.result = intf.result;
     trans.zero = intf.zero;
   endtask
@@ -49,7 +49,7 @@ module tb_alu();
   int num_fails = 0;
 
   //Use the reference model to score a transaction
-  task automatic score(general_trans trans);
+  task automatic score(alu_general_trans trans);
     bit test_fail = 0;
 
     //use trans inputs to calc expected values
@@ -74,7 +74,7 @@ module tb_alu();
     num_tests++;
   endtask
 
-  task test(general_trans trans);
+  task test(alu_general_trans trans);
       @(posedge clk);
       drive(trans);
       //wait for the inputs to propogate to the outputs
@@ -95,10 +95,10 @@ module tb_alu();
 
   /**************  TESTING ***************************/
   //we are going to need these kinds of transactions for our tests
-  logical_op_trans logical_trans;
-  add_op_trans add_trans;
-  sub_op_trans sub_trans;
-  general_trans gen_trans;
+  alu_logical_op_trans logical_trans;
+  alu_add_op_trans add_trans;
+  alu_sub_op_trans sub_trans;
+  alu_general_trans unconstrained_trans;
 
   initial begin
     //create coverage and connect it to the interface
@@ -111,7 +111,7 @@ module tb_alu();
     logical_trans = new();
     add_trans = new();
     sub_trans = new();
-    gen_trans = new();
+    unconstrained_trans = new();
 
     /*************  TEST AND ***************/
     repeat(1000) begin
@@ -132,21 +132,21 @@ module tb_alu();
     end
 
     /************ TEST SUB ****************/
-    repeat(1000) begin
+    repeat(1500) begin
       assert(sub_trans.randomize());
       test(sub_trans);
     end
 
     /************ TEST EVERYTHING COMPLETELY RANDOMIZED ****************/
     repeat(1000) begin
-      assert(gen_trans.randomize());
-      test(gen_trans);
+      assert(unconstrained_trans.randomize());
+      test(unconstrained_trans);
     end
 
     /************ TEST INVALID OP ****************/
-    assert(gen_trans.randomize());
-    gen_trans.alu_op = alu_op_t'(4'b1111);
-    test(gen_trans);
+    assert(unconstrained_trans.randomize());
+    unconstrained_trans.alu_op = alu_op_t'(4'b1111);
+    test(unconstrained_trans);
 
     print_results();
 

@@ -2,15 +2,61 @@ package tb_alu_stimulus_pkg;
   import riscv_32i_defs_pkg::*;
 
   //base transaction class
-  class general_trans;
+  class alu_general_trans;
     //output to DUT
     rand alu_op_t alu_op;
-    rand word_t in_a;
-    rand word_t in_b;
+    rand bit [XLEN-1:0] in_a;
+    rand bit [XLEN-1:0] in_b;
 
     //input from DUT
     word_t result;
     logic zero;
+
+    /******* NOTE **********/
+    //I am using the post_randomize function to manually randomize the MSB in
+    //the inputs.
+    //
+    //I am doing this because of a possible bug in the free version of xsim.
+    //When I try and use dist to get corners and non corners like this:
+    //
+    // in_a dist {
+    //   WORD_ALL_ZEROS                          := 3,
+    //   WORD_ALT_ONES_55                        := 3,
+    //   WORD_ALT_ONES_AA                        := 3,
+    //   WORD_ALL_ONES                           := 3,
+    //   [WORD_ALL_ZEROS + 1 : WORD_ALL_ONES - 1] :/ 2  //MSB DOESNT GET RANDOMIZED
+    // };
+    //
+    //The constraint solver never sets the MSB when it chooses a value in the
+    //range. Bits [30:0] are fully randomized, but the MSB is never set.
+    //
+    //This is either a bug in this version of xsim, or I am misunderstanding
+    //how constraints work. Im still learning so it could be either, but
+    //I think it might just be a bug because I think the above dist should work.
+    /***********************/
+    function void post_randomize();
+    //During post_rand manually randomize the MSB in both inputs
+    //I only want to do this when the input is not one of the corners
+      if(!(in_a inside {WORD_ALL_ZEROS, WORD_ALL_ONES,
+                        WORD_ALT_ONES_55, WORD_ALT_ONES_AA,
+                        WORD_UNSIGNED_ONE,
+                        WORD_MAX_SIGNED_POS, WORD_MIN_SIGNED_NEG})) begin
+        randcase
+          1: in_a[XLEN-1] = 1'b0;
+          1: in_a[XLEN-1] = 1'b1;
+        endcase
+      end
+
+      if(!(in_b inside {WORD_ALL_ZEROS, WORD_ALL_ONES,
+                        WORD_ALT_ONES_55, WORD_ALT_ONES_AA,
+                        WORD_UNSIGNED_ONE,
+                        WORD_MAX_SIGNED_POS, WORD_MIN_SIGNED_NEG})) begin
+        randcase
+          1: in_b[XLEN-1] = 1'b0;
+          1: in_b[XLEN-1] = 1'b1;
+        endcase
+      end
+    endfunction
 
     function void print(string msg = "");
       $display("-----------------------");
@@ -28,164 +74,96 @@ package tb_alu_stimulus_pkg;
     endfunction
   endclass
 
-  //enum to switch how we randomize the inputs
-  typedef enum {CORNERS_ONLY, //input constrained to corner cases only
-                FULL_RANGE,   //input comes from the entire range (corners included)
-                WEIGHTED      //input chosen from corner and full_range using a dist
-                } input_randomization_mode;
-
-  //operation specific transactions (logical, add, sub ...)
-  //contains the randomization_mode infestructure and
-  //its children specify there own corner cases
-  virtual class op_specific_trans extends general_trans;
-    //By default use a weighted dist to set which catagory we get input from
-    input_randomization_mode in_a_mode = WEIGHTED;
-    input_randomization_mode in_b_mode = WEIGHTED;
-
-    //which catagory inputs are constrained too
-    typedef enum {CORNER, FULL} input_catagory;
-    input_catagory in_a_cat;
-    input_catagory in_b_cat;
-
-    //look at the randomization mode, and return an input catagory
-    function input_catagory catagory_select(input_randomization_mode input_mode);
-      input_catagory cat;
-      unique case(input_mode)
-        CORNERS_ONLY: begin
-          return CORNER;
-        end
-        FULL_RANGE: begin
-          return FULL;
-        end
-        WEIGHTED: begin
-          randcase
-            2: return CORNER;
-            1: return FULL;
-          endcase
-        end
-      endcase
-    endfunction
-
-    //before randomization set the catagory inputs should be constrained too
-    function void pre_randomize();
-      in_a_cat = catagory_select(in_a_mode);
-      in_b_cat = catagory_select(in_b_mode);
-    endfunction
-  endclass
-
   //transaction for logical operations (and, or ...)
-  class logical_op_trans extends op_specific_trans;
-    //constrain to corners, else us the full range
+  class alu_logical_op_trans extends alu_general_trans;
     constraint logical_op_inputs {
-      if(in_a_cat == CORNER) {
-        in_a inside {
-          32'h0000_0000,
-          32'h5555_5555,
-          32'haaaa_aaaa,
-          32'hffff_ffff
-        };
-      }
-
-      if(in_b_cat == CORNER) {
-        in_b inside {
-          32'h0000_0000,
-          32'h5555_5555,
-          32'haaaa_aaaa,
-          32'hffff_ffff
-        };
-      }
+      /******* NOTE **********/
+      //I think this might be another case of a bug in xsim.
+      //
+      //In my range I set the ranges from ['0 + 1 to '1 - 1] (so I carve out the all 1s and all 0s cases)
+      //
+      // in_a dist {
+      //   WORD_ALL_ZEROS                          := 3,
+      //   WORD_ALT_ONES_55                        := 3,
+      //   WORD_ALT_ONES_AA                        := 3,
+      //   WORD_ALL_ONES                           := 3,
+      //   [WORD_ALL_ZEROS + 1 : WORD_ALL_ONES - 1] :/ 2  //I carve out all zeros and all 1s
+      // };
+      //
+      //I do this because when the range overlapped with those values, the
+      //constraint solver only used the value 32'd1 when it selected a value
+      //from the range.
+      //
+      //I think it might be because the range is so large and the overlaps
+      //were causing issues. Maybe its too much for the solver to handle?
+      //But then why dont I have to carve out the AA and 55 corners?
+      //
+      //I dont know it might have something to do with when the solver tries
+      //to handle the extreme corners of this big range (so the range ending
+      //points), and it just picks the easiest solution, which is 32'd1? maybe?
+      //
+      //Once again, this is either a bug in this version of xsim, or I am misunderstanding
+      //how constraints work. Im still learning so it could be either, but
+      //I think it might just be a bug.
+      /***********************/
+      in_a dist {
+        WORD_ALL_ZEROS                            := 3,
+        WORD_ALT_ONES_55                          := 3, //the pattern 4'h5 = 0101 repeated
+        WORD_ALT_ONES_AA                          := 3, //the pattern 4'hA = 1010 repeated
+        WORD_ALL_ONES                             := 3,
+        [WORD_ALL_ZEROS + 1 : WORD_ALL_ONES - 1]  :/ 2
+      };
+      in_b dist {
+        WORD_ALL_ZEROS                            := 3,
+        WORD_ALT_ONES_55                          := 3, //the pattern 4'h5 = 0101 repeated
+        WORD_ALT_ONES_AA                          := 3, //the pattern 4'hA = 1010 repeated
+        WORD_ALL_ONES                             := 3,
+        [WORD_ALL_ZEROS + 1 : WORD_ALL_ONES - 1]  :/ 2
+      };
     }
   endclass
 
   //transaction for ADD ops
-  class add_op_trans extends op_specific_trans;
+  class alu_add_op_trans extends alu_general_trans;
     constraint add_op { alu_op == ALU_ADD; }
 
-    //constrain to corners, else us the full range
     constraint add_op_inputs {
-      if(in_a_cat == CORNER) {
-        in_a inside {
-          32'h0000_0000,
-          32'h0000_0001,
-          32'hffff_ffff
-        };
-      }
-
-      if(in_b_cat == CORNER) {
-        in_b inside {
-          32'h0000_0000,
-          32'h0000_0001,
-          32'hffff_ffff
-        };
-      }
+      in_a dist {
+        WORD_UNSIGNED_ZERO                        := 3,
+        WORD_UNSIGNED_ONE                         := 3,
+        WORD_MAX_UNSIGNED                         := 3,
+        [WORD_ALL_ZEROS + 1 : WORD_ALL_ONES - 1]  :/ 2
+      };
+      in_b dist {
+        WORD_UNSIGNED_ZERO                        := 3,
+        WORD_UNSIGNED_ONE                         := 3,
+        WORD_MAX_UNSIGNED                         := 3,
+        [WORD_ALL_ZEROS + 1 : WORD_ALL_ONES - 1]  :/ 2
+      };
     }
   endclass
-  
-  //SUB op transaction
-  class sub_op_trans extends op_specific_trans;
+
+  //transaction for SUB ops
+  class alu_sub_op_trans extends alu_general_trans;
     constraint sub_op { alu_op == ALU_SUB; }
 
-    //constrain to corners, else the whole range
     constraint sub_op_inputs {
-      if(in_a_cat == CORNER) {
-        in_a inside {
-          32'h0000_0000,
-          32'h0000_0001,
-          32'hffff_ffff,
-          32'h7fff_ffff,
-          32'h8000_0000
-        };
-      }
-
-      if(in_b_cat == CORNER) {
-        in_b inside {
-          32'h0000_0000,
-          32'h0000_0001,
-          32'hffff_ffff,
-          32'h7fff_ffff,
-          32'h8000_0000
-        };
-      }
+      in_a dist {
+        WORD_SIGNED_ZERO                          := 4,
+        WORD_SIGNED_POS_ONE                       := 4,
+        WORD_SIGNED_NEG_ONE                       := 4,
+        WORD_MAX_SIGNED_POS                       := 4,
+        WORD_MIN_SIGNED_NEG                       := 4,
+        [WORD_ALL_ZEROS + 1 : WORD_ALL_ONES - 1]  :/ 2
+      };
+      in_b dist {
+        WORD_SIGNED_ZERO                          := 4,
+        WORD_SIGNED_POS_ONE                       := 4,
+        WORD_SIGNED_NEG_ONE                       := 4,
+        WORD_MAX_SIGNED_POS                       := 4,
+        WORD_MIN_SIGNED_NEG                       := 4,
+        [WORD_ALL_ZEROS + 1 : WORD_ALL_ONES - 1]  :/ 2
+      };
     }
-
-    /********* NOTE *************/
-    //I Do this in post_rand instead of inside a constraint
-    //because doing this
-    //
-    //in_a[31:0] dist {
-    //  2'b00 := 1,
-    //  2'b01 := 1,
-    //  2'b10 := 1,
-    //  2'b11 := 1,
-    // }
-    //
-    //inside of a constraint was causing vivado to crash during elaboration
-    //(I was getting a seg fault during the xelab call)
-    //So its possible its a bug in the free version of vivado im using
-    /****************************/
-    function void post_randomize();
-      //I want the full range of values to be spread evenly over 
-      //High and low positive 2s comp values
-      //and
-      //High and low neg 2s comp values
-      //So I set make sure the frist two msbs are evenly distributed
-      if(in_a_cat == FULL) begin
-        randcase
-          1: in_a[XLEN-1:XLEN-2] = 2'b00;
-          1: in_a[XLEN-1:XLEN-2] = 2'b01;
-          1: in_a[XLEN-1:XLEN-2] = 2'b10;
-          1: in_a[XLEN-1:XLEN-2] = 2'b11;
-        endcase
-      end
-
-      if(in_b_cat == FULL) begin
-        randcase
-          1: in_b[XLEN-1:XLEN-2] = 2'b00;
-          1: in_b[XLEN-1:XLEN-2] = 2'b01;
-          1: in_b[XLEN-1:XLEN-2] = 2'b10;
-          1: in_b[XLEN-1:XLEN-2] = 2'b11;
-        endcase
-      end
-    endfunction
   endclass
 endpackage
