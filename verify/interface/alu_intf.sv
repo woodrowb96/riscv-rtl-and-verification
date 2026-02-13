@@ -10,7 +10,7 @@ interface alu_intf;
   modport coverage(input alu_op, in_a, in_b, result, zero);
   modport assertion(input alu_op, in_a, in_b, result, zero);
 
-  task print(string msg = "");
+  function print(string msg = "");
     $display("-----------------------");
     $display("ALU INTERFACE:%s\n",msg);
     $display("time: %t", $time);
@@ -23,5 +23,5 @@ interface alu_intf;
     $display("result: %h", result);
     $display("zero: %b", zero);
     $display("-----------------------");
-  endtask
+  endfunction
 endinterface

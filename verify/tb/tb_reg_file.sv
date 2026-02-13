@@ -119,7 +119,7 @@ module tb_reg_file();
     intf.rd_reg_2 <= '0;
 
     repeat(1000) begin
-      trans.randomize();
+      assert(trans.randomize();
       test(trans);
     end
 

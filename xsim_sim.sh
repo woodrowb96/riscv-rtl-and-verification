@@ -161,7 +161,7 @@ fi
 
 cd "$PROJECT_ROOT_DIR/sim"  || exit 1
 
-#Check if modelsim directory exists in sim dir, if not create it
+#Check if xsim directory exists in sim dir, if not create it
 if [ ! -d 'xsim' ] ; then 
   echo "no xsim directory found"
   echo $'creating ./sim/xsim directory\n'
@@ -309,7 +309,7 @@ if [ "$GUI_MODE" = "true" ] ; then        #if we are in gui mode
   else
     xsim $TEST_BENCH -gui
   fi
-else                                      #else we are in GUI mode
+else                                      #else we are in CLI mode
   if [ -n "$TCL" ] ; then
     xsim $TEST_BENCH -tclbatch "$TCL"
   else
