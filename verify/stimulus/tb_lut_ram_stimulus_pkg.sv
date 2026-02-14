@@ -8,6 +8,14 @@ package tb_lut_ram_stimulus_pkg;
 
     logic [LUT_WIDTH-1:0] rd_data;
 
+    function bit compare(lut_ram_trans #(LUT_WIDTH, LUT_DEPTH) other);
+      return (this.wr_en   === other.wr_en   &&
+              this.wr_addr === other.wr_addr &&
+              this.rd_addr === other.rd_addr &&
+              this.wr_data === other.wr_data &&
+              this.rd_data === other.rd_data);
+    endfunction
+
     function print(string msg = "");
       $display("-----------------------");
       $display("LUT_RAM_TRANS:%s\n",msg);
