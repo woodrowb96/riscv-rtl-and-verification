@@ -287,8 +287,15 @@ echo $'\n'
 echo "ELABORATING TEST BENCH: $TEST_BENCH"
 echo $'\n'
 xelab $TEST_BENCH -debug typical
+
+#If we failed the elaboration, then dont run the sim
+if [ $? -ne 0 ] ; then
+  echo $'\n'
+  echo "ERROR $SCRIPT_NAME: elaboration exit 0"
+  exit 1
+fi
 echo $'\n'
-#
+
 # #-------------------- run the simulation    ------------------------------
 
 echo "SIMULATING TEST BENCH: $TEST_BENCH"
