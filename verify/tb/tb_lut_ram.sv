@@ -1,6 +1,7 @@
 import riscv_32i_defs_pkg::*;
 import tb_lut_ram_stimulus_pkg::*;
 import lut_ram_ref_model_pkg::*;
+import tb_lut_ram_coverage_pkg::*;
 
 module tb_lut_ram();
   localparam CLK_PERIOD = 10;
@@ -26,6 +27,8 @@ module tb_lut_ram();
                                                                 .wr_data(intf.wr_data),
                                                                 .rd_data(intf.rd_data)
                                                               );
+  /********  COVERAGE **************************/
+  tb_lut_ram_coverage #(MEM_WIDTH, MEM_DEPTH) coverage;
 
   /*********  LUT REFERENCE MODEL ***************/
   lut_ram_ref_model #(MEM_WIDTH, MEM_DEPTH) ref_lut_ram;
@@ -101,16 +104,20 @@ module tb_lut_ram();
 
   initial begin
     ref_lut_ram = new();
+    coverage = new(intf.monitor);
     trans = new();
+
+    coverage.start();
 
     for(int i = 0; i < 1000; i++) begin
       assert(trans.randomize());
       test_monitor_before_write(trans);
     end
 
+    coverage.stop();
+
     print_test_results();
 
     $stop(1);
   end
-
 endmodule

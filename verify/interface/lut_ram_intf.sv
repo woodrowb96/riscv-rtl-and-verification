@@ -9,7 +9,7 @@ interface lut_ram_intf #(
   logic [LUT_WIDTH-1:0] wr_data;
   logic [LUT_WIDTH-1:0] rd_data;
 
-  modport monitor(input wr_en, wr_addr, rd_addr, wr_data, rd_data);
+  modport monitor(input clk, wr_en, wr_addr, rd_addr, wr_data, rd_data);
 
   function void print(string msg = "");
     $display("[%s] t=%0t wr_en:%b wr_addr:%0d rd_addr:%0d wr_data:%h rd_data:%h",
