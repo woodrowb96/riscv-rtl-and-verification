@@ -48,17 +48,13 @@ module tb_lut_ram();
 
   function automatic void score(trans_t actual);
     trans_t expected = new();
-
-    //expected inputs should match the actual ones
     expected.wr_en = actual.wr_en;
     expected.wr_addr = actual.wr_addr;
     expected.rd_addr = actual.rd_addr;
     expected.wr_data = actual.wr_data;
 
-    //predict the expected output
     expected.rd_data = ref_lut_ram.read(actual.rd_addr);
 
-    //if expected doesnt match actual, then the test has failed
     if(!expected.compare(actual)) begin
       $display("----------------");
       $error("LUT_RAM_TB: test fail");
@@ -70,6 +66,28 @@ module tb_lut_ram();
     num_tests++;
   endfunction
 
+  //test with same cycle reads.
+  //Output is monitored BEFORE wr_data has been clocked into the dut
+  task test_monitor_before_write(trans_t trans);
+    drive(trans);               //drive the inputs
+    #1                          //let rd_addr propogate to rd_data
+    monitor(trans);             //monitor and score the combinatorial reads, before next clk edge
+    score(trans);
+    @(posedge clk)              //clk the wr_data into memory, update the reference model with the new writes
+    ref_lut_ram.update(trans);
+  endtask
+
+  //test with next cycle reads.
+  //Output is monitored AFTER wr_data has been clocked into the dut
+  task test_monitor_after_write(trans_t trans);
+    drive(trans);                //drive the inputs
+    @(posedge clk)               //clk the wr_data into memory, update the reference model with the new writes
+    ref_lut_ram.update(trans);
+    #1                           //let the combinatorial outputs settle
+    monitor(trans);              //monitor and score the combinatorial reads AFTER the writes were written in
+    score(trans);
+  endtask
+
   function void print_test_results();
     $display("----------------");
     $display("Test results:");
@@ -80,29 +98,14 @@ module tb_lut_ram();
 
   /************  TESTING ********/
   trans_t trans;
-  initial begin
 
+  initial begin
     ref_lut_ram = new();
     trans = new();
 
-    trans.wr_en = '0;
-    trans.wr_addr = 'd1;
-    trans.rd_addr = 'd1;
-    trans.wr_data = '0;
-    drive(trans);
-
-    for(int i = 0; i < 10; i++) begin
-      @(posedge intf.clk)
-      trans.wr_data = trans.wr_data + 'd1;
-      trans.wr_en = ~trans.wr_en;
-      trans.wr_addr = i * 10;
-      trans.rd_addr = i * 10;
-      drive(trans);
-      @(posedge intf.clk)
-      ref_lut_ram.update(trans);
-      #1
-      monitor(trans);
-      score(trans);
+    for(int i = 0; i < 1000; i++) begin
+      assert(trans.randomize());
+      test_monitor_before_write(trans);
     end
 
     print_test_results();
