@@ -1,11 +1,11 @@
 import riscv_32i_defs_pkg::*;
-import tb_lut_ram_stimulus_pkg::*;
+import tb_lut_ram_transaction_pkg::*;
 import lut_ram_ref_model_pkg::*;
 import tb_lut_ram_coverage_pkg::*;
 
 module tb_lut_ram();
   localparam CLK_PERIOD = 10;
-  localparam MEM_DEPTH = 256;
+  localparam MEM_DEPTH = 10000;
   localparam MEM_WIDTH = XLEN;
   typedef lut_ram_trans #(MEM_WIDTH, MEM_DEPTH) trans_t;
 

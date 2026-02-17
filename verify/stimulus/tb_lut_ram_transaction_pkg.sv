@@ -1,4 +1,4 @@
-package tb_lut_ram_stimulus_pkg;
+package tb_lut_ram_transaction_pkg;
 
   class lut_ram_trans #(parameter int LUT_WIDTH = 32, parameter int LUT_DEPTH = 256);
     //dut input
