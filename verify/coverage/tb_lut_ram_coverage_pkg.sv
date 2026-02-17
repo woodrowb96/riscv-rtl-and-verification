@@ -68,6 +68,10 @@ package tb_lut_ram_coverage_pkg;
       read_before_write: coverpoint (vif.wr_en && (vif.rd_addr == vif.wr_addr)) {
         bins hit = {1};
       }
+
+      //The data we read out has to have been written in, so this covers
+      //reading stuff after it was written
+      read_after_write: cross rd_addr, rd_data;
     endgroup
 
     function new(virtual lut_ram_intf #(.LUT_WIDTH(LUT_WIDTH), .LUT_DEPTH(LUT_DEPTH)).monitor vif);
