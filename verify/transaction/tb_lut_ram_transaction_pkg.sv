@@ -8,6 +8,12 @@ package tb_lut_ram_transaction_pkg;
 
     logic [LUT_WIDTH-1:0] rd_data;
 
+    //We want to keep the addresses within the legal range
+    constraint legal_address_range{
+      wr_addr inside {[0:LUT_DEPTH-1]};
+      rd_addr inside {[0:LUT_DEPTH-1]};
+    }
+
     function bit compare(lut_ram_trans #(LUT_WIDTH, LUT_DEPTH) other);
       return (this.wr_en   === other.wr_en   &&
               this.wr_addr === other.wr_addr &&
@@ -19,6 +25,19 @@ package tb_lut_ram_transaction_pkg;
     function void print(string msg = "");
       $display("[%s] t=%0t wr_en:%b wr_addr:%0d rd_addr:%0d wr_data:%h rd_data:%h",
                msg, $time, wr_en, wr_addr, rd_addr, wr_data, rd_data);
+    endfunction
+
+    //I manually post_randomize the msb of data.
+    //(SEE THE NOTE BELLOW FOR AN EXPLINATION OF WHY)
+    localparam longint unsigned ALL_ZEROS = {LUT_WIDTH{1'b0}};
+    localparam longint unsigned ALL_ONES = {LUT_WIDTH{1'b1}};
+    function void post_randomize();
+      if(!(wr_data inside {ALL_ZEROS, ALL_ONES})) begin
+        randcase
+          1: wr_data[LUT_WIDTH-1] = 1'b0;
+          1: wr_data[LUT_WIDTH-1] = 1'b1;
+        endcase
+      end
     endfunction
 
     /************ NOTE *********************/
@@ -53,15 +72,5 @@ package tb_lut_ram_transaction_pkg;
     //  I think using the post_rand function is probably the cleanest way to
     //  get the MSB to randomize
     /**************************************/
-    localparam longint unsigned ALL_ZEROS = {LUT_WIDTH{1'b0}};
-    localparam longint unsigned ALL_ONES = {LUT_WIDTH{1'b1}};
-    function void post_randomize();
-      if(!(wr_data inside {ALL_ZEROS, ALL_ONES})) begin
-        randcase
-          1: wr_data[LUT_WIDTH-1] = 1'b0;
-          1: wr_data[LUT_WIDTH-1] = 1'b1;
-        endcase
-      end
-    endfunction
   endclass
 endpackage
