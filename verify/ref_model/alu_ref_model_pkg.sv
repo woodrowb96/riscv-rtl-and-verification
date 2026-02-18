@@ -6,16 +6,18 @@ package alu_ref_model_pkg;
   typedef struct {
     word_t result;
     logic zero;
-  } alu_ref_output;
+  } ref_alu_output;
 
   class alu_ref_model;
 
-    function alu_ref_output predict(alu_trans trans);
+    function ref_alu_output predict(alu_trans trans);
       logic [XLEN:0] in_a_wide = {1'b0, trans.in_a};
       logic [XLEN:0] in_b_wide = {1'b0, trans.in_b};
       logic [XLEN:0] result_wide = '0;
 
       logic zero = 1'b0;
+
+      ref_alu_output prediction;
 
       if(trans.alu_op == ALU_SUB) begin
         result_wide = in_a_wide - in_b_wide;
@@ -34,7 +36,10 @@ package alu_ref_model_pkg;
         zero = 1'b1;
       end
 
-      return '{result_wide[XLEN-1:0], zero};
+      prediction.result = result_wide[XLEN-1:0];
+      prediction.zero = zero;
+
+      return prediction;
     endfunction
   endclass
 endpackage

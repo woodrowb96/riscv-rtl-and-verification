@@ -5,12 +5,14 @@ import alu_ref_model_pkg::*;
 import riscv_32i_defs_pkg::*;
 
 module tb_alu();
+  localparam CLK_PERIOD = 10;
+
   /*********** CLK *************/
   //alu is purely comb, but I use a clk to sync testing
   bit clk;
   initial begin
     clk = 0;
-    forever #5 clk = ~clk;    //period of #10
+    forever #(CLK_PERIOD/2) clk = ~clk;
   end
 
   /*********** INTERFACE *************/
@@ -30,6 +32,9 @@ module tb_alu();
   /*********** COVERAGE *************/
   tb_alu_coverage coverage;
 
+  /****************  ALU REFERENCE MODEL **************/
+  alu_ref_model ref_alu;
+
   /*********** TASKS *************/
   task drive(alu_trans trans);
     intf.alu_op = trans.alu_op;
@@ -42,34 +47,28 @@ module tb_alu();
     trans.zero = intf.zero;
   endtask
 
-  //reference alu used to score tests
-  alu_ref_model ref_alu;
 
-  //keep track of how many tests weve scored, and how many failed
   int num_tests = 0;
   int num_fails = 0;
 
-  //Use the reference model to score a transaction
-  task automatic score(alu_trans trans);
-    bit test_fail = 0;
+  task automatic score(alu_trans actual);
+    ref_alu_output prediction;
 
-    //use trans inputs to calc expected values
-    alu_ref_output expected = ref_alu.predict(trans);
+    alu_trans expected = new();
+    expected.alu_op = actual.alu_op;
+    expected.in_a = actual.in_a;
+    expected.in_b = actual.in_b;
 
-    //score out trans outputs
-    if(trans.result != expected.result) begin
-      $error("FAIL: Incorrect Result expected:%0h", expected.result);
-      test_fail = 1;
-    end
-    if(trans.zero != expected.zero) begin
-      $error("FAIL: Zero flag incorrect expected:%0b", expected.zero);
-      test_fail = 1;
-    end
+    prediction = ref_alu.predict(actual);
+    expected.result = prediction.result;
+    expected.zero = prediction.zero;
 
-    //handle failed tests
-    if(test_fail) begin
+    if(!expected.compare(actual)) begin
+      $display("----------------");
+      $error("ALU_TB: test fail");
+      expected.print("EXPECTED");
+      actual.print("ACTUAL");
       num_fails++;
-      trans.print();
     end
 
     num_tests++;
@@ -78,12 +77,10 @@ module tb_alu();
   task test(alu_trans trans);
       @(posedge clk);
       drive(trans);
-      //wait for the inputs to propogate to the outputs
-      #1;
+      #1;                       //let the input propogate to the output
       monitor(trans);
-      score(trans);
-      //collect our coverage
       coverage.sample();
+      score(trans);
   endtask
 
   task print_results();
@@ -102,13 +99,9 @@ module tb_alu();
   alu_trans unconstrained_trans;
 
   initial begin
-    //create coverage and connect it to the interface
     coverage = new(intf.coverage);
-
-    //create the referance alu
     ref_alu = new();
 
-    //create our transactions
     logical_trans = new();
     add_trans = new();
     sub_trans = new();
