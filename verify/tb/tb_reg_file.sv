@@ -1,4 +1,4 @@
-import tb_reg_file_stimulus_pkg::*;
+import tb_reg_file_transaction_pkg::*;
 import reg_file_ref_model_pkg::*;
 import tb_reg_file_coverage_pkg::*;
 import riscv_32i_defs_pkg::*;
@@ -34,6 +34,9 @@ module tb_reg_file();
   /************  COVERAGE ************/
   tb_reg_file_coverage coverage;
 
+  /************  REFERENCE REG_FILE ************/
+  reg_file_ref_model ref_reg_file;
+
   /************  TASKS ************/
 
   task drive(reg_file_trans trans);
@@ -49,48 +52,42 @@ module tb_reg_file();
     trans.rd_data_2 = intf.rd_data_2;
   endtask
 
-  //test scoring
   int num_tests = 0;
   int num_fails = 0;
 
-  //reference reg file, to score tests
-  reg_file_ref_model ref_reg_file;
-
   //score test by making sure rd_data matches expected values
-  task automatic score(reg_file_trans trans);
-    bit test_fail = 0;
+  function automatic void score(reg_file_trans actual);
+    reg_file_trans expected = new();
+    expected.wr_en = actual.wr_en;
+    expected.wr_reg = actual.wr_reg;
+    expected.wr_data = actual.wr_data;
+    expected.rd_reg_1 = actual.rd_reg_1;
+    expected.rd_reg_2 = actual.rd_reg_2;
 
-    //update the reference model, and get the expected output
-    reg_file_output exp;
-    exp = ref_reg_file.process_trans(trans);
+    expected.rd_data_1 = ref_reg_file.read(actual.rd_reg_1);
+    expected.rd_data_2 = ref_reg_file.read(actual.rd_reg_2);
 
-    //check our reads
-    if(trans.rd_data_1 != exp.rd_data_1) begin
-      $error("FAIL: Incorrect rd_data_1 rd_reg_1:%0d expected:%0h actual:%0h",
-              trans.rd_reg_1, exp.rd_data_1, trans.rd_data_1);
-      test_fail = 1;
-    end
-    if(trans.rd_data_2 != exp.rd_data_2) begin
-      $error("FAIL: Incorrect rd_data_2 rd_reg_2:%0d expected:%0h actual:%0h",
-              trans.rd_reg_2, exp.rd_data_2, trans.rd_data_2);
-      test_fail = 1;
-    end
-
-    //handle failed test
-    if(test_fail) begin
+    if(!expected.compare(actual)) begin
+      $display("----------------");
+      $error("REG_FILE_TB: test fail");
+      expected.print("EXPECTED");
+      actual.print("ACTUAL");
       num_fails++;
     end
 
     num_tests++;
-  endtask
+  endfunction
 
   task test(reg_file_trans trans);
-    @(posedge clk);
     drive(trans);
-    #PROPOGATION_DELAY      //wait so the combinatorial reads can propogate
+    #PROPOGATION_DELAY      //let the combinatorial reads propogate
     monitor(trans);
-    score(trans);
     coverage.sample();
+    score(trans);
+
+    //clk the writes in and update the ref_model
+    @(posedge clk);
+    ref_reg_file.update(trans);
   endtask
 
   task print_test_results();
@@ -108,13 +105,6 @@ module tb_reg_file();
     coverage = new(intf.monitor);
     ref_reg_file = new();
     trans = new();
-
-    //drive initial values
-    intf.wr_en <= '0;             //start out not writing
-    intf.wr_reg <= X0;           //pointing wr_reg to x0
-    intf.wr_data <= '1; //driving wr_data to all 1s
-    intf.rd_reg_1 <= '0;          //reading from x0
-    intf.rd_reg_2 <= '0;
 
     repeat(1000) begin
       assert(trans.randomize());
