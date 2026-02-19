@@ -1,5 +1,6 @@
 package tb_alu_transaction_pkg;
   import riscv_32i_defs_pkg::*;
+  import riscv_32i_control_pkg::*;
 
   class alu_trans;
     rand alu_op_t alu_op;

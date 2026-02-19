@@ -1,5 +1,6 @@
 package alu_ref_model_pkg;
   import riscv_32i_defs_pkg::*;
+  import riscv_32i_control_pkg::*;
   import tb_alu_transaction_pkg::*;
 
   //so we can return both expected values at the same time

@@ -1,5 +1,6 @@
 package tb_alu_coverage_pkg;
   import riscv_32i_defs_pkg::*;
+  import riscv_32i_control_pkg::*;
   class tb_alu_coverage;
 
     virtual alu_intf.coverage vif;

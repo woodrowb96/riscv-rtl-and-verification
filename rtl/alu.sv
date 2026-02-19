@@ -24,6 +24,7 @@ Output:
             1 if result == 0, else 0
 */
 import riscv_32i_defs_pkg::*;
+import riscv_32i_control_pkg::*;
 
 module alu(
   //control

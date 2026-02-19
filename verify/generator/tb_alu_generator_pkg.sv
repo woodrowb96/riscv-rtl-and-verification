@@ -1,5 +1,6 @@
 package tb_alu_generator_pkg;
   import riscv_32i_defs_pkg::*;
+  import riscv_32i_control_pkg::*;
   import tb_alu_transaction_pkg::*;
 
   /********* NOTE  ************/
