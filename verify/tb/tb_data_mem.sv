@@ -5,6 +5,7 @@ import tb_data_mem_transaction_pkg::*;
 
 module tb_data_mem();
   localparam int CLK_PERIOD = 10;
+  localparam int PROPOGATION_DELAY = 3;
 
   //clk
   logic clk;
@@ -14,7 +15,7 @@ module tb_data_mem();
   end
 
   /************** INTERFACE *********/
-  data_men_interface intf(clk);
+  data_mem_intf intf(clk);
 
   /********* DUT ***********/
   data_mem dut(.clk(clk),
@@ -24,7 +25,45 @@ module tb_data_mem();
                 .rd_data(intf.rd_data)
               );
 
+  /*************  TASKS *********************/
+  task drive(data_mem_trans trans);
+    intf.wr_sel <= trans.wr_sel;
+    intf.addr <= trans.addr;
+    intf.wr_data <= trans.wr_data;
+  endtask
+
+  task monitor(data_mem_trans trans);
+    trans.rd_data = intf.rd_data;
+  endtask
+
+  task test(data_mem_trans trans);
+    drive(trans);
+    #PROPOGATION_DELAY
+    monitor(trans);
+    score(trans);
+    @(posedge clk);
+    //TO DO: add a ref_model.update
+
+  endtask
+
+  int num_tests = 0;
+  int num_fails = 0;
+
+  function automatic void score(data_mem_trans actual);
+  //TO DO
+  endfunction
+
+  function void print_test_results();
+    $display("----------------");
+    $display("Test results:");
+    $display("Total tests ran: %0d", num_tests);
+    $display("Total tests failed: %0d", num_fails);
+    $display("----------------");
+  endfunction
+
   initial begin
+
+    print_test_results();
   end
 
 endmodule
