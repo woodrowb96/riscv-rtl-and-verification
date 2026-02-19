@@ -3,7 +3,7 @@ package tb_data_mem_transaction_pkg;
   import riscv_32i_config_pkg::*;
   import riscv_32i_control_pkg::*;
 
-  class tb_data_mem_transaction;
+  class data_mem_trans;
     rand byte_sel_t wr_sel;
     rand word_t addr;
     rand word_t wr_data;
