@@ -1,6 +1,6 @@
 package riscv_32i_defs_pkg;
   //register and word defs
-  parameter int XLEN = 32;                //registers are 32 bits wide
+  parameter int unsigned XLEN = 32;                //registers are 32 bits wide
   typedef logic [XLEN-1:0] word_t;    //words are 32 bit wide
   //misc words
   parameter word_t WORD_ALL_ONES = 32'hffff_ffff;
@@ -18,9 +18,13 @@ package riscv_32i_defs_pkg;
   parameter word_t WORD_SIGNED_NEG_ONE = WORD_ALL_ONES;
   parameter word_t WORD_SIGNED_ZERO = WORD_ALL_ZEROS;
 
+  //byte
+  parameter int unsigned BYTE_LEN = 8;
+  typedef logic [7:0] byte_t;
+
   //reg file defs
-  parameter int RF_DEPTH = 32;        //reg file is 32 registers deep
-  parameter int RF_ADDR_WIDTH = 5;    //A reg_file address are 5 bits wide, so we can address all 32 regs
+  parameter int unsigned RF_DEPTH = 32;        //reg file is 32 registers deep
+  parameter int unsigned RF_ADDR_WIDTH = 5;    //A reg_file address are 5 bits wide, so we can address all 32 regs
   typedef logic [RF_ADDR_WIDTH-1:0] rf_addr_t;
   parameter rf_addr_t X0 = 5'd0;
 endpackage
