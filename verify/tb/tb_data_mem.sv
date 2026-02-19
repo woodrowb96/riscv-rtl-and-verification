@@ -50,7 +50,7 @@ module tb_data_mem();
   int num_fails = 0;
 
   function automatic void score(data_mem_trans actual);
-  //TO DO
+    trans.print("ACTUAL");
   endfunction
 
   function void print_test_results();
@@ -61,9 +61,13 @@ module tb_data_mem();
     $display("----------------");
   endfunction
 
+  data_mem_trans trans;
   initial begin
+    trans = new();
 
     print_test_results();
+
+    $stop(1);
   end
 
 endmodule
