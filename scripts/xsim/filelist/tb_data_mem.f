@@ -7,3 +7,4 @@ rtl/data_mem.sv
 
 # VERIFICATION
 verify/interface/data_mem_intf.sv
+verify/transaction/tb_data_mem_transaction_pkg.sv
