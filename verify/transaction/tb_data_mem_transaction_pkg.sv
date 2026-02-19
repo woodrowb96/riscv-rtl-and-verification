@@ -14,6 +14,13 @@ package tb_data_mem_transaction_pkg;
       addr inside { [DATA_MEM_MIN_ADDR : DATA_MEM_MAX_ADDR] };
     }
 
+    function bit compare(data_mem_trans other);
+      return (this.wr_sel  === other.wr_sel  &&
+              this.addr    === other.addr    &&
+              this.wr_data === other.wr_data &&
+              this.rd_data === other.rd_data);
+    endfunction
+
     function void print(string msg = "");
       $display("[%s] t=%0t wr_sel:%0b addr:%0d wr_data:%h rd_data:%h",
                msg, $time, wr_sel, addr, wr_data, rd_data);
