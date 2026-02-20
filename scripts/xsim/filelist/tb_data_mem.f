@@ -11,3 +11,4 @@ verify/transaction/tb_lut_ram_transaction_pkg.sv
 verify/transaction/tb_data_mem_transaction_pkg.sv
 verify/ref_model/lut_ram_ref_model_pkg.sv
 verify/ref_model/data_mem_ref_model_pkg.sv
+verify/coverage/tb_data_mem_coverage_pkg.sv
