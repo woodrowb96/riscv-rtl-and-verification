@@ -1,9 +1,33 @@
 package tb_data_mem_coverage_pkg;
   import riscv_32i_config_pkg::*;
+  import riscv_32i_config_pkg::*;
   import riscv_32i_defs_pkg::*;
 
   class tb_data_mem_coverage;
     virtual data_mem_intf.monitor vif;
+
+    //using an associative array to keep track of prev written addresses
+    word_t prev_written_addresses [word_t];
+
+    //A function to check if the trans on vif, is currently overwritting a
+    //previously written address
+    //
+    //  -NOTE: Calling this function will also update the prev_written_addresses
+    //         and add the current_addr if vif.wr_sel != 0
+    function automatic bit overwritting(word_t current_addr);
+      bit overwrite = 0;
+
+      if(vif.wr_sel != 0) begin                                  //if we are currently writting
+        overwrite = prev_written_addresses.exists(current_addr); //see if we already wrote to the current_addr
+        prev_written_addresses[current_addr] = 1;                //and add the current_addr to the prev_written array
+      end
+
+      return overwrite;
+    endfunction
+
+    function void clear_prev_written_addresses();
+      prev_written_addresses.delete();
+    endfunction
 
     covergroup cg @(posedge vif.clk);
 
@@ -56,27 +80,15 @@ package tb_data_mem_coverage_pkg;
         bins non_corners = {[WORD_ALL_ZEROS + 1 : WORD_ALL_ONES - 1]};
       }
 
-      //we want to cover overwritting data
-      //  -Note: this is coverage is specifically written to cover
-      //         a consequetive write to the same address. I think its the
-      //         simplest way to capture the overwrite functionality.
-      //  -Note: I guard the coverpoint with wr_sel != 0, so we are not
-      //         covering back-to-back writes (so not writting and address,
-      //         then immediatly overwritting it the next cycle). So there
-      //         could be clock cycles between the first write where we dont
-      //         write to that address
-      overwrite: coverpoint vif.addr
-        iff(vif.wr_sel != 0) {
-          bins hit = ([DATA_MEM_FIRST_ADDR:DATA_MEM_LAST_ADDR][*2]);
-        }
+      //we want to cover overwritting prev written data
+      overwrite: coverpoint overwritting(vif.addr) {
+        bins hit = {1};
+      }
 
-        //we want to cover overwritting
-        //starting at each byte offset and
-        //with each kind of wr_sel
-        //  -so we want an overwrite from with every combo of wr_sel_x_byte_offset
-        overwrite_x_byte_offset_x_wr_sel: cross overwrite, byte_offset, wr_sel {
-          ignore_bins not_writting = binsof(wr_sel.no_write);
-        }
+      //we want to make sure we overwrite in all combos of wr_sel and at each byte offset
+      overwrite_x_byte_offset_x_wr_sel: cross overwrite, byte_offset, wr_sel {
+        ignore_bins not_writting = binsof(wr_sel.no_write);
+      }
     endgroup
 
     function new(virtual data_mem_intf.monitor vif);
