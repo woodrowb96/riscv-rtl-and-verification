@@ -13,3 +13,4 @@ verify/ref_model/lut_ram_ref_model_pkg.sv
 verify/ref_model/data_mem_ref_model_pkg.sv
 verify/coverage/tb_data_mem_coverage_pkg.sv
 verify/generator/tb_data_mem_generator_pkg.sv
+verify/assert/data_mem_assert.sv
