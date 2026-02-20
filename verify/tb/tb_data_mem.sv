@@ -88,7 +88,7 @@ module tb_data_mem();
     ref_data_mem = new();
     trans = new();
 
-    repeat(10) begin
+    repeat(1000) begin
       assert(trans.randomize()) else
         $fatal(1, "DATA_MEM_TB: trans.randomize() failed");
       test(trans);
