@@ -9,7 +9,6 @@ interface alu_intf;
   logic zero;
 
   modport coverage(input alu_op, in_a, in_b, result, zero);
-  modport assertion(input alu_op, in_a, in_b, result, zero);
 
   function void print(string msg = "");
     $display("[%s] t=%0t alu_op:%0b in_a:%0h in_b:%0h result:%0h zero:%0b",

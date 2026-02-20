@@ -30,7 +30,7 @@ module tb_reg_file();
                     );
 
   /************  BIND ASSERTIONS ************/
-  bind tb_reg_file.dut reg_file_assert dut_assert(tb_reg_file.intf);
+  bind tb_reg_file.dut reg_file_assert dut_assert(.*);
 
   /************  COVERAGE ************/
   tb_reg_file_coverage coverage;

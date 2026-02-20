@@ -27,7 +27,7 @@ module tb_alu();
           );
 
   /*********** BIND ASSERTIONS *************/
-  bind tb_alu.dut alu_assert dut_assert(intf.assertion);
+  bind tb_alu.dut alu_assert dut_assert(.*);
 
   /*********** COVERAGE *************/
   tb_alu_coverage coverage;

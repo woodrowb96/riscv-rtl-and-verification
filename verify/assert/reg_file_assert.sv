@@ -1,26 +1,33 @@
 import riscv_32i_defs_pkg::*;
 
 module reg_file_assert(
-  reg_file_intf.monitor intf
+  input logic clk,
+  input logic wr_en,
+  input rf_addr_t rd_reg_1,
+  input rf_addr_t rd_reg_2,
+  input rf_addr_t wr_reg,
+  input word_t wr_data,
+  input word_t rd_data_1,
+  input word_t rd_data_2
 );
   /*********   x0 READ CHECK **************/
   //We want to make sure we always read 0 from x0
   property x0_rd_zero_prop(rf_addr_t rd_reg, word_t rd_data);
-    @(posedge intf.clk)
+    @(posedge clk)
     (rd_reg == X0) |-> (rd_data == '0);
   endproperty
 
   x0_rd_zero_rd_reg_1_assert:
-    assert property(x0_rd_zero_prop(intf.rd_reg_1, intf.rd_data_1)) else
-      $error("x0_rd_zero_rd_reg_1_assert: rd_data_1=0x%0h", intf.rd_data_1);
+    assert property(x0_rd_zero_prop(rd_reg_1, rd_data_1)) else
+      $error("x0_rd_zero_rd_reg_1_assert: rd_data_1=0x%0h", rd_data_1);
   x0_rd_zero_rd_reg_2_assert:
-    assert property(x0_rd_zero_prop(intf.rd_reg_2, intf.rd_data_2)) else
-      $error("x0_rd_zero_rd_reg_2_assert: rd_data_2=0x%0h", intf.rd_data_2);
+    assert property(x0_rd_zero_prop(rd_reg_2, rd_data_2)) else
+      $error("x0_rd_zero_rd_reg_2_assert: rd_data_2=0x%0h", rd_data_2);
 
   /*********   x0 OVERWRITE CHECK **************/
   //x0 should always be zero, it should never be overwritten
   property x0_always_zero_prop;
-    @(posedge intf.clk)
+    @(posedge clk)
     reg_file.reg_file[X0] == '0;
   endproperty
 
@@ -33,9 +40,9 @@ module reg_file_assert(
   property write_prop;
     //if wr_en and we are not writting to x0 |=>
     //then the data should be in the reg_file during the next clk cycle
-    @(posedge intf.clk)
-    (intf.wr_en && intf.wr_reg != X0) |=>
-      (reg_file.reg_file[$past(intf.wr_reg)] == $past(intf.wr_data));
+    @(posedge clk)
+    (wr_en && wr_reg != X0) |=>
+      (reg_file.reg_file[$past(wr_reg)] == $past(wr_data));
   endproperty
 
   write_assert:
@@ -52,8 +59,8 @@ module reg_file_assert(
         assert property(
           //if we are not writting to this register |=>
           //then the data should not have changed
-          @(posedge intf.clk)
-          !(intf.wr_en && intf.wr_reg == index) |=>
+          @(posedge clk)
+          !(wr_en && wr_reg == index) |=>
             reg_file.reg_file[index] === $past(reg_file.reg_file[index])
         );
     end
@@ -62,17 +69,17 @@ module reg_file_assert(
   /*********** READ CHECK ******************/
   //We want to make sure we are reading out the actual data stored in the
   //reg_file
-  always @(posedge intf.clk) begin
+  always @(posedge clk) begin
     #0
-    if(intf.rd_reg_1 != X0) begin
-      assert (intf.rd_data_1 === reg_file.reg_file[intf.rd_reg_1]) else
+    if(rd_reg_1 != X0) begin
+      assert (rd_data_1 === reg_file.reg_file[rd_reg_1]) else
         $error("read_rd_reg_1_assert: expected:%0h, actual:%0h",
-                reg_file.reg_file[intf.rd_reg_1], intf.rd_data_1);
+                reg_file.reg_file[rd_reg_1], rd_data_1);
     end
-    if(intf.rd_reg_2 != X0) begin
-      assert (intf.rd_data_2 === reg_file.reg_file[intf.rd_reg_2]) else
+    if(rd_reg_2 != X0) begin
+      assert (rd_data_2 === reg_file.reg_file[rd_reg_2]) else
         $error("read_rd_reg_2_assert: expected:%0h, actual:%0h",
-                reg_file.reg_file[intf.rd_reg_2], intf.rd_data_2);
+                reg_file.reg_file[rd_reg_2], rd_data_2);
     end
 
     /********* NOTE *********/

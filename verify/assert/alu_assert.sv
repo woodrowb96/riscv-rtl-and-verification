@@ -1,16 +1,23 @@
+import riscv_32i_defs_pkg::*;
+import riscv_32i_control_pkg::*;
+
 module alu_assert(
-  alu_intf.assertion intf
+  input alu_op_t alu_op,
+  input word_t in_a,
+  input word_t in_b,
+  input word_t result,
+  input logic zero
 );
   always_comb begin
     //zero flag assertion
-    if(intf.result == '0) begin
-      assert(intf.zero == 1'b1) else
+    if(result == '0) begin
+      assert(zero == 1'b1) else
         $error("ERROR ALU: Zero flag not set, result=%0h, zero_flag=%0b",
-              intf.result, intf.zero);
-    end else if(intf.result != '0) begin
-      assert(intf.zero == 1'b0) else
+              result, zero);
+    end else if(result != '0) begin
+      assert(zero == 1'b0) else
         $error("ERROR ALU: Zero flag set incorrectly, result=%0h, zero_flag=%0b",
-              intf.result, intf.zero);
+              result, zero);
     end
   end
 
@@ -35,32 +42,32 @@ module alu_assert(
     //want its assertions to have to be given a clock to work.
     /*******************************/
     //always_comb begin
-    // case(intf.alu_op)
+    // case(alu_op)
     //   4'b0000: begin
-    //     assert #0 (intf.result == (intf.in_a & intf.in_b)) else
+    //     assert #0 (result == (in_a & in_b)) else
     //       $error("ERROR ALU: AND op result mismatch, in_a = %h, in_b = %h, result = %h",
-    //               intf.in_a, intf.in_b, intf.result);
+    //               in_a, in_b, result);
     //   end
     //   4'b0001: begin
-    //     assert #0 (intf.result == (intf.in_a | intf.in_b)) else
+    //     assert #0 (result == (in_a | in_b)) else
     //       $error("ERROR ALU: OR op result mismatch, in_a = %h, in_b = %h, result = %h",
-    //               intf.in_a, intf.in_b, intf.result);
+    //               in_a, in_b, result);
     //   end
     //   4'b0010: begin
-    //     assert #0 (intf.result == (intf.in_a + intf.in_b)) else
+    //     assert #0 (result == (in_a + in_b)) else
     //       $error("ERROR ALU: ADD op result mismatch, in_a = %h, in_b = %h, result = %h",
-    //               intf.in_a, intf.in_b, intf.result);
+    //               in_a, in_b, result);
     //   end
     //   4'b0110: begin
-    //     assert #0 (intf.result == (intf.in_a - intf.in_b)) else
+    //     assert #0 (result == (in_a - in_b)) else
     //       $error("ERROR ALU: SUB op result mismatch, in_a = %h, in_b = %h, result = %h",
-    //               intf.in_a, intf.in_b, intf.result);
+    //               in_a, in_b, result);
     //   end
     //   default: begin
-    //     assert #0 (intf.result == '0) else
+    //     assert #0 (result == '0) else
     //       $error("ERROR ALU: INVALID op result is not zero,",
     //               "ALU_OP: %b, result: %h, in_a: %h, in_b %h",
-    //               intf.alu_op, intf.result, intf.in_a, intf.in_b);
+    //               alu_op, result, in_a, in_b);
     //   end
     // endcase
   // end

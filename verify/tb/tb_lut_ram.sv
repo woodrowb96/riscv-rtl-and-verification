@@ -31,7 +31,7 @@ module tb_lut_ram();
                                                                 .rd_data(intf.rd_data)
                                                               );
   /**********  BIND ASSERTIONS *****************/
-  bind tb_lut_ram.dut lut_ram_assert dut_assert(tb_lut_ram.intf);
+  bind tb_lut_ram.dut lut_ram_assert #(.LUT_WIDTH(LUT_WIDTH), .LUT_DEPTH(LUT_DEPTH)) dut_assert(.*);
 
   /********  COVERAGE **************************/
   tb_lut_ram_coverage #(MEM_WIDTH, MEM_DEPTH) coverage;
