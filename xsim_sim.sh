@@ -173,7 +173,7 @@ fi
 
 echo "COMPILING FILELIST DEPENDENCIES: $FILE_LIST"
 echo $'\n'
-xvlog -sv --work work="$XSIM_WORKING_DIR" --log "$XSIM_DIR/xvlog.log" -f "$FILE_LIST"
+xvlog -sv -L uvm --work work="$XSIM_WORKING_DIR" --log "$XSIM_DIR/xvlog.log" -f "$FILE_LIST"
 
 #If we failed to compile the dependencies, then dont run the sim
 if [ $? -ne 0 ] ; then
@@ -188,7 +188,7 @@ echo $'\n'
 
 echo "COMPILING TEST BENCH: $TEST_BENCH"
 echo $'\n'
-xvlog -sv --work work="$XSIM_WORKING_DIR" --log "$XSIM_DIR/xvlog.log" "$PROJECT_ROOT_DIR/$TEST_BENCH_PATH"
+xvlog -sv -L uvm --work work="$XSIM_WORKING_DIR" --log "$XSIM_DIR/xvlog.log" "$PROJECT_ROOT_DIR/$TEST_BENCH_PATH"
 
 #If we failed to compile the tb, then dont run the sim
 if [ $? -ne 0 ] ; then
@@ -204,7 +204,7 @@ cd "$XSIM_DIR" || exit 1
 
 echo "ELABORATING TEST BENCH: $TEST_BENCH"
 echo $'\n'
-xelab $TEST_BENCH -debug typical
+xelab -L uvm $TEST_BENCH -debug typical
 
 #If we failed the elaboration, then dont run the sim
 if [ $? -ne 0 ] ; then

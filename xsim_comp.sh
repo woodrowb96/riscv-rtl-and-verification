@@ -60,7 +60,7 @@ if [[ -f "$FILE_LIST_DIR/$MODULE_NAME.f" ]] ; then
   echo $'\n'
   echo "COMPILING FILELIST: $MODULE_NAME.f"
   echo $'\n'
-  xvlog -sv --work work="$XSIM_WORKING_DIR" -f "$FILE_LIST"
+  xvlog -sv -L uvm --work work="$XSIM_WORKING_DIR" -f "$FILE_LIST"
   if [ $? -ne 0 ] ; then
     echo $'\n'
     echo "WARNING $SCRIPT_NAME: $MODULE_NAME.f compilation failed"
@@ -75,4 +75,4 @@ fi
 echo $'\n'
 echo "COMPILING: $MODULE_NAME"
 echo $'\n'
-xvlog -sv --work work="$XSIM_WORKING_DIR" "$PROJECT_ROOT_DIR/$1"
+xvlog -sv -L uvm --work work="$XSIM_WORKING_DIR" "$PROJECT_ROOT_DIR/$1"
