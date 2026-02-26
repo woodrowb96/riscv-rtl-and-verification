@@ -2,7 +2,7 @@
 
 RTL Design and Verification of a RISC-V RV32I implementation.
 
-A specific emphasis has been put on verification.
+Special emphasis has been put on verification.
 My goal is to not only design and implement an RV32I Core, but to also fully and professionally verify that implementation.
 
 Each RTL module is being developed alongside a full coverage-driven verification environment consisting of:
@@ -42,7 +42,7 @@ Current development can be viewed on the single_cycle branch.
 ```
 
 ## RTL Modules
-These are the current RTL modules implemented:
+I've currently implemented and verified the following modules:
 - ALU
 - Register File
 - LUT RAM
@@ -50,13 +50,17 @@ These are the current RTL modules implemented:
 
 ## Verification
 
-Every RTL module is paired with an accompanying coverage-driven verification environment, a testbench, functional coverage model and SVA assertions.
+Each RTL module is paired with an accompanying coverage-driven verification environment,
+consisting of:
+- a Testbench
+- a Functional Coverage Model
+- SVA assertions
 
 ### Testbench
 
-Testbenches consist of sequential generate-drive-monitor-score loops.
+Testbenches are built around a sequential generate->drive->monitor->score loop.
 
-Transactions are generated, driven into the DUT, monitored, and scored against the DUT's reference model.
+Transactions are generated, driven into the DUT, monitored, and finally scored against the DUT's reference model.
 
 - **Transactions** — randomizable stimulus/response pair
 - **Generator** — Randomize transactions using constraints. Constraints are chosen to hit full coverage.
@@ -64,8 +68,8 @@ Transactions are generated, driven into the DUT, monitored, and scored against t
 - **Monitor** — Capture the DUT's output through the interface
 - **Scoreboard** — Use the DUT's reference model to score the DUT's output
 
-Note: I intentionally decided to not introduce parallel processes into my testbenches.
-I want to keep my custom verification environment relatively simple in that regard,
+Note: I intentionally do not use any parallel processes in my testbenches.
+I wanted to keep my custom verification environment relatively simple in that regard,
 so intentionally limited myself to not using forked classes for generate, drive, monitor and score.
 
 ### Functional Coverage
@@ -74,7 +78,7 @@ Each module is accompanied by a functional coverage model.
 Coverage is defined inside SystemVerilog covergroups using coverpoints and crosses.
 
 A large part of the verification process for each module consists of going back and forth
-between looking at the coverage and rewriting constraints in the generator. That loop continues
+between the coverage model and generator, looking at the coverage model and rewriting constraints,
 until the testbench is hitting 100% coverage.
 
 ### SVA Assertions
@@ -89,10 +93,10 @@ assertion modules. For example, my data_mem assertions include the assertions fo
 
 ## How to Compile and Run Simulations
 
-I've two bash scripts that are used to compile and run simulations using Xilinx Vivado.
+I've written two bash scripts that are used to compile and run simulations using Xilinx Vivado.
 
-You only need to call the sim script on the top-level module and the script will use the
-filelists to compile all the testbench dependencies.
+You only need to call the sim script on the top-level testbench module and the script will use its 
+filelists to automatically compile all of the testbench's dependencies.
 
 ### Compile and Simulate
 
