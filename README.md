@@ -2,9 +2,9 @@
 
 RTL Design and Verification of a RISC-V RV32I implementation.
 
-A special emphasis has been put on verification. The goal is not just the RTL implementation of a RISCV Core, but to also fully and professionally verify that implementation.
+A special emphasis has been put on verification. The goal is not just the RTL implementation of a RISC-V Core, but to also fully and professionally verify that implementation.
 
-Each RTL module is developed alongside a full coverage driven verification environment consisting of:
+Each RTL module is developed alongside a full coverage-driven verification environment consisting of:
 - Functional coverage
 - Constrained random stimulus
 - Behavioral reference models
@@ -40,7 +40,7 @@ Note: I am actively developing this project. Current development can be viewed o
 ```
 
 ## RTL Modules
-These are the current rtl modules implemented:
+These are the current RTL modules implemented:
 - ALU
 - Register File
 - LUT RAM
@@ -48,19 +48,19 @@ These are the current rtl modules implemented:
 
 ## Verification
 
-Every rtl module is paired with an accompanying full verification environment.
+Every RTL module is paired with an accompanying full verification environment.
 
 ### Testbench
 
-Testbenches consist of transaction based, sequential generate-drive-monitor-score loops.
+Testbenches consist of transaction-based, sequential generate-drive-monitor-score loops.
 
 Transactions are generated, driven into the DUT, monitored, and scored against the DUT's reference model.
 
 - **Transactions** — randomizable stimulus/response pair
 - **Generator** — Randomize transactions using constraints. Constraints are chosen to hit full coverage.
 - **Driver** — Drive the randomized transaction into the DUT through the interface
-- **Monitor** — Captures the DUTs output through the interface
-- **Scoreboard** — Uses the DUTs reference model to score the DUTs output
+- **Monitor** — Capture the DUT's output through the interface
+- **Scoreboard** — Use the DUT's reference model to score the DUT's output
 
 Note: I intentionally decided to not introduce parallel processes into my testbenches.
 I want to keep my custom verification environment relatively simple in that regard,
@@ -82,9 +82,9 @@ Once bound, assertions run alongside the RTL during simulation, providing a pass
 of individual functionality within the RTL itself.
 
 Assertions can be used hierarchically just like the RTL — child module assertions can be bound inside parent
-assertion modules. For example my data_mem assertions include the assertions for lut_ram inside them.
+assertion modules. For example, my data_mem assertions include the assertions for lut_ram inside them.
 
-## How to Run
+## How to Compile and Run Simulations
 
 I have written out two scripts that work with Xilinx Vivado to compile and simulate the RTL.
 
@@ -103,7 +103,7 @@ You can use the sim script to run the simulation in either CLI mode (default) or
 ./xsim_sim.sh -g verify/tb/tb_data_mem.sv
 ```
 
-You only need to call the sim script on the top level module and the script will use the
+You only need to call the sim script on the top-level module and the script will use the
 filelists to compile all the testbench dependencies.
 
 ## Next Steps
@@ -112,11 +112,11 @@ I am actively developing the project. Current work is being done on the single_c
 
 - Short Term:
     - Continue implementing and verifying RTL.
-    - Currently working towards the implementation and verification of a single cycle implementation of an RV32I Core.
+    - Currently working towards the implementation and verification of a single cycle version of the RV32I Core.
 
 - Long Term:
-    - Implement 5 stage pipelining with forwarding, hazard detection and branch prediction.
+    - Implement 5-stage pipelining with forwarding, hazard detection and branch prediction.
     - Implement memory hierarchy with an L1 cache.
-    - Build UVM versions of each module's verification
+    - Build UVM versions of each module's verification.
     - Get a version of the core running on an FPGA.
 
