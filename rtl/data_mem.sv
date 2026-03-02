@@ -130,11 +130,11 @@ module data_mem (
   //A word length line in memory is (from most significant byte, to least significant byte):
   //  {byte_3, byte_2, byte_1, byte_0}
   lut_ram #(.LUT_DEPTH(DATA_MEM_DEPTH), .LUT_WIDTH(BYTE_LEN))
-    byte_3 (.clk(clk), .wr_en(lut_ram_wr_en[3]), .wr_addr(byte_3_addr), .rd_addr(byte_3_addr), .wr_data(byte_3_wr), .rd_data(byte_3_rd));
+    u_byte_3 (.clk(clk), .wr_en(lut_ram_wr_en[3]), .wr_addr(byte_3_addr), .rd_addr(byte_3_addr), .wr_data(byte_3_wr), .rd_data(byte_3_rd));
   lut_ram #(.LUT_DEPTH(DATA_MEM_DEPTH), .LUT_WIDTH(BYTE_LEN))
-    byte_2 (.clk(clk), .wr_en(lut_ram_wr_en[2]), .wr_addr(byte_2_addr), .rd_addr(byte_2_addr), .wr_data(byte_2_wr), .rd_data(byte_2_rd));
+    u_byte_2 (.clk(clk), .wr_en(lut_ram_wr_en[2]), .wr_addr(byte_2_addr), .rd_addr(byte_2_addr), .wr_data(byte_2_wr), .rd_data(byte_2_rd));
   lut_ram #(.LUT_DEPTH(DATA_MEM_DEPTH), .LUT_WIDTH(BYTE_LEN))
-    byte_1 (.clk(clk), .wr_en(lut_ram_wr_en[1]), .wr_addr(byte_1_addr), .rd_addr(byte_1_addr), .wr_data(byte_1_wr), .rd_data(byte_1_rd));
+    u_byte_1 (.clk(clk), .wr_en(lut_ram_wr_en[1]), .wr_addr(byte_1_addr), .rd_addr(byte_1_addr), .wr_data(byte_1_wr), .rd_data(byte_1_rd));
   lut_ram #(.LUT_DEPTH(DATA_MEM_DEPTH), .LUT_WIDTH(BYTE_LEN))
-    byte_0 (.clk(clk), .wr_en(lut_ram_wr_en[0]), .wr_addr(byte_0_addr), .rd_addr(byte_0_addr), .wr_data(byte_0_wr), .rd_data(byte_0_rd));
+    u_byte_0 (.clk(clk), .wr_en(lut_ram_wr_en[0]), .wr_addr(byte_0_addr), .rd_addr(byte_0_addr), .wr_data(byte_0_wr), .rd_data(byte_0_rd));
 endmodule

@@ -23,10 +23,10 @@ add_wave -radix hex tb_data_mem/dut/byte_1_wr
 add_wave -radix hex tb_data_mem/dut/byte_2_wr
 add_wave -radix hex tb_data_mem/dut/byte_3_wr
 add_wave_divider
-add_wave -radix hex tb_data_mem/dut/byte_0/mem
-add_wave -radix hex tb_data_mem/dut/byte_1/mem
-add_wave -radix hex tb_data_mem/dut/byte_2/mem
-add_wave -radix hex tb_data_mem/dut/byte_3/mem
+add_wave -radix hex tb_data_mem/dut/u_byte_0/mem
+add_wave -radix hex tb_data_mem/dut/u_byte_1/mem
+add_wave -radix hex tb_data_mem/dut/u_byte_2/mem
+add_wave -radix hex tb_data_mem/dut/u_byte_3/mem
 add_wave_divider
 
 run all

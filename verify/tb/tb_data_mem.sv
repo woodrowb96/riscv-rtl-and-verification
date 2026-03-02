@@ -28,6 +28,9 @@ module tb_data_mem();
                 .rd_data(intf.rd_data)
               );
 
+  /********** BIND ASSERTIONS ****************/
+  bind tb_data_mem.dut data_mem_assert dut_assert(.*);
+
   /***********  COVERAGE *********************/
   tb_data_mem_coverage coverage;
 
