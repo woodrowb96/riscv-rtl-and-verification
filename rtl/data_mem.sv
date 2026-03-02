@@ -54,6 +54,11 @@ module data_mem (
   byte_t     byte_0_wr, byte_1_wr, byte_2_wr, byte_3_wr;
   byte_sel_t lut_ram_wr_en;
 
+  //Data_mem depth needs to be a power of 2.
+  //This is needed to ensure the addresses naturally wrap silently
+  initial assert((DATA_MEM_DEPTH & (DATA_MEM_DEPTH - 1)) == 0) else
+    $fatal("DATA_MEM_DEPTH must be power of 2");
+
   always_comb begin
 
     //look at the byte offset and:
