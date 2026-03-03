@@ -4,4 +4,5 @@ rtl/package/riscv_32i_config_pkg.sv
 rtl/inst_mem.sv
 
 #VERIFICATION
+verify/package/verify_config_pkg.sv
 verify/interface/inst_mem_intf.sv

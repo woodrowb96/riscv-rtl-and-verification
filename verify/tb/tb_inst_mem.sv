@@ -1,7 +1,7 @@
-module tb_inst_mem();
-  import riscv_32i_defs_pkg::*;
+import riscv_32i_defs_pkg::*;
+import verify_config_pkg::*;
 
-  localparam string TEST_0 = "../../verify/programs/test_0.txt";
+module tb_inst_mem();
   localparam CLK_PERIOD = 10;
   localparam PROPOGATION_DELAY = 1;
 
@@ -16,7 +16,7 @@ module tb_inst_mem();
   inst_mem_intf intf();
 
   /******  DUT *************/
-  inst_mem #(.PROGRAM(TEST_0)) dut(.inst_addr(intf.inst_addr), .inst(intf.inst));
+  inst_mem #(INST_MEM_TEST_0) dut(.inst_addr(intf.inst_addr), .inst(intf.inst));
 
   /********* TASKS ***********/
   task drive(word_t inst_addr);

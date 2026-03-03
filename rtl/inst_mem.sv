@@ -44,7 +44,11 @@ module inst_mem #(parameter string PROGRAM = "NO_INST_MEM_PROGRAM_SPECIFIED") (
 
   //initialize the rom for simulation
   //(may need to use another way for synthesis onto an fpga)
-  initial $readmemh(PROGRAM, inst_rom);
+  initial begin
+    $readmemh(PROGRAM, inst_rom);
+    assert(inst_rom[0] !== 'x) else
+      $fatal(1, "Failed to load program: %s", PROGRAM);
+  end
 
   /*************** READ OUT INSTRUCTION *****************************/
 
