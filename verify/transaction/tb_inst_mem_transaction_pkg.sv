@@ -20,7 +20,7 @@ package tb_inst_mem_transaction_pkg;
     endfunction
 
     function void print(string msg = "");
-      $display("[%s] t=%0t inst_addr:%0d inst:%0h", msg, $time, inst_addr, inst);
+      $display("[%s] t=%0t inst_addr:%0d inst:%h", msg, $time, inst_addr, inst);
     endfunction
   endclass
 endpackage

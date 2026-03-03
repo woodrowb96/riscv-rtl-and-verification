@@ -7,3 +7,4 @@ rtl/inst_mem.sv
 verify/package/verify_config_pkg.sv
 verify/interface/inst_mem_intf.sv
 verify/transaction/tb_inst_mem_transaction_pkg.sv
+verify/ref_model/inst_mem_ref_model_pkg.sv
