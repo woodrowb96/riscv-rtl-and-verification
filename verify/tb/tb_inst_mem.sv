@@ -2,6 +2,7 @@ import riscv_32i_defs_pkg::*;
 import verify_config_pkg::*;
 import tb_inst_mem_transaction_pkg::*;
 import inst_mem_ref_model_pkg::*;
+import tb_inst_mem_generator_pkg::*;
 
 module tb_inst_mem();
   localparam CLK_PERIOD = 10;
@@ -44,7 +45,7 @@ module tb_inst_mem();
 
     if(!expected.compare(actual)) begin
       $display("----------------");
-      $error("DATA_MEM_TB: test fail");
+      $error("INST_MEM_TB: test fail");
       expected.print("EXPECTED");
       actual.print("ACTUAL");
       num_fails++;
@@ -66,22 +67,19 @@ module tb_inst_mem();
     #PROPOGATION_DELAY
     monitor(trans);
     score(trans);
+    @(posedge clk);
   endtask
 
   /*********** TESTING **************/
-  inst_mem_trans trans;
+  tb_inst_mem_generator gen;
 
   initial begin
-    trans = new();
-    trans.inst_addr = '0;
-    trans.inst = '0;
+    gen = new();
 
     ref_inst_mem = new(INST_MEM_TEST_0);
 
-    for(int i = 0; i < 10; i++) begin
-      @(posedge clk)
-      trans.inst_addr = 4 * i;
-      test(trans);
+    repeat(1000) begin
+      test(gen.gen_trans());
     end
 
     print_test_results();
