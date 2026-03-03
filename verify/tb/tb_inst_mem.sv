@@ -1,5 +1,6 @@
 import riscv_32i_defs_pkg::*;
 import verify_config_pkg::*;
+import tb_inst_mem_transaction_pkg::*;
 
 module tb_inst_mem();
   localparam CLK_PERIOD = 10;
@@ -19,29 +20,29 @@ module tb_inst_mem();
   inst_mem #(INST_MEM_TEST_0) dut(.inst_addr(intf.inst_addr), .inst(intf.inst));
 
   /********* TASKS ***********/
-  task drive(word_t inst_addr);
-    intf.inst_addr = inst_addr;
+  task drive(inst_mem_trans trans);
+    intf.inst_addr = trans.inst_addr;
   endtask
 
-  task monitor(output word_t inst);
-    inst = intf.inst;
+  task monitor(inst_mem_trans trans);
+    trans.inst = intf.inst;
   endtask
 
   /*********** TESTING **************/
-  word_t inst_addr;
-  word_t inst;
+  inst_mem_trans trans;
 
   initial begin
-    inst_addr = '0;
-    inst = '0;
+    trans = new();
+    trans.inst_addr = '0;
+    trans.inst = '0;
 
     for(int i = 0; i < 10; i++) begin
       @(posedge clk)
-      inst_addr = 4 * i;
-      drive(inst_addr);
+      trans.inst_addr = 4 * i;
+      drive(trans);
       #PROPOGATION_DELAY
-      monitor(inst);
-      $display("inst_addr: %0d, inst: %h", inst_addr, inst);
+      monitor(trans);
+      trans.print();
     end
 
     $stop(1);

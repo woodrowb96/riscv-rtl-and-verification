@@ -5,5 +5,6 @@ package riscv_32i_config_pkg;
   parameter int unsigned DATA_MEM_LAST_WORD_ADDR = DATA_MEM_LAST_ADDR - 4; //the last full word stored in memory
 
   parameter int unsigned INST_MEM_DEPTH = 256;
+  parameter int unsigned INST_MEM_LAST_ADDR = (INST_MEM_DEPTH * 4) - 4;   //last word in inst_mem
   parameter int unsigned INST_MEM_FIRST_ADDR = 0;
 endpackage
