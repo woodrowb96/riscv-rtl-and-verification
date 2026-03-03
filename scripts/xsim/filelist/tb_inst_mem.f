@@ -1,0 +1,7 @@
+# RTL
+rtl/package/riscv_32i_defs_pkg.sv
+rtl/package/riscv_32i_config_pkg.sv
+rtl/inst_mem.sv
+
+#VERIFICATION
+verify/interface/inst_mem_intf.sv
