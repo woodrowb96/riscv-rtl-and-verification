@@ -55,7 +55,7 @@ module inst_mem #(parameter string PROGRAM = "NO_INST_MEM_PROGRAM_SPECIFIED") (
 
   //truncate the addr to fit in the rom_addr port
   //and drop the bottom 2bits (the byte offset)
-  assign rom_addr = rom_addr_t'(inst_addr[XLEN-1:2]);
+  assign rom_addr = rom_addr_t'(inst_addr >> 2);
 
   assign inst = inst_rom[rom_addr];
 

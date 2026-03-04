@@ -7,7 +7,6 @@ import tb_inst_mem_coverage_pkg::*;
 
 module tb_inst_mem();
   localparam CLK_PERIOD = 10;
-  localparam PROPAGATION_DELAY = 1;
   localparam DUT_TEST_MEM = INST_MEM_TEST_1;
 
   //clk
@@ -23,6 +22,12 @@ module tb_inst_mem();
   /******  DUT *************/
   inst_mem #(DUT_TEST_MEM) dut(.inst_addr(intf.inst_addr), .inst(intf.inst));
 
+  /***** BIND ASSERTIONS *****/
+  //hook up the testbench clk to the clk, then connect the rest of dut ports
+  bind tb_inst_mem.dut inst_mem_assert dut_assert(.clk(tb_inst_mem.clk),
+                                                  .inst_addr(inst_addr),
+                                                  .inst(inst)
+                                                  );
   /******* COVERAGE ************/
   tb_inst_mem_coverage coverage;
 
@@ -69,11 +74,10 @@ module tb_inst_mem();
 
   task test(inst_mem_trans trans);
     drive(trans);
-    #PROPAGATION_DELAY
+    @(posedge clk);
     monitor(trans);
     score(trans);
     coverage.sample();
-    @(posedge clk);
   endtask
 
   /*********** TESTING **************/
