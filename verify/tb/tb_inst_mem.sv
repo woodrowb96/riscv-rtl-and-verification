@@ -7,7 +7,8 @@ import tb_inst_mem_coverage_pkg::*;
 
 module tb_inst_mem();
   localparam CLK_PERIOD = 10;
-  localparam PROPOGATION_DELAY = 1;
+  localparam PROPAGATION_DELAY = 1;
+  localparam DUT_TEST_MEM = INST_MEM_TEST_1;
 
   //clk
   logic clk;
@@ -20,7 +21,7 @@ module tb_inst_mem();
   inst_mem_intf intf();
 
   /******  DUT *************/
-  inst_mem #(INST_MEM_TEST_0) dut(.inst_addr(intf.inst_addr), .inst(intf.inst));
+  inst_mem #(DUT_TEST_MEM) dut(.inst_addr(intf.inst_addr), .inst(intf.inst));
 
   /******* COVERAGE ************/
   tb_inst_mem_coverage coverage;
@@ -68,7 +69,7 @@ module tb_inst_mem();
 
   task test(inst_mem_trans trans);
     drive(trans);
-    #PROPOGATION_DELAY
+    #PROPAGATION_DELAY
     monitor(trans);
     score(trans);
     coverage.sample();
@@ -82,10 +83,21 @@ module tb_inst_mem();
     coverage = new(intf.monitor);
     gen = new();
 
-    ref_inst_mem = new(INST_MEM_TEST_0);
+    ref_inst_mem = new(DUT_TEST_MEM);
 
+    //run the main test
     repeat(1000) begin
       test(gen.gen_trans());
+    end
+
+    //test misaligned addresses (so addresses with non-zero byte offset)
+    repeat(10) begin
+      test(gen.gen_misaligned_trans());
+    end
+
+    //test out of bounds addresses
+    repeat(10) begin
+      test(gen.gen_oob_trans());
     end
 
     print_test_results();

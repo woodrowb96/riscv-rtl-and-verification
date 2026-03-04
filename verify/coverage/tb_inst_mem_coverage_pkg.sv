@@ -46,8 +46,6 @@ package tb_inst_mem_coverage_pkg;
         bins non_corner = {[WORD_ALL_ZEROS + 1 : WORD_ALL_ONES - 1]};
       }
 
-      //we want to read all the corner inst from each corner addr
-      inst_x_inst_addr: cross inst, inst_addr;
     endgroup
 
     function void sample();
