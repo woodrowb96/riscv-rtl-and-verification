@@ -14,8 +14,9 @@ NOTE:
       to catch and handle that scenario.
 
   - Misaligned access:
-      This module assumes word aligned access and doesnt handle scenarios where byte_offset != 0.
-      Ill leave the catching and handling of that to other parts of the riscv implementation.
+      This module assumes word aligned access and silently rounds non-zero byte offests 
+      down to the next lower word. It doesnt throw a flag or error Ill leave the catching
+      and handling of misaligned access to other parts of the riscv implementation.
 */
 import riscv_32i_defs_pkg::*;
 import riscv_32i_config_pkg::*;

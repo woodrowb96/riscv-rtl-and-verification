@@ -3,6 +3,7 @@ import verify_config_pkg::*;
 import tb_inst_mem_transaction_pkg::*;
 import inst_mem_ref_model_pkg::*;
 import tb_inst_mem_generator_pkg::*;
+import tb_inst_mem_coverage_pkg::*;
 
 module tb_inst_mem();
   localparam CLK_PERIOD = 10;
@@ -20,7 +21,10 @@ module tb_inst_mem();
 
   /******  DUT *************/
   inst_mem #(INST_MEM_TEST_0) dut(.inst_addr(intf.inst_addr), .inst(intf.inst));
-  
+
+  /******* COVERAGE ************/
+  tb_inst_mem_coverage coverage;
+
   /****** REF_MODEL *********/
 
   inst_mem_ref_model ref_inst_mem;
@@ -67,6 +71,7 @@ module tb_inst_mem();
     #PROPOGATION_DELAY
     monitor(trans);
     score(trans);
+    coverage.sample();
     @(posedge clk);
   endtask
 
@@ -74,6 +79,7 @@ module tb_inst_mem();
   tb_inst_mem_generator gen;
 
   initial begin
+    coverage = new(intf.monitor);
     gen = new();
 
     ref_inst_mem = new(INST_MEM_TEST_0);
