@@ -22,7 +22,8 @@ Current development can be viewed on the single_cycle branch.
 │   ├── alu.sv          # Arithmetic logic unit
 │   ├── reg_file.sv     # 32x32 register file
 │   ├── lut_ram.sv      # Generic parameterized LUT-RAM
-│   └── data_mem.sv     # Byte-addressable data memory
+│   ├── data_mem.sv     # Byte-addressable data memory
+│   └── inst_mem.sv     # Read-only instruction memory (ROM)
 │
 ├── verify/
 │   ├── tb/             # Top-level testbenches
@@ -31,11 +32,15 @@ Current development can be viewed on the single_cycle branch.
 │   ├── ref_model/      # Behavioral reference models used to score tests
 │   ├── coverage/       # Functional coverage
 │   ├── assert/         # SVA assertion modules (bound into RTL)
-│   └── interface/      # SystemVerilog interfaces
+│   ├── interface/      # SystemVerilog interfaces
+│   ├── package/        # Verification config (test program paths, etc.)
+│   └── programs/       # Hex program files loaded into instruction memory
 │
-├── scripts/xsim/
-│   ├── filelist/       # Compilation dependencies
-│   └── *.tcl           # Waveform and simulation TCL scripts
+├── scripts/
+│   ├── xsim/
+│   │   ├── filelist/   # Compilation dependencies
+│   │   └── *.tcl       # Waveform and simulation TCL scripts
+│   └── gen/            # Python scripts for test data generation
 │
 ├── xsim_comp.sh        # Compile script (Xilinx xvlog)
 └── xsim_sim.sh         # Simulate script (Xilinx xsim)
@@ -47,6 +52,7 @@ I've currently implemented and verified the following modules:
 - Register File
 - LUT RAM
 - Data Memory
+- Instruction Memory
 
 ## Verification
 
@@ -91,14 +97,18 @@ of individual functionality within the RTL itself.
 Assertions can be used hierarchically just like the RTL — child module assertions can be bound inside parent
 assertion modules. For example, my data_mem assertions include the assertions for lut_ram inside them.
 
+### Scripts
+
+- `scripts/gen/gen_rand_inst_mem.py`
+    - Generates randomized instruction memory contents with weighted corner-case values for use in constrained random testing.
+- `xsim_comp.sh`
+    - Compiles a SystemVerilog file and its filelist dependencies using Xilinx xvlog.
+- `xsim_sim.sh`
+    - Compiles, elaborates, and simulates a testbench using Xilinx xsim.
+    - By default, the script looks for a TCL script named `<testbench>.tcl` to run the sim, but a custom TCL script can be specified with `-t`.
+    - Supports CLI and GUI (`-g`) modes.
+
 ## How to Compile and Run Simulations
-
-I've written two bash scripts that are used to compile and run simulations using Xilinx Vivado.
-
-You only need to call the sim script on the top-level testbench module and the script will use its 
-filelists to automatically compile all of the testbench's dependencies.
-
-### Compile and Simulate
 
 ```bash
 # Compile a testbench and its dependencies
@@ -109,6 +119,7 @@ filelists to automatically compile all of the testbench's dependencies.
 
 # Run simulation with GUI waveform viewer
 ./xsim_sim.sh -g verify/tb/tb_data_mem.sv
+
 ```
 
 ## Next Steps
