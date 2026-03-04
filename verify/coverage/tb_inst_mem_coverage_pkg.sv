@@ -26,7 +26,7 @@ package tb_inst_mem_coverage_pkg;
       }
 
       //My implementation assumes alligned access, but the module is supposed
-      //to handle the misaligned case silently so well cover it.
+      //to handle the misaligned case silently so we'll cover it.
       misaligned_access: coverpoint misaligned_addr(vif.inst_addr){
         bins aligned = {0};
         bins misaligned = {1};

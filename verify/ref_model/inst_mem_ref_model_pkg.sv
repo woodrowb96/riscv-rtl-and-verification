@@ -9,7 +9,7 @@ package inst_mem_ref_model_pkg;
     word_t ref_inst_rom [int unsigned];
 
     function automatic word_t read(word_t inst_addr);
-      //get rid of the byte offset
+    //get rid of the byte offset
       int unsigned ref_inst_addr = inst_addr >> 2;
 
       //manually wrap out of bounds addresses

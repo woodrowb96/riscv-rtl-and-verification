@@ -20,7 +20,7 @@ package tb_inst_mem_generator_pkg;
     //we are overriding the legal_addr_range const in the base class
     //so that we will only gen OOB addresses
     constraint legal_addr_range {
-      inst_addr >= INST_MEM_LAST_ADDR;
+      inst_addr > INST_MEM_LAST_ADDR;
     }
   endclass
 
