@@ -1,6 +1,6 @@
 package reg_file_ref_model_pkg;
   import tb_reg_file_transaction_pkg::*;
-  import riscv_32i_defs_pkg::*;
+  import rv32i_defs_pkg::*;
 
   class reg_file_ref_model;
     word_t ref_mem [0:RF_DEPTH-1];

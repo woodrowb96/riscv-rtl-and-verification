@@ -1,4 +1,4 @@
-import riscv_32i_defs_pkg::*;
+import rv32i_defs_pkg::*;
 
 interface inst_mem_intf;
   word_t inst_addr;

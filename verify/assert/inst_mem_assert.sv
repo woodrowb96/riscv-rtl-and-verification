@@ -1,5 +1,5 @@
-import riscv_32i_defs_pkg::*;
-import riscv_32i_config_pkg::*;
+import rv32i_defs_pkg::*;
+import rv32i_config_pkg::*;
 
 module inst_mem_assert(
   //inst_mem doesnt have any clocked logic

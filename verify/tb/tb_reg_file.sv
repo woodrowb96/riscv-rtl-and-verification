@@ -2,7 +2,7 @@ import tb_reg_file_transaction_pkg::*;
 import tb_reg_file_generator_pkg::*;
 import reg_file_ref_model_pkg::*;
 import tb_reg_file_coverage_pkg::*;
-import riscv_32i_defs_pkg::*;
+import rv32i_defs_pkg::*;
 // `timescale 1ns / 10ps
 
 module tb_reg_file();

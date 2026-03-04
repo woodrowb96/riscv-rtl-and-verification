@@ -1,6 +1,6 @@
-import riscv_32i_defs_pkg::*;
-import riscv_32i_config_pkg::*;
-import riscv_32i_control_pkg::*;
+import rv32i_defs_pkg::*;
+import rv32i_config_pkg::*;
+import rv32i_control_pkg::*;
 import tb_data_mem_transaction_pkg::*;
 import data_mem_ref_model_pkg::*;
 import tb_data_mem_coverage_pkg::*;

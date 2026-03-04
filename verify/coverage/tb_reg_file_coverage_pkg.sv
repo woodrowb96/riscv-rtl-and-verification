@@ -1,5 +1,5 @@
 package tb_reg_file_coverage_pkg;
-  import riscv_32i_defs_pkg::*;
+  import rv32i_defs_pkg::*;
 
   class tb_reg_file_coverage;
     virtual reg_file_intf.monitor vif;

@@ -1,6 +1,6 @@
 package tb_inst_mem_generator_pkg;
   import tb_inst_mem_transaction_pkg::*;
-  import riscv_32i_config_pkg::*;
+  import rv32i_config_pkg::*;
 
   //SEE THE NOTE IN: tb_lut_ram_generator_pkg.sv for why im using child trans
   //classes instead of just inlining this stuff in the generator

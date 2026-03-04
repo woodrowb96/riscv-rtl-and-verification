@@ -1,4 +1,4 @@
-package riscv_32i_control_pkg;
+package rv32i_control_pkg;
 
   //select sub bytes in a word
   //for example in data_mem we use it to select which bytes to write

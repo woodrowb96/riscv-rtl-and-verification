@@ -18,7 +18,7 @@ Output:
 Note:
   Register x0 (reg_file[0]) always returns '0
 */
-import riscv_32i_defs_pkg::*;
+import rv32i_defs_pkg::*;
 
 module reg_file (
   input logic clk,

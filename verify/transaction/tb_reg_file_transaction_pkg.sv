@@ -1,5 +1,5 @@
 package tb_reg_file_transaction_pkg;
-  import riscv_32i_defs_pkg::*;
+  import rv32i_defs_pkg::*;
 
   class reg_file_trans;
     rand logic wr_en;

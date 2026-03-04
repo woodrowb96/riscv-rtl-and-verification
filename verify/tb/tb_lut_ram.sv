@@ -1,4 +1,4 @@
-import riscv_32i_defs_pkg::*;
+import rv32i_defs_pkg::*;
 import tb_lut_ram_transaction_pkg::*;
 import tb_lut_ram_generator_pkg::*;
 import lut_ram_ref_model_pkg::*;

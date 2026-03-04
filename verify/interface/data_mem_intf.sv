@@ -1,6 +1,6 @@
-import riscv_32i_defs_pkg::*;
-import riscv_32i_config_pkg::*;
-import riscv_32i_control_pkg::*;
+import rv32i_defs_pkg::*;
+import rv32i_config_pkg::*;
+import rv32i_control_pkg::*;
 
 interface data_mem_intf(input logic clk);
   byte_sel_t wr_sel;

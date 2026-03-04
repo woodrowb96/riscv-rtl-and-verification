@@ -1,4 +1,4 @@
-package riscv_32i_config_pkg;
+package rv32i_config_pkg;
   parameter int unsigned DATA_MEM_DEPTH = 1024;
   parameter int unsigned DATA_MEM_FIRST_ADDR = 0;                          //first address in mem (also the first byte and first word)
   parameter int unsigned DATA_MEM_LAST_ADDR = (DATA_MEM_DEPTH * 4) - 1;    //the last address in memory (so the last byte)

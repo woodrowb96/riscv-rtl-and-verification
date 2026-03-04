@@ -29,9 +29,9 @@ NOTE:  OUT_OF_BOUND ACCESS
   I let out of bounds addresses silently wrap around to the start of memory.
   I dont handle that or prevent it in this module, and leave that to other parts of the implementation
 */
-import riscv_32i_defs_pkg::*;
-import riscv_32i_config_pkg::*;
-import riscv_32i_control_pkg::*;
+import rv32i_defs_pkg::*;
+import rv32i_config_pkg::*;
+import rv32i_control_pkg::*;
 
 module data_mem (
   //clk

@@ -1,7 +1,7 @@
 package tb_data_mem_coverage_pkg;
-  import riscv_32i_config_pkg::*;
-  import riscv_32i_config_pkg::*;
-  import riscv_32i_defs_pkg::*;
+  import rv32i_config_pkg::*;
+  import rv32i_config_pkg::*;
+  import rv32i_defs_pkg::*;
 
   class tb_data_mem_coverage;
     virtual data_mem_intf.monitor vif;

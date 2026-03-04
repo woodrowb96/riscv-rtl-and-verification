@@ -1,5 +1,5 @@
-import riscv_32i_defs_pkg::*;
-import riscv_32i_control_pkg::*;
+import rv32i_defs_pkg::*;
+import rv32i_control_pkg::*;
 
 interface alu_intf;
   alu_op_t alu_op;

@@ -1,4 +1,4 @@
-package riscv_32i_defs_pkg;
+package rv32i_defs_pkg;
   /*****************  REGISTERS *****************************/
   parameter int unsigned XLEN = 32;   //registers are 32 bits wide
 

@@ -1,3 +1,3 @@
 # RTL DEPENDENCIES
-rtl/package/riscv_32i_defs_pkg.sv
-rtl/package/riscv_32i_control_pkg.sv
+rtl/package/rv32i_defs_pkg.sv
+rtl/package/rv32i_control_pkg.sv

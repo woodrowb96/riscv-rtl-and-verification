@@ -1,4 +1,4 @@
-import riscv_32i_defs_pkg::*;
+import rv32i_defs_pkg::*;
 import verify_config_pkg::*;
 import tb_inst_mem_transaction_pkg::*;
 import inst_mem_ref_model_pkg::*;

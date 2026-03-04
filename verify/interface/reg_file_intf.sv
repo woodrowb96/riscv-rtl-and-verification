@@ -1,4 +1,4 @@
-import riscv_32i_defs_pkg::*;
+import rv32i_defs_pkg::*;
 
 interface reg_file_intf(input clk);
   logic wr_en;

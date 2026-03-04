@@ -1,6 +1,6 @@
 package inst_mem_ref_model_pkg;
-  import riscv_32i_defs_pkg::*;
-  import riscv_32i_config_pkg::*;
+  import rv32i_defs_pkg::*;
+  import rv32i_config_pkg::*;
 
   class inst_mem_ref_model;
 

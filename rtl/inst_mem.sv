@@ -18,8 +18,8 @@ NOTE:
       down to the next lower word. It doesnt throw a flag or error Ill leave the catching
       and handling of misaligned access to other parts of the riscv implementation.
 */
-import riscv_32i_defs_pkg::*;
-import riscv_32i_config_pkg::*;
+import rv32i_defs_pkg::*;
+import rv32i_config_pkg::*;
 
 module inst_mem #(parameter string PROGRAM = "NO_INST_MEM_PROGRAM_SPECIFIED") (
   //input

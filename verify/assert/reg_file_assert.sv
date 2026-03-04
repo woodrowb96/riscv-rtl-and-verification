@@ -1,4 +1,4 @@
-import riscv_32i_defs_pkg::*;
+import rv32i_defs_pkg::*;
 
 module reg_file_assert(
   input logic clk,
