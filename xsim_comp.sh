@@ -57,18 +57,53 @@ MODULE_NAME=${MODULE_NAME%.*}
 
 if [[ -f "$FILE_LIST_DIR/$MODULE_NAME.f" ]] ; then
   FILE_LIST="$FILE_LIST_DIR/$MODULE_NAME.f"
-  echo $'\n'
-  echo "COMPILING FILELIST: $MODULE_NAME.f"
-  echo $'\n'
-  xvlog -sv -L uvm --work work="$XSIM_WORKING_DIR" -f "$FILE_LIST"
-  if [ $? -ne 0 ] ; then
-    echo $'\n'
-    echo "WARNING $SCRIPT_NAME: $MODULE_NAME.f compilation failed"
-  fi
 else
   echo $'\n'
   echo "WARNING: no filelist $MODULE_NAME.f found"
 fi
+
+#-----------  split out the .cpp and .sv files ---------------
+SV_FILE_LIST="/tmp/${MODULE_NAME}_sv_files.f"
+CPP_FILE_LIST="/tmp/${MODULE_NAME}_cpp_files.f"
+
+if [ -f "$FILE_LIST" ] ; then
+  grep '\.sv' "$FILE_LIST" > "$SV_FILE_LIST"
+  grep '\.cpp' "$FILE_LIST" > "$CPP_FILE_LIST"
+fi
+
+#-------------------  compile cpp Dependencies ------------------
+if [ -s "$CPP_FILE_LIST" ] ; then  #if the cpp filelist is not empty
+  echo $'\n'
+  echo "COMPILING FILELIST: $MODULE_NAME.f .cpp files"
+  echo $'\n'
+  #move into the xsim dir
+  #(I do this since im having trouble getting --work to work with xsc.
+  # In the future ill maybe clean this up)
+  cd "$XSIM_DIR"
+
+  #prepend the absolute path to each cpp file, then compile
+  xsc $(cat "$CPP_FILE_LIST" | sed "s|^|$PROJECT_ROOT_DIR/|")
+
+  #move back to the root
+  cd "$PROJECT_ROOT_DIR"
+  if [ $? -ne 0 ] ; then
+    echo $'\n'
+    echo "WARNING $SCRIPT_NAME: $MODULE_NAME.f CPP compilation failed"
+  fi
+fi
+
+#-------------------  compile SV Dependencies ------------------
+if [ -s "$SV_FILE_LIST" ] ; then  #if the sv filelist is not empty
+  echo $'\n'
+  echo "COMPILING FILELIST: $MODULE_NAME.f .sv"
+  echo $'\n'
+  xvlog -sv -L uvm --work work="$XSIM_WORKING_DIR" -f "$SV_FILE_LIST"
+  if [ $? -ne 0 ] ; then
+    echo $'\n'
+    echo "WARNING $SCRIPT_NAME: $MODULE_NAME.f SV compilation failed"
+  fi
+fi
+
 
 #-------------------- compile file ------------------------------
 
@@ -76,3 +111,6 @@ echo $'\n'
 echo "COMPILING: $MODULE_NAME"
 echo $'\n'
 xvlog -sv -L uvm --work work="$XSIM_WORKING_DIR" "$PROJECT_ROOT_DIR/$1"
+
+#-------------------  cleanup any log or pb file -------------------
+mv xsc.log xsc.pb xvlog.log xvlog.pb "$XSIM_DIR" 2>/dev/null

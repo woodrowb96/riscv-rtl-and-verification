@@ -152,6 +152,15 @@ else
   exit 1
 fi
 
+#-----------  split out the .cpp and .sv files ---------------
+SV_FILE_LIST="/tmp/${TEST_BENCH}_sv_files.f"
+CPP_FILE_LIST="/tmp/${TEST_BENCH}_cpp_files.f"
+
+if [ -f "$FILE_LIST" ] ; then
+  grep '\.sv' "$FILE_LIST" > "$SV_FILE_LIST"
+  grep '\.cpp' "$FILE_LIST" > "$CPP_FILE_LIST"
+fi
+
 #-------------------- ensure sim directory exists      ------------------------------
 
 #Check if sim directory exists at project root, if not the create it
@@ -169,19 +178,48 @@ if [ ! -d "$XSIM_DIR" ] ; then
   mkdir -p "$XSIM_DIR"
 fi
 
-#-------------------- compile filelist dependencies ----------------
-
-echo "COMPILING FILELIST DEPENDENCIES: $FILE_LIST"
-echo $'\n'
-xvlog -sv -L uvm --work work="$XSIM_WORKING_DIR" --log "$XSIM_DIR/xvlog.log" -f "$FILE_LIST"
-
-#If we failed to compile the dependencies, then dont run the sim
-if [ $? -ne 0 ] ; then
+#-------------------  compile cpp Dependencies ------------------
+if [ -s "$CPP_FILE_LIST" ] ; then  #if the cpp filelist is not empty
   echo $'\n'
-  echo "ERROR $SCRIPT_NAME: $FILE_LIST compilation failed"
-  exit 1
+  echo "COMPILING FILELIST: $TEST_BENCH.f .cpp dependencies"
+  echo $'\n'
+
+  #move into the xsim dir
+  #(I do this since im having trouble getting --work to work with xsc.
+  # In the future ill maybe clean this up)
+  cd "$XSIM_DIR"
+
+  #prepend the absolute path to each cpp file, then compile
+  xsc $(cat "$CPP_FILE_LIST" | sed "s|^|$PROJECT_ROOT_DIR/|")
+
+  #exit if the comp failed
+  if [ $? -ne 0 ] ; then
+    echo $'\n'
+    echo "ERROR $SCRIPT_NAME: $FILE_LIST CPP compilation failed"
+    exit 1
+  fi
+
+  #move back to the root
+  cd "$PROJECT_ROOT_DIR"
+
+  echo $'\n'
 fi
-echo $'\n'
+
+#-------------------- compile SV dependencies ----------------
+
+if [ -s "$SV_FILE_LIST" ] ; then  #if the sv filelist is not empty
+  echo "COMPILING FILELIST: $FILE_LIST sv dependencies"
+  echo $'\n'
+  xvlog -sv -L uvm --work work="$XSIM_WORKING_DIR" --log "$XSIM_DIR/xvlog.log" -f "$SV_FILE_LIST"
+
+  #If we failed to compile the dependencies, then dont run the sim
+  if [ $? -ne 0 ] ; then
+    echo $'\n'
+    echo "ERROR $SCRIPT_NAME: $FILE_LIST SV compilation failed"
+    exit 1
+  fi
+  echo $'\n'
+fi
 
 
 #-------------------- compile test_bench ------------------------------
@@ -204,7 +242,13 @@ cd "$XSIM_DIR" || exit 1
 
 echo "ELABORATING TEST BENCH: $TEST_BENCH"
 echo $'\n'
-xelab -L uvm $TEST_BENCH -debug typical
+
+#if we have cpp files, elab with dpi else just do normal elab
+if [ -s "$CPP_FILE_LIST" ] ; then 
+  xelab -L uvm $TEST_BENCH -debug typical -sv_lib "xsim.dir/work/xsc/dpi"
+else
+  xelab -L uvm $TEST_BENCH -debug typical 
+fi
 
 #If we failed the elaboration, then dont run the sim
 if [ $? -ne 0 ] ; then
