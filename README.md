@@ -23,13 +23,14 @@ Current development can be viewed on the single_cycle branch.
 │   ├── reg_file.sv     # 32x32 register file
 │   ├── lut_ram.sv      # Generic parameterized LUT-RAM
 │   ├── data_mem.sv     # Byte-addressable data memory
-│   └── inst_mem.sv     # Read-only instruction memory (ROM)
+│   ├── inst_mem.sv     # Read-only instruction memory (ROM)
+│   └── imm_gen.sv      # Immediate generation unit
 │
 ├── verify/
 │   ├── tb/             # Top-level testbenches
 │   ├── transaction/    # Transaction classes (randomizable stimulus)
 │   ├── generator/      # Constrained random generators
-│   ├── ref_model/      # Behavioral reference models used to score tests
+│   ├── ref_model/      # Behavioral reference models (SV and C++ via DPI-C)
 │   ├── coverage/       # Functional coverage
 │   ├── assert/         # SVA assertion modules (bound into RTL)
 │   ├── interface/      # SystemVerilog interfaces
@@ -53,6 +54,7 @@ I've currently implemented and verified the following modules:
 - LUT RAM
 - Data Memory
 - Instruction Memory
+- Immediate Generator
 
 ## Verification
 
@@ -73,6 +75,7 @@ Transactions are generated, driven into the DUT, monitored, and finally scored a
 - **Driver** — Drive the randomized transaction into the DUT through the interface
 - **Monitor** — Capture the DUT's output through the interface
 - **Scoreboard** — Use the DUT's reference model to score the DUT's output
+- **Reference Models** — Behavioral reference models used to score tests. Either written in SystemVerilog or written in C++ and integrated into the testing environment via DPI-C.
 
 Note: I intentionally do not use any parallel processes in my testbenches.
 I wanted to keep my custom verification environment relatively simple in that regard,
@@ -97,16 +100,36 @@ of individual functionality within the RTL itself.
 Assertions can be used hierarchically just like the RTL — child module assertions can be bound inside parent
 assertion modules. For example, my data_mem assertions include the assertions for lut_ram inside them.
 
+### Reference Models
+
+Each module has a behavioral reference model used by the scoreboard to verify the DUT's output.
+
+Reference models are written either in SystemVerilog or C++.
+
+C++ reference models are integrated into the rest of the verification environment through
+DPI-C.
+
+Reference model implementations are intentionally kept as independent as possible from the RTL,
+either by using a different implementation than the RTL or by writing
+the reference model in a completely different language like C++. Maximizing the
+difference between RTL and reference model implementations helps ensure that we are not
+just duplicating the same bugs in both. Ideally a completely different person would write
+the verification for each module than the one who wrote the RTL, but obviously that's not
+possible with a personal project.
+
 ### Scripts
 
 - `scripts/gen/gen_rand_inst_mem.py`
     - Generates randomized instruction memory contents with weighted corner-case values for use in constrained random testing.
 - `xsim_comp.sh`
     - Compiles a SystemVerilog file and its filelist dependencies using Xilinx xvlog.
+    - Automatically compiles any C++ DPI-C files found in the filelist using xsc.
 - `xsim_sim.sh`
-    - Compiles, elaborates, and simulates a testbench using Xilinx xsim.
+    - Compiles, elaborates, and simulates a testbench using Xilinx xvlog, xelab and xsim.
+    - Automatically compiles and links C++ DPI-C files found in the filelist using xsc.
     - By default, the script looks for a TCL script named `<testbench>.tcl` to run the sim, but a custom TCL script can be specified with `-t`.
     - Supports CLI and GUI (`-g`) modes.
+
 
 ## How to Compile and Run Simulations
 
