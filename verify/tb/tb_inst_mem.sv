@@ -74,7 +74,7 @@ module tb_inst_mem();
 
   task test(inst_mem_trans trans);
     drive(trans);
-    @(posedge clk);
+    @(posedge clk);    //wait till clk edge, to sync the tests and let output settle
     monitor(trans);
     score(trans);
     coverage.sample();
