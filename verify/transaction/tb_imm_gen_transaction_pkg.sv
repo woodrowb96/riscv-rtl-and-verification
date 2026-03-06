@@ -20,7 +20,7 @@ package tb_imm_gen_transaction_pkg;
     function void print(string msg = "");
       opcode_t opcode;
       opcode = opcode_t'(inst[6:0]);
-      $display("[%s] t=%0t inst:%0h, imm:%0h, opcode:%s", msg, $time, inst, imm, opcode.name());
+      $display("[%s] t=%0t inst:%h, imm:%h, opcode:%s", msg, $time, inst, imm, opcode.name());
     endfunction
 
     /******** NOTE ********/

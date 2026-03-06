@@ -110,6 +110,9 @@ assertion modules. For example, my data_mem assertions include the assertions fo
 
 ## How to Compile and Run Simulations
 
+Prerequisites
+    - Xilinx Vivado (xvlog, xelab, xsim, xsc must be on PATH)
+
 ```bash
 # Compile a testbench and its dependencies
 ./xsim_comp.sh verify/tb/tb_data_mem.sv

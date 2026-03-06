@@ -1,5 +1,6 @@
 import rv32i_defs_pkg::*;
 import tb_imm_gen_transaction_pkg::*;
+import imm_gen_ref_model_pkg::*;
 
 module tb_imm_gen();
   localparam CLK_PERIOD = 10;
@@ -16,6 +17,9 @@ module tb_imm_gen();
 
   /******* DUT ***********/
   imm_gen dut(.inst(intf.inst), .imm(intf.imm));
+
+  /******** REF MODEL **************/
+  imm_gen_ref_model ref_imm_gen;
 
   /************* TASKS *************/
 
@@ -34,19 +38,15 @@ module tb_imm_gen();
     imm_gen_trans expected = new();
     expected.inst = actual.inst;
 
-    // TO DO:
-    //   Havent written the ref_model yet, so cant get expected.imm
-    //   Will just print the actual trans to examine for now
-    actual.print("ACTUAL");
+    expected.imm = ref_imm_gen.compute(actual.inst);
 
-    // if(!expected.compare(actual)) begin
-    //   $display("----------------");
-    //   $error("IMM_GEN_TB: test fail");
-    //   expected.print("EXPECTED");
-    //   actual.print("ACTUAL");
-    //   num_fails++;
-    // end
-    //
+    if(!expected.compare(actual)) begin
+      $display("----------------");
+      $error("IMM_GEN_TB: test fail");
+      expected.print("EXPECTED");
+      actual.print("ACTUAL");
+      num_fails++;
+    end
 
     num_tests++;
   endfunction
@@ -70,9 +70,10 @@ module tb_imm_gen();
   imm_gen_trans trans;
 
   initial begin
+    ref_imm_gen = new();
     trans = new();
 
-    repeat(10) begin
+    repeat(1000) begin
       assert(trans.randomize());
       test(trans);
     end
