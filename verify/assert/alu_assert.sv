@@ -2,73 +2,77 @@ import rv32i_defs_pkg::*;
 import rv32i_control_pkg::*;
 
 module alu_assert(
+  //rtl has no clk, but we'll use the tb's clock to sync assertions
+  input logic tb_clk,
+
+  //DUT input
   input alu_op_t alu_op,
   input word_t in_a,
   input word_t in_b,
+
+  //DUT output
   input word_t result,
   input logic zero
 );
-  always_comb begin
-    //zero flag assertion
+  /************** ZERO FLAG ASSERTIONS *************************/
+
+  //make sure zero flag gets asserted properly
+  always @(posedge tb_clk) begin
     if(result == '0) begin
       assert(zero == 1'b1) else
-        $error("ERROR ALU: Zero flag not set, result=%0h, zero_flag=%0b",
-              result, zero);
-    end else if(result != '0) begin
-      assert(zero == 1'b0) else
-        $error("ERROR ALU: Zero flag set incorrectly, result=%0h, zero_flag=%0b",
-              result, zero);
+        $error("[ALU_ASSERT] zero flag not set, result:%0h, zero:%0b", result, zero);
     end
   end
 
-    /************* NOTE *************/
-    //I want to have immediate assertions that run and look at the alu_op then check the
-    //result against the inputs
-    //
-    //The problem I had was that these assertions were always failing.
-    //I think the issue was alu_op was changing and the always_comb block
-    //would get triggered, then it would check the assertion.  But this
-    //happened immediatly and did not give the inputs enough time to propogate
-    //to the outputs so the assertions were failing.
-    //
-    //I wanted to add these defered immediate assertions, but they are not
-    //supported on the version of Vivado im using (the free one). I havent
-    //been able to test if the following works, but I think it probably does.
-    //
-    //The defered immediate assertions seems like the best solution.
-    //
-    //I dont want to add a clock and use concurent assertions, because the rtl
-    //that this is binded into (alu.sv) is purely combinatorial and I dont
-    //want its assertions to have to be given a clock to work.
-    /*******************************/
-    //always_comb begin
-    // case(alu_op)
-    //   4'b0000: begin
-    //     assert #0 (result == (in_a & in_b)) else
-    //       $error("ERROR ALU: AND op result mismatch, in_a = %h, in_b = %h, result = %h",
-    //               in_a, in_b, result);
-    //   end
-    //   4'b0001: begin
-    //     assert #0 (result == (in_a | in_b)) else
-    //       $error("ERROR ALU: OR op result mismatch, in_a = %h, in_b = %h, result = %h",
-    //               in_a, in_b, result);
-    //   end
-    //   4'b0010: begin
-    //     assert #0 (result == (in_a + in_b)) else
-    //       $error("ERROR ALU: ADD op result mismatch, in_a = %h, in_b = %h, result = %h",
-    //               in_a, in_b, result);
-    //   end
-    //   4'b0110: begin
-    //     assert #0 (result == (in_a - in_b)) else
-    //       $error("ERROR ALU: SUB op result mismatch, in_a = %h, in_b = %h, result = %h",
-    //               in_a, in_b, result);
-    //   end
-    //   default: begin
-    //     assert #0 (result == '0) else
-    //       $error("ERROR ALU: INVALID op result is not zero,",
-    //               "ALU_OP: %b, result: %h, in_a: %h, in_b %h",
-    //               alu_op, result, in_a, in_b);
-    //   end
-    // endcase
-  // end
+  //make sure zero flag gets deaserted properly
+  always @(posedge tb_clk) begin
+    if(result != '0) begin
+      assert(zero == 1'b0) else
+        $error("[ALU_ASSERT] zero flag set incorrectly, result:%0h, zero:%0b", result, zero);
+    end
+  end
+
+  /************** ALU OP ASSERTIONS *************************/
+  //make sure we do the correct operation for each ALU_OP
+
+  //ALU_AND
+  always @(posedge tb_clk) begin
+    if(alu_op == ALU_AND) begin
+      assert(result == (in_a & in_b)) else
+        $error("[ALU_ASSERT] AND result mismatch, in_a:%h, in_b:%h, result:%h", in_a, in_b, result);
+    end
+  end
+
+  //ALU_OR
+  always @(posedge tb_clk) begin
+    if(alu_op == ALU_OR) begin
+      assert(result == (in_a | in_b)) else
+        $error("[ALU_ASSERT] OR result mismatch, in_a:%h, in_b:%h, result:%h", in_a, in_b, result);
+    end
+  end
+
+  //ALU_ADD
+  always @(posedge tb_clk) begin
+    if(alu_op == ALU_ADD) begin
+      assert(result == (in_a + in_b)) else
+        $error("[ALU_ASSERT] ADD result mismatch, in_a:%h, in_b:%h, result:%h", in_a, in_b, result);
+    end
+  end
+
+  //ALU_SUB
+  always @(posedge tb_clk) begin
+    if(alu_op == ALU_SUB) begin
+      assert(result == (in_a - in_b)) else
+        $error("[ALU_ASSERT] SUB result mismatch, in_a:%h, in_b:%h, result:%h", in_a, in_b, result);
+    end
+  end
+
+  //INVALID OP: result should be zero
+  always @(posedge tb_clk) begin
+    if(!(alu_op inside {ALU_AND, ALU_OR, ALU_ADD, ALU_SUB})) begin
+      assert(result == '0) else
+        $error("[ALU_ASSERT] invalid op result not zero, alu_op:%0b, in_a:%h, in_b:%h, result:%h",
+                alu_op, in_a, in_b, result);
+    end
+  end
 endmodule
