@@ -8,7 +8,7 @@ package alu_ref_model_pkg;
       input  int unsigned  in_a,   //word_t(32 bits)  -> int unsigned  -> uint32_t
       input  int unsigned  in_b,
       output int unsigned  result, //uint32_t  -> int unsigned  -> word_t(32 bits)
-      output byte unsigned zero    //unint8_t  -> byte unsigned -> logic(1 bit)
+      output byte unsigned zero    //uint8_t  -> byte unsigned -> logic(1 bit)
   );
 
   typedef struct {
