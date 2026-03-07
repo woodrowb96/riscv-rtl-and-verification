@@ -28,7 +28,7 @@ package verify_const_pkg;
   localparam word_t WORD_MAX_UNSIGNED  = WORD_ALL_ONES;
   localparam word_t WORD_UNSIGNED_ONE  = 32'h0000_0001;
   localparam word_t WORD_UNSIGNED_ZERO = WORD_ALL_ZEROS;
-  //signed corner bit patterns (stored as word_t to avoid signed/unsigned mismatch in constraints)
+  //signed 2s compliment bit patterns
   localparam word_t WORD_MAX_SIGNED_POS = 32'h7fff_ffff;
   localparam word_t WORD_MIN_SIGNED_NEG = 32'h8000_0000;
   localparam word_t WORD_SIGNED_POS_ONE = 32'h0000_0001;
