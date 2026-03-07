@@ -1,5 +1,6 @@
 package tb_reg_file_transaction_pkg;
   import rv32i_defs_pkg::*;
+  import verify_const_pkg::*;
 
   class reg_file_trans;
     rand logic wr_en;

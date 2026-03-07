@@ -1,21 +1,19 @@
 package tb_alu_coverage_pkg;
   import rv32i_defs_pkg::*;
   import rv32i_control_pkg::*;
+  import verify_const_pkg::*;
+
   class tb_alu_coverage;
 
     virtual alu_intf.coverage vif;
 
-    //function used to determine if two inputs will overflow when added
-    //in_a and in_b are treated as unsigned numbers
+    /**************** COVERAGE HELPER FUNCTIONS *****************/
+    //some helper functions to detect overflows
+    /***********************************************************/
     function automatic bit add_overflow(word_t in_a, word_t in_b);
-      //result is one bit wider that the inputs
-      logic [XLEN:0] result;
-
-      //extend the two inputs by one bit, put a 0 in the new msb, then add
-      result = {1'b0, in_a} + {1'b0, in_b};
-
-      //if extra bit in result is set, then we have overflowed
-      return result[XLEN];
+      //compute a wide result, check if the wide msb is set
+      logic [XLEN:0] result_wide = {1'b0, in_a} + {1'b0, in_b};
+      return result_wide[XLEN];
     endfunction
 
     //function to determine if two inputs will overflow during subtraction
@@ -171,13 +169,14 @@ package tb_alu_coverage_pkg;
         }
     endgroup
 
+    function void sample();
+      cg_alu.sample();
+    endfunction
+
     function new(virtual alu_intf.coverage vif);
       this.vif = vif;
       this.cg_alu = new();
     endfunction
-
-    function void sample();
-      cg_alu.sample();
-    endfunction
   endclass
+
 endpackage

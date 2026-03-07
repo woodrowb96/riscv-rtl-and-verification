@@ -1,5 +1,6 @@
 package tb_reg_file_generator_pkg;
   import rv32i_defs_pkg::*;
+  import verify_const_pkg::*;
   import tb_reg_file_transaction_pkg::*;
 
   /********* NOTE  ************/

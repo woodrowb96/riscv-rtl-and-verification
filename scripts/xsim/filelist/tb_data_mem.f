@@ -6,6 +6,7 @@ rtl/lut_ram.sv
 rtl/data_mem.sv
 
 # VERIFICATION
+verify/package/verify_const_pkg.sv
 verify/interface/data_mem_intf.sv
 verify/transaction/tb_lut_ram_transaction_pkg.sv
 verify/transaction/tb_data_mem_transaction_pkg.sv

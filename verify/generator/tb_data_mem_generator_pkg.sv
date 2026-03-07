@@ -1,6 +1,7 @@
 package tb_data_mem_generator_pkg;
   import rv32i_defs_pkg::*;
   import rv32i_config_pkg::*;
+  import verify_const_pkg::*;
   import tb_data_mem_transaction_pkg::*;
 
   //SEE THE NOTE IN: tb_lut_ram_generator_pkg.sv for why im using child trans

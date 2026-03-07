@@ -32,21 +32,4 @@ package rv32i_defs_pkg;
     OP_JAL    = 7'b1101111,  // J-type
     OP_JALR   = 7'b1100111   // I-type
   } opcode_t;
-
-  /*****************  WORD CONSTANTS  *****************************/
-  //some logical patterns
-  parameter int unsigned WORD_ALL_ONES = 32'hffff_ffff;
-  parameter int unsigned WORD_ALL_ZEROS = 32'h0000_0000;
-  parameter int unsigned WORD_ALT_ONES_AA = 32'haaaa_aaaa;
-  parameter int unsigned WORD_ALT_ONES_55 = 32'h5555_5555;
-  //some unsigned numbers
-  parameter int unsigned WORD_MAX_UNSIGNED = WORD_ALL_ONES;
-  parameter int unsigned WORD_UNSIGNED_ONE = 32'h0000_0001;
-  parameter int unsigned WORD_UNSIGNED_ZERO = WORD_ALL_ZEROS;
-  //signed params
-  parameter int WORD_MAX_SIGNED_POS = 32'sh7fff_ffff;
-  parameter int WORD_MIN_SIGNED_NEG = 32'sh8000_0000;
-  parameter int WORD_SIGNED_POS_ONE = 32'sh0000_0001;
-  parameter int WORD_SIGNED_NEG_ONE = 32'shffff_ffff;
-  parameter int WORD_SIGNED_ZERO = 32'sh0000_0000;
 endpackage

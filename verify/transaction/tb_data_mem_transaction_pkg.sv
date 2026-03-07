@@ -2,6 +2,7 @@ package tb_data_mem_transaction_pkg;
   import rv32i_defs_pkg::*;
   import rv32i_config_pkg::*;
   import rv32i_control_pkg::*;
+  import verify_const_pkg::*;
 
   class data_mem_trans;
     rand byte_sel_t wr_sel;

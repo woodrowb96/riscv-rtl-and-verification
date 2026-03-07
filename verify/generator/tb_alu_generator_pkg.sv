@@ -1,6 +1,7 @@
 package tb_alu_generator_pkg;
   import rv32i_defs_pkg::*;
   import rv32i_control_pkg::*;
+  import verify_const_pkg::*;
   import tb_alu_transaction_pkg::*;
 
   /********* NOTE  ************/

@@ -7,6 +7,7 @@ rtl/alu.sv
 verify/ref_model/alu_ref_model.cpp
 
 #Verification
+verify/package/verify_const_pkg.sv
 verify/interface/alu_intf.sv
 verify/assert/alu_assert.sv
 verify/coverage/tb_alu_coverage_pkg.sv
