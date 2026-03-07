@@ -15,7 +15,7 @@ enum Opcodes : uint8_t {
 
 extern "C" {
 
-  uint32_t dpi_compute_imm_gen(uint32_t inst)
+  uint32_t dpi_imm_gen_compute(uint32_t inst)
   {
     uint32_t imm {0xBADBAD00};
     uint8_t opcode = inst & 0x7F;

@@ -3,6 +3,9 @@ rtl/package/rv32i_defs_pkg.sv
 rtl/package/rv32i_control_pkg.sv
 rtl/alu.sv
 
+#CPP
+verify/ref_model/alu_ref_model.cpp
+
 #Verification
 verify/interface/alu_intf.sv
 verify/assert/alu_assert.sv

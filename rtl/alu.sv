@@ -23,8 +23,7 @@ Output:
   result  : 32'b result of operation
 
 Output flags:
-  zero: 1'b zero flag
-          - set when result == 0
+  zero: 1'b zero flag, set when result == 0
 */
 import rv32i_defs_pkg::*;
 import rv32i_control_pkg::*;

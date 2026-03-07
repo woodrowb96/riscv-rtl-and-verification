@@ -29,13 +29,13 @@ module tb_alu();
   /*********** BIND ASSERTIONS *************/
   bind tb_alu.dut alu_assert dut_assert(.*);
 
-  /*********** COVERAGE *************/
+  /************ COVERAGE *******************/
   tb_alu_coverage coverage;
 
-  /****************  ALU REFERENCE MODEL **************/
+  /********* REFERENCE MODEL **************/
   alu_ref_model ref_alu;
 
-  /*********** TASKS *************/
+  /************* TASKS ******************/
   task drive(alu_trans trans);
     intf.alu_op = trans.alu_op;
     intf.in_a = trans.in_a;
@@ -47,21 +47,20 @@ module tb_alu();
     trans.zero = intf.zero;
   endtask
 
-
   int num_tests = 0;
   int num_fails = 0;
 
   task automatic score(alu_trans actual);
-    ref_alu_output prediction;
+    alu_out_t expected_out;
 
     alu_trans expected = new();
     expected.alu_op = actual.alu_op;
     expected.in_a = actual.in_a;
     expected.in_b = actual.in_b;
 
-    prediction = ref_alu.predict(actual);
-    expected.result = prediction.result;
-    expected.zero = prediction.zero;
+    expected_out = ref_alu.compute(actual.alu_op, actual.in_a, actual.in_b);
+    expected.result = expected_out.result;
+    expected.zero = expected_out.zero;
 
     if(!expected.compare(actual)) begin
       $display("----------------");
@@ -75,12 +74,11 @@ module tb_alu();
   endtask
 
   task test(alu_trans trans);
-      @(posedge clk);
-      drive(trans);
-      #1;                       //let the input propogate to the output
-      monitor(trans);
-      coverage.sample();
-      score(trans);
+    drive(trans);
+    @(posedge clk);  //sync tests and let the inputs propagate to the outputs
+    monitor(trans);
+    score(trans);
+    coverage.sample();
   endtask
 
   task print_results();
@@ -107,11 +105,13 @@ module tb_alu();
 
     //sub has alot of corner cases to hit
     //so we just loop and gen only sub transactions
+    //(should probably make this a directed test that walks though all the
+    // combinations of corners but this is fine for now)
     repeat(3500) begin
       test(generator.gen_sub_trans());
     end
 
-    //test the ouput of an invalid trans is correct (result == 0, and zero ==0)
+    //test the output of an invalid trans is correct (result == 0, and zero ==0)
     assert(trans.randomize()) else
       $fatal(1, "ALU_TB: trans randomization failed");
     trans.alu_op = alu_op_t'(4'b1111);
