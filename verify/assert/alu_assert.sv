@@ -24,7 +24,7 @@ module alu_assert(
     end
   end
 
-  //make sure zero flag gets deaserted properly
+  //make sure zero flag gets deasserted properly
   always @(posedge tb_clk) begin
     if(result != '0) begin
       assert(zero == 1'b0) else
