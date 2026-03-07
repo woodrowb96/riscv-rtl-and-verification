@@ -12,6 +12,10 @@ package tb_alu_transaction_pkg;
     word_t result;
     logic zero;
 
+    constraint valid_alu_ops {
+      alu_op inside {ALU_AND, ALU_OR, ALU_ADD, ALU_SUB};
+    }
+
     function bit compare(alu_trans other);
       return (this.alu_op === other.alu_op &&
               this.in_a   === other.in_a   &&

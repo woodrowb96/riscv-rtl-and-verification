@@ -33,8 +33,8 @@ package tb_alu_coverage_pkg;
     localparam int unsigned UNSIGNED_LOWER_THIRD     = WORD_MAX_UNSIGNED / 3;
     localparam int unsigned UNSIGNED_LOWER_TWO_THIRD = (WORD_MAX_UNSIGNED / 3) * 2;
     //to help split the signed values up into high and low pos and neg 4ths in coverage
-    localparam int SIGNED_POS_LOWER_HALF = WORD_MAX_SIGNED_POS / 2;
-    localparam int SIGNED_NEG_LOWER_HALF = 32'hC000_0000;
+    localparam word_t SIGNED_POS_LOWER_HALF = WORD_MAX_SIGNED_POS / 2;
+    localparam word_t SIGNED_NEG_LOWER_HALF = 32'hC000_0000;
 
     covergroup cg;
       /********************** ALU_OP COVERAGE ******************/
@@ -122,8 +122,7 @@ package tb_alu_coverage_pkg;
       /******************** SUB OPERATION COVERAGE ***********************/
 
       //we want to hit the following corners values/ranges for both inputs
-      //  NOTE: we are treating the values as signed 2s complement numbers
-      in_a_sub_op: coverpoint $signed(vif.in_a)
+      in_a_sub_op: coverpoint vif.in_a
         iff (vif.alu_op == ALU_SUB) {
           bins zero                 = {WORD_SIGNED_ZERO};
           bins signed_pos_one       = {WORD_SIGNED_POS_ONE};
@@ -135,7 +134,7 @@ package tb_alu_coverage_pkg;
           bins non_corners_high_neg = {[SIGNED_NEG_LOWER_HALF     : WORD_SIGNED_NEG_ONE   - 1]};
           bins non_corners_low_neg  = {[WORD_MIN_SIGNED_NEG   + 1 : SIGNED_NEG_LOWER_HALF - 1]};
         }
-      in_b_sub_op: coverpoint $signed(vif.in_b)
+      in_b_sub_op: coverpoint vif.in_b
         iff (vif.alu_op == ALU_SUB) {
           bins zero                 = {WORD_SIGNED_ZERO};
           bins signed_pos_one       = {WORD_SIGNED_POS_ONE};

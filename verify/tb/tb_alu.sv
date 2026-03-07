@@ -81,6 +81,15 @@ module tb_alu();
     coverage.sample();
   endtask
 
+  task test_invalid_op(alu_trans trans);
+    trans.alu_op = alu_op_t'(4'b1111);    //make it invalid
+    drive(trans);
+    @(posedge clk);
+    monitor(trans);
+    score(trans);
+    coverage.sample();
+  endtask
+
   task print_results();
     $display("----------------");
     $display("Test results:");
@@ -91,31 +100,19 @@ module tb_alu();
 
   /**************  TESTING ***************************/
   tb_alu_generator generator;
-  alu_trans trans;
 
   initial begin
     coverage = new(intf.coverage);
     ref_alu = new();
     generator = new();
-    trans = new();
 
-    repeat(1500) begin
+    //main tests
+    repeat(4000) begin
       test(generator.gen_trans());
     end
 
-    //sub has alot of corner cases to hit
-    //so we just loop and gen only sub transactions
-    //(should probably make this a directed test that walks though all the
-    // combinations of corners but this is fine for now)
-    repeat(3500) begin
-      test(generator.gen_sub_trans());
-    end
-
-    //test the output of an invalid trans is correct (result == 0, and zero ==0)
-    assert(trans.randomize()) else
-      $fatal(1, "ALU_TB: trans randomization failed");
-    trans.alu_op = alu_op_t'(4'b1111);
-    test(trans);
+    //single directed test to test invalid op behavior
+    test_invalid_op(generator.gen_trans());
 
     print_results();
 
