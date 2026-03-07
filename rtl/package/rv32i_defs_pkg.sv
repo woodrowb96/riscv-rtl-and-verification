@@ -1,21 +1,24 @@
+/*
+  This module contains typedef and param definitions concerning the rv32i specification.
+*/
 package rv32i_defs_pkg;
   /*****************  REGISTERS *****************************/
   parameter int unsigned XLEN = 32;   //registers are 32 bits wide
 
-  /*****************  WORD  *****************************/
+  /*********************  WORD  *****************************/
   typedef logic [XLEN-1:0] word_t;    //words are 32 bit wide
 
-  /*****************  BYTE  *****************************/
+  /*********************  BYTE  *****************************/
   parameter int unsigned BYTE_LEN = 8;
   typedef logic [7:0] byte_t;
 
   /*****************  REGISTER FILE  *****************************/
-  parameter int unsigned RF_DEPTH = 32;        //reg file depth
+  parameter int unsigned RF_DEPTH = 32;
   parameter int unsigned RF_ADDR_WIDTH = 5;
 
   typedef logic [RF_ADDR_WIDTH-1:0] rf_addr_t;
 
-  parameter rf_addr_t X0 = 5'd0;                  //x0 is a special reg that always returns 0
+  parameter rf_addr_t X0 = 5'd0;  //x0 is a special register that always holds '0
 
   /***************  INSTRUCTION FIELDS ***************************/
   typedef enum logic [6:0] {
@@ -29,7 +32,6 @@ package rv32i_defs_pkg;
     OP_JAL    = 7'b1101111,  // J-type
     OP_JALR   = 7'b1100111   // I-type
   } opcode_t;
-
 
   /*****************  WORD CONSTANTS  *****************************/
   //some logical patterns
@@ -47,5 +49,4 @@ package rv32i_defs_pkg;
   parameter int WORD_SIGNED_POS_ONE = 32'sh0000_0001;
   parameter int WORD_SIGNED_NEG_ONE = 32'shffff_ffff;
   parameter int WORD_SIGNED_ZERO = 32'sh0000_0000;
-
 endpackage
