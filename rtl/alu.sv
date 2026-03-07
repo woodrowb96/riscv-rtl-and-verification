@@ -46,7 +46,7 @@ module alu(
   assign zero = (result == '0);
 
   always_comb begin
-    case(alu_op)
+    unique case(alu_op)
       ALU_AND: begin
         result = in_a & in_b;
       end

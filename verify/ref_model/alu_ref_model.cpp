@@ -24,7 +24,7 @@ extern "C" {
 
     //make sure we didnt get passed nullptrs
     if(!result_out || !zero_out) {
-      fprintf(stderr, "[ALU_REF_MODEL] passed nullptrs");
+      fprintf(stderr, "[ALU_REF_MODEL] passed nullptrs\n");
       return;
     }
 
@@ -47,6 +47,7 @@ extern "C" {
         break;
       }
       default: {
+        fprintf(stderr, "[ALU_REF_MODEL] WARNING: invalid op\n");
         result = 0;
         break;
       }
