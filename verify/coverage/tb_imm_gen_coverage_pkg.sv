@@ -19,6 +19,7 @@ package tb_imm_gen_coverage_pkg;
         bins op_auipc  = {OP_AUIPC};
         bins op_jal    = {OP_JAL};
         bins op_jalr   = {OP_JALR};
+        illegal_bins invalid = default; //just to help debuugging
       }
 
       /********************** SIGN COVERAGE ****************************/
@@ -37,7 +38,7 @@ package tb_imm_gen_coverage_pkg;
       //      Covering it once in the opcode coverpoint is sufficient.
 
       //I-type encoded immediate (inst[30:20]), excluding the sign bit (inst[31])
-      i_type_corners: coverpoint vif.imm[10:0]
+      i_type_corners: coverpoint vif.inst[30:20]
         iff(vif.inst[6:0] inside {OP_IMM, OP_LOAD, OP_JALR}) {
           bins all_zeros = {IMM_11_ALL_ZEROS};
           bins all_ones  = {IMM_11_ALL_ONES};
@@ -51,7 +52,7 @@ package tb_imm_gen_coverage_pkg;
       }
 
       //S-type encoded immediate {inst[30:25],inst[11:7]} excluding sign bit inst[31]
-      s_type_corners: coverpoint vif.imm[10:0]
+      s_type_corners: coverpoint {vif.inst[30:25], vif.inst[11:7]}
         iff(vif.inst[6:0] inside {OP_STORE}) {
           bins all_zeros = {IMM_11_ALL_ZEROS};
           bins all_ones  = {IMM_11_ALL_ONES};
@@ -61,7 +62,7 @@ package tb_imm_gen_coverage_pkg;
       }
 
       //B-type encoded immediate {inst[7],inst[30:25],inst[11:8]} excluding the sign bit
-      b_type_corners: coverpoint vif.imm[11:1] //bit 0 is not part of the encoded imm
+      b_type_corners: coverpoint {vif.inst[7], vif.inst[30:25], vif.inst[11:8]}
         iff(vif.inst[6:0] inside {OP_BRANCH}) {
           bins all_zeros = {IMM_11_ALL_ZEROS};
           bins all_ones  = {IMM_11_ALL_ONES};
@@ -73,7 +74,7 @@ package tb_imm_gen_coverage_pkg;
       //U-type encoded immediate {inst[31:12]}
       //NOTE: U-types dont sign extend so im including the sign bit here and 
       //      wont cross it later.
-      u_type_corners: coverpoint vif.imm[31:12]
+      u_type_corners: coverpoint vif.inst[31:12]
         iff(vif.inst[6:0] inside {OP_LUI, OP_AUIPC}) {
           bins all_zeros = {IMM_20_ALL_ZEROS};
           bins all_ones  = {IMM_20_ALL_ONES};
@@ -81,12 +82,12 @@ package tb_imm_gen_coverage_pkg;
       }
 
       //J-type encoded immediate {inst[19:12],inst[20], inst[30:21]}, excluding sign bit
-      j_type_corners: coverpoint vif.imm[19:1]
+      j_type_corners: coverpoint {vif.inst[19:12], vif.inst[20], vif.inst[30:21]}
         iff(vif.inst[6:0] inside {OP_JAL}) {
           bins all_zeros = {IMM_19_ALL_ZEROS};
           bins all_ones  = {IMM_19_ALL_ONES};
-          bins alt_55    = {IMM_19_ALT_55};
-          bins alt_aa    = {IMM_19_ALT_AA};
+          bins alt_55    = {IMM_19_ALT_55};     //the pattern 0101 repeated
+          bins alt_aa    = {IMM_19_ALT_AA};     //the pattern 1010 repeated
           bins other = default;
       }
 
