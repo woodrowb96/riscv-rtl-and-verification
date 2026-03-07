@@ -19,7 +19,7 @@ package tb_imm_gen_coverage_pkg;
         bins op_auipc  = {OP_AUIPC};
         bins op_jal    = {OP_JAL};
         bins op_jalr   = {OP_JALR};
-        illegal_bins invalid = default; //just to help debuugging
+        illegal_bins invalid = default; //just to help debugging
       }
 
       /********************** SIGN COVERAGE ****************************/
