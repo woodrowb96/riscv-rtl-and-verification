@@ -1,6 +1,7 @@
 import rv32i_defs_pkg::*;
 import tb_imm_gen_transaction_pkg::*;
 import imm_gen_ref_model_pkg::*;
+import tb_imm_gen_coverage_pkg::*;
 
 module tb_imm_gen();
   localparam CLK_PERIOD = 10;
@@ -17,6 +18,9 @@ module tb_imm_gen();
 
   /******* DUT ***********/
   imm_gen dut(.inst(intf.inst), .imm(intf.imm));
+
+  /******** COVERAGE *********/
+  tb_imm_gen_coverage coverage;
 
   /******** REF MODEL **************/
   imm_gen_ref_model ref_imm_gen;
@@ -56,6 +60,7 @@ module tb_imm_gen();
     @(posedge clk);    //wait till clk edge, to sync the tests and let output settle
     monitor(trans);
     score(trans);
+    coverage.sample();
   endtask
 
   function void print_test_results();
@@ -70,6 +75,7 @@ module tb_imm_gen();
   imm_gen_trans trans;
 
   initial begin
+    coverage = new(intf.monitor);
     ref_imm_gen = new();
     trans = new();
 
