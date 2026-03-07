@@ -2,6 +2,7 @@ import rv32i_defs_pkg::*;
 import tb_imm_gen_transaction_pkg::*;
 import imm_gen_ref_model_pkg::*;
 import tb_imm_gen_coverage_pkg::*;
+import tb_imm_gen_generator_pkg::*;
 
 module tb_imm_gen();
   localparam CLK_PERIOD = 10;
@@ -72,16 +73,15 @@ module tb_imm_gen();
   endfunction
 
   /**************  TESTS **************/
-  imm_gen_trans trans;
+  tb_imm_gen_generator generator;
 
   initial begin
     coverage = new(intf.monitor);
     ref_imm_gen = new();
-    trans = new();
+    generator = new();
 
     repeat(1000) begin
-      assert(trans.randomize());
-      test(trans);
+      test(generator.gen_trans());
     end
 
     print_test_results();

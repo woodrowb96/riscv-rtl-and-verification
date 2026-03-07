@@ -11,3 +11,4 @@ verify/interface/imm_gen_intf.sv
 verify/transaction/tb_imm_gen_transaction_pkg.sv
 verify/ref_model/imm_gen_ref_model_pkg.sv
 verify/coverage/tb_imm_gen_coverage_pkg.sv
+verify/generator/tb_imm_gen_generator_pkg.sv
