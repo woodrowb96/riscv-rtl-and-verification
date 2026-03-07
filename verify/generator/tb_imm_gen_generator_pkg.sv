@@ -36,7 +36,7 @@ package tb_imm_gen_generator_pkg;
     //   };
     // };
 
-    //using post rand to workaround the vivado bug, see the note bellow
+    //using post rand to workaround the vivado bug, see the note below
     function void post_randomize();
 
       super.post_randomize(); //call parent's post_rand to make sure the MSB gets randomized

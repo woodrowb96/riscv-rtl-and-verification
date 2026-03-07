@@ -20,6 +20,12 @@ module tb_imm_gen();
   /******* DUT ***********/
   imm_gen dut(.inst(intf.inst), .imm(intf.imm));
 
+  /********** BIND ASSERTIONS ************/
+  bind tb_imm_gen.dut imm_gen_assert dut_assert(.tb_clk(tb_imm_gen.clk),
+                                                .inst(inst),
+                                                .imm(imm)
+                                                );
+
   /******** COVERAGE *********/
   tb_imm_gen_coverage coverage;
 
