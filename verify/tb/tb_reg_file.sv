@@ -3,11 +3,11 @@ import tb_reg_file_generator_pkg::*;
 import reg_file_ref_model_pkg::*;
 import tb_reg_file_coverage_pkg::*;
 import rv32i_defs_pkg::*;
-// `timescale 1ns / 10ps
 
 module tb_reg_file();
   localparam CLK_PERIOD = 10;
-  localparam PROPOGATION_DELAY = 3;
+  localparam PROPAGATION_DELAY = 3;
+
   //clock
   logic clk;
   initial begin
@@ -20,14 +20,14 @@ module tb_reg_file();
 
   /************  DUT ************/
   reg_file dut(.clk(clk),
-                    .wr_en(intf.wr_en),
-                    .rd_reg_1(intf.rd_reg_1),
-                    .rd_reg_2(intf.rd_reg_2),
-                    .wr_reg(intf.wr_reg),
-                    .wr_data(intf.wr_data),
-                    .rd_data_1(intf.rd_data_1),
-                    .rd_data_2(intf.rd_data_2)
-                    );
+              .wr_en(intf.wr_en),
+              .rd_reg_1(intf.rd_reg_1),
+              .rd_reg_2(intf.rd_reg_2),
+              .wr_reg(intf.wr_reg),
+              .wr_data(intf.wr_data),
+              .rd_data_1(intf.rd_data_1),
+              .rd_data_2(intf.rd_data_2)
+              );
 
   /************  BIND ASSERTIONS ************/
   bind tb_reg_file.dut reg_file_assert dut_assert(.*);
@@ -56,7 +56,6 @@ module tb_reg_file();
   int num_tests = 0;
   int num_fails = 0;
 
-  //score test by making sure rd_data matches expected values
   function automatic void score(reg_file_trans actual);
     reg_file_trans expected = new();
     expected.wr_en = actual.wr_en;
@@ -81,12 +80,10 @@ module tb_reg_file();
 
   task test(reg_file_trans trans);
     drive(trans);
-    #PROPOGATION_DELAY      //let the combinatorial reads propogate
+    #PROPAGATION_DELAY            //let the combinatorial reads propagate
     monitor(trans);
     score(trans);
-
-    //clk the writes in and update the ref_model
-    @(posedge clk);
+    @(posedge clk);               //clk the writes in and update the reference model
     ref_reg_file.update(trans);
   endtask
 
@@ -100,8 +97,8 @@ module tb_reg_file();
 
   /*********** TESTING ******************/
   tb_reg_file_generator generator;
-  initial begin
 
+  initial begin
     coverage = new(intf.monitor);
     ref_reg_file = new();
     generator = new();
@@ -111,7 +108,7 @@ module tb_reg_file();
     repeat(1000) begin
       test(generator.gen_trans());
     end
-    coverage.start();
+    coverage.stop();
 
     print_test_results();
 

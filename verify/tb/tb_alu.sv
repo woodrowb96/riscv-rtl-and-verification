@@ -43,9 +43,9 @@ module tb_alu();
 
   /************* TASKS ******************/
   task drive(alu_trans trans);
-    intf.alu_op = trans.alu_op;
-    intf.in_a = trans.in_a;
-    intf.in_b = trans.in_b;
+    intf.alu_op <= trans.alu_op;
+    intf.in_a <= trans.in_a;
+    intf.in_b <= trans.in_b;
   endtask
 
   task monitor(alu_trans trans);
@@ -56,7 +56,7 @@ module tb_alu();
   int num_tests = 0;
   int num_fails = 0;
 
-  task automatic score(alu_trans actual);
+  function automatic void score(alu_trans actual);
     alu_out_t expected_out;
 
     alu_trans expected = new();
@@ -77,7 +77,7 @@ module tb_alu();
     end
 
     num_tests++;
-  endtask
+  endfunction
 
   task test(alu_trans trans);
     drive(trans);

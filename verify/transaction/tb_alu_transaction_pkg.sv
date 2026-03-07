@@ -29,11 +29,11 @@ package tb_alu_transaction_pkg;
                msg, $time, alu_op, in_a, in_b, result, zero);
     endfunction
 
+
     /******** NOTE ********/
-    //Manually using the post_rand function to randomize the msb is
-    //a workaround for a bug in xsim.
+    //Post_randomizing the MSB is a workaround for a Vivado bug.
     //
-    //SEE: tb_lut_ram_transaction_pkg.sv NOTE for a full explanation
+    //See the note in lut_ram_transaction_pkg.sc for full explination.
     /***********************/
     function void post_randomize();
       if(!(in_a inside {WORD_ALL_ZEROS, WORD_ALL_ONES,

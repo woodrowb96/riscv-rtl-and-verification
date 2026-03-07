@@ -3,12 +3,13 @@ package tb_reg_file_transaction_pkg;
   import verify_const_pkg::*;
 
   class reg_file_trans;
+    //DUT input
     rand logic wr_en;
     rand rf_addr_t rd_reg_1;
     rand rf_addr_t rd_reg_2;
     rand rf_addr_t wr_reg;
     rand word_t wr_data;
-
+    //DUT output
     word_t rd_data_1;
     word_t rd_data_2;
 
@@ -28,10 +29,9 @@ package tb_reg_file_transaction_pkg;
     endfunction
 
     /******** NOTE ********/
-    //Manually using the post_rand function to randomize the msb is
-    //a workaround for a bug in xsim.
+    //Post_randomizing the MSB is a workaround for a Vivado bug.
     //
-    //SEE: tb_lut_ram_transaction_pkg.sv NOTE for a full explination
+    //See the note in lut_ram_transaction_pkg.sc for full explination.
     /***********************/
     function void post_randomize();
       if(!(wr_data inside {WORD_ALL_ZEROS, WORD_ALL_ONES})) begin
@@ -42,4 +42,5 @@ package tb_reg_file_transaction_pkg;
       end
     endfunction
   endclass
+
 endpackage
