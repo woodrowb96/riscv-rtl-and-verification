@@ -1,6 +1,7 @@
 /*
-ALU module for single cycle rv32i partial implementation
-For this partial implementation I am only implementing AND, OR ADD and SUB operations.
+  ALU module for riscv rv32i implementation.
+
+  NOTE: I havent implemented all the operations yet.
 
 Control:
   alu_op  : 4'b alu operation
@@ -8,10 +9,10 @@ Control:
   ---------ALU CONTROL-----------------
   | ALU_OP  | Function | result       |
   -------------------------------------
-  | 0000    | AND      | in_a & in_b  |
-  | 0001    | OR       | in_a | in_b  |
-  | 0010    | ADD      | in_a + in_b  |
-  | 0110    | SUB      | in_a - in_b  |
+  | 0000    | ALU_AND  | in_a & in_b  |
+  | 0001    | ALU_OR   | in_a | in_b  |
+  | 0010    | ALU_ADD  | in_a + in_b  |
+  | 0110    | ALU_SUB  | in_a - in_b  |
   -------------------------------------
 
 Input:
@@ -20,15 +21,17 @@ Input:
 
 Output:
   result  : 32'b result of operation
-  zero    : 1'b zero flag
-            1 if result == 0, else 0
+
+Output flags:
+  zero: 1'b zero flag
+          - set when result == 0
 */
 import rv32i_defs_pkg::*;
 import rv32i_control_pkg::*;
 
 module alu(
   //control
-  input alu_op_t alu_op,     //alu control signal
+  input alu_op_t alu_op,
 
   //input
   input word_t in_a,
@@ -36,24 +39,30 @@ module alu(
 
   //output
   output word_t result,
-  output logic zero             // 1 if result == 0, else 0
+
+  //output flags
+  output logic zero
 );
 
-  //zero flag set when result is all 0s
   assign zero = (result == '0);
 
   always_comb begin
     case(alu_op)
-      ALU_AND:
+      ALU_AND: begin
         result = in_a & in_b;
-      ALU_OR:
+      end
+      ALU_OR: begin
         result = in_a | in_b;
-      ALU_ADD:
+      end
+      ALU_ADD: begin
         result = in_a + in_b;
-      ALU_SUB:
+      end
+      ALU_SUB: begin
         result = in_a - in_b;
-      default:
+      end
+      default: begin
         result = '0;
+      end
     endcase
   end
 
