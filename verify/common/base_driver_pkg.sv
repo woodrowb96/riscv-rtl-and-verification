@@ -8,13 +8,13 @@ package base_drive_pkg;
     typedef mailbox #(base_transaction) mailbox_t;
     mailbox_t drv_mbx_in;
 
-    pure virtual function void drive(base_transaction trans);
+    pure virtual task drive(base_transaction trans);
 
-    function void run();
+    task run();
       base_transaction trans;
       drv_mbx_in.get(trans);
       drive(trans);
-    endfunction;
+    endtask
 
     function new(mailbox_t drv_mbx_in);
       this.drv_mbx_in = drv_mbx_in;
