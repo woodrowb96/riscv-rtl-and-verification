@@ -104,7 +104,7 @@ module tb_reg_file();
     ref_reg_file = new();
     generator = new();
 
-    repeat(1000) begin
+    repeat(1500) begin
       test(generator.gen_trans());
     end
 

@@ -31,7 +31,7 @@ package tb_reg_file_transaction_pkg;
     /******** NOTE ********/
     //Post_randomizing the MSB is a workaround for a Vivado bug.
     //
-    //See the note in lut_ram_transaction_pkg.sc for full explination.
+    //See the note in lut_ram_transaction_pkg.sv for full explanation.
     /***********************/
     function void post_randomize();
       if(!(wr_data inside {WORD_ALL_ZEROS, WORD_ALL_ONES})) begin
