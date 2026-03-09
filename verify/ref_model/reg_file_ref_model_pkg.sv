@@ -10,9 +10,9 @@ package reg_file_ref_model_pkg;
         ref_mem[index] = data;
       end
 
-      //terminate the sim, if x0 ever gets set
-      ref_x0_wr_check: assert(ref_mem[X0] === 0)
-        else $fatal(1, "REF_REG_FILE::write(): expected x0 != 0");
+      //terminate the sim if the reference x0 is ever written into
+      assert(ref_mem[X0] === 0) else
+        $fatal(1, "REF_REG_FILE::write(): expected x0 != 0");
     endfunction
 
     function word_t read(rf_addr_t index);
@@ -29,7 +29,7 @@ package reg_file_ref_model_pkg;
     endfunction
 
     function new();
-      ref_mem[X0] = 0;  //initialize x0 to 0
+      ref_mem[X0] = 0;
     endfunction
   endclass
 endpackage
