@@ -1,8 +1,7 @@
 package base_scoreboard_pkg;
-  import base_transaction_pkg::*;
 
-  virtual class base_scoreboard;
-    typedef mailbox #(base_transaction) mailbox_t;
+  virtual class base_scoreboard #(parameter type TRANS_T);
+    typedef mailbox #(TRANS_T) mailbox_t;
     mailbox_t mon_to_scb_mbx;
 
     int num_tests = 0;
@@ -12,18 +11,25 @@ package base_scoreboard_pkg;
       this.mon_to_scb_mbx = mon_to_scb_mbx;
     endfunction
 
-    pure virtual function bit compare(input base_transaction actual_trans);
+    pure virtual function bit compare(input TRANS_T actual);
 
     task run();
-      base_transaction actual_trans;
-      mon_to_scb_mbx.get(actual_trans);
+      TRANS_T actual;
+      mon_to_scb_mbx.get(actual);
 
-      if(!compare(actual_trans)) begin
+      if(!compare(actual)) begin
         num_fails++;
       end
 
       num_tests++;
     endtask
+
+    function void print_fail(TRANS_T actual, TRANS_T expected, string tag = "");
+      $display("----------------");
+      $error("[%s]: test fail", tag);
+      expected.print("EXPECTED");
+      actual.print("ACTUAL");
+    endfunction
 
     function void print_results(string tag = "", string msg = "");
       $display("----------------");

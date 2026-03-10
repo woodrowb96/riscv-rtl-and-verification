@@ -1,13 +1,15 @@
 package tb_alu_transaction_pkg;
+  import base_transaction_pkg::*;
   import rv32i_defs_pkg::*;
   import rv32i_control_pkg::*;
   import verify_const_pkg::*;
 
-  class alu_trans;
+  class alu_trans extends base_transaction;
     //DUT input
     rand alu_op_t alu_op;
     rand logic [XLEN-1:0] in_a;
     rand logic [XLEN-1:0] in_b;
+
     //DUT output
     word_t result;
     logic zero;
@@ -25,8 +27,8 @@ package tb_alu_transaction_pkg;
     endfunction
 
     function void print(string msg = "");
-      $display("[%s] t=%0t alu_op:%0b in_a:%0h in_b:%0h result:%0h zero:%0b",
-               msg, $time, alu_op, in_a, in_b, result, zero);
+      $display("[%s] t=%0t alu_op:%s in_a:%0h in_b:%0h result:%0h zero:%0b",
+               msg, $time, alu_op.name(), in_a, in_b, result, zero);
     endfunction
 
 

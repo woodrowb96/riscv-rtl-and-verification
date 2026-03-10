@@ -1,4 +1,5 @@
 package tb_alu_generator_pkg;
+  import base_generator_pkg::*;
   import rv32i_defs_pkg::*;
   import rv32i_control_pkg::*;
   import verify_const_pkg::*;
@@ -79,8 +80,16 @@ package tb_alu_generator_pkg;
     };
   endclass
 
-  /**************************** GENERATOR **************************************/
-  class tb_alu_generator;
+  /*==============================================================================*/
+  /*------------------------------ GENERATOR -------------------------------------*/
+  /*==============================================================================*/
+
+  class alu_full_rand_generator extends base_generator #(alu_trans);
+
+    function new(mailbox_t gen_to_drv_mbx);
+      super.new(gen_to_drv_mbx);
+    endfunction
+
     function alu_trans gen_trans();
       alu_trans trans;
 
@@ -116,8 +125,9 @@ package tb_alu_generator_pkg;
         end
       endcase
 
-      return trans;   //return the trans
+      return trans;
     endfunction
+
   endclass
 
 endpackage

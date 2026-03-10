@@ -156,6 +156,9 @@ fi
 SV_FILE_LIST="/tmp/${TEST_BENCH}_sv_files.f"
 CPP_FILE_LIST="/tmp/${TEST_BENCH}_cpp_files.f"
 
+#cleanup any stale temp files
+rm -f "$SV_FILE_LIST" "$CPP_FILE_LIST"
+
 if [ -f "$FILE_LIST" ] ; then
   grep '\.sv' "$FILE_LIST" > "$SV_FILE_LIST"
   grep '\.cpp' "$FILE_LIST" > "$CPP_FILE_LIST"
@@ -285,3 +288,6 @@ else                                      #else we are in CLI mode
     xsim $TEST_BENCH -runall
   fi
 fi
+
+#-------------------  cleanup temp files -------------------
+rm -f "$SV_FILE_LIST" "$CPP_FILE_LIST"

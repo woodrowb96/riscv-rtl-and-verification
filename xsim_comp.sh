@@ -66,6 +66,9 @@ fi
 SV_FILE_LIST="/tmp/${MODULE_NAME}_sv_files.f"
 CPP_FILE_LIST="/tmp/${MODULE_NAME}_cpp_files.f"
 
+#cleanup any stale temp files
+rm -f "$SV_FILE_LIST" "$CPP_FILE_LIST"
+
 if [ -f "$FILE_LIST" ] ; then
   grep '\.sv' "$FILE_LIST" > "$SV_FILE_LIST"
   grep '\.cpp' "$FILE_LIST" > "$CPP_FILE_LIST"
@@ -112,5 +115,6 @@ echo "COMPILING: $MODULE_NAME"
 echo $'\n'
 xvlog -sv -L uvm --work work="$XSIM_WORKING_DIR" "$PROJECT_ROOT_DIR/$1"
 
-#-------------------  cleanup any log or pb file -------------------
+#-------------------  cleanup temp and log files -------------------
+rm -f "$SV_FILE_LIST" "$CPP_FILE_LIST"
 mv xsc.log xsc.pb xvlog.log xvlog.pb "$XSIM_DIR" 2>/dev/null
