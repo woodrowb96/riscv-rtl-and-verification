@@ -31,11 +31,10 @@ package tb_alu_transaction_pkg;
                msg, $time, alu_op.name(), in_a, in_b, result, zero);
     endfunction
 
-
     /******** NOTE ********/
     //Post_randomizing the MSB is a workaround for a Vivado bug.
     //
-    //See the note in lut_ram_transaction_pkg.sc for full explination.
+    //See the note in lut_ram_transaction_pkg.sv for full explanation.
     /***********************/
     function void post_randomize();
       if(!(in_a inside {WORD_ALL_ZEROS, WORD_ALL_ONES,

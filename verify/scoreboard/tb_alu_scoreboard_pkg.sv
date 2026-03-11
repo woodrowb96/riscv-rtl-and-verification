@@ -5,10 +5,9 @@ package tb_alu_scoreboard_pkg;
   import tb_alu_coverage_pkg::*;
 
   class alu_scoreboard extends base_scoreboard #(alu_trans);
-    //ref model
     alu_ref_model ref_alu;
-    //coverage
-    alu_coverage coverage;
+
+    alu_coverage coverage;  //we are collecting coverage
 
     function new(alu_coverage coverage, string tag, mailbox_t mon_to_scb_mbx);
       super.new(tag, mon_to_scb_mbx);
@@ -35,10 +34,10 @@ package tb_alu_scoreboard_pkg;
       passed = expected.compare(actual);
 
       //handle pass/fail
-      if(passed) begin   //if test passed, add the actual trans to coverage
-        coverage.sample(actual);
+      if(passed) begin
+        coverage.sample(actual);  //only collect coverage on passing transactions
       end
-      else begin                          //if test failed
+      else begin
         print_fail(actual, expected);
       end
 

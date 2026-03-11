@@ -25,24 +25,29 @@ package tb_alu_tests_pkg;
 
   /*=============================== CHILD TESTS ==================================*/
 
+  //test all operations randomly
+  //(see the generator for full details on randomization)
   class alu_full_rand_test extends alu_base_test #(alu_full_rand_gen);
     function new(virtual alu_intf vif, alu_coverage coverage);
       super.new(vif, coverage, "ALU_FULL_RAND_TEST");
     endfunction
   endclass
 
+  //walk through all combos of corners and do the operation
   class alu_add_corner_walk_test extends alu_base_test #(alu_add_corner_walk_gen);
     function new(virtual alu_intf vif, alu_coverage coverage);
       super.new(vif, coverage, "ALU_ADD_CORNER_WALK_TEST");
     endfunction
   endclass
 
+  //walk through all combos of corners and do the operation
   class alu_sub_corner_walk_test extends alu_base_test #(alu_sub_corner_walk_gen);
     function new(virtual alu_intf vif, alu_coverage coverage);
       super.new(vif, coverage, "ALU_SUB_CORNER_WALK_TEST");
     endfunction
   endclass
 
+  //gen only invalid ops and test
   class alu_invalid_op_test extends alu_base_test #(alu_invalid_op_gen);
     function new(virtual alu_intf vif, alu_coverage coverage);
       super.new(vif, coverage, "ALU_INVALID_OP_TEST");

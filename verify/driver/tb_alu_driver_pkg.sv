@@ -4,7 +4,11 @@ package tb_alu_driver_pkg;
 
   class alu_driver extends base_driver #(alu_trans);
     virtual alu_intf vif;
-    event drv_done;  //help sync monitor and driver (we dont want to start monitoring until AFTER weve driven)
+
+    //used to help sync driving and monitoring
+    //(its mostly there so we dont monitor the first driven transaction until
+    // after the first drive has occurred)
+    event drv_done;
 
     function new(virtual alu_intf vif, string tag, mailbox_t gen_to_drv_mbx);
       super.new(tag, gen_to_drv_mbx);
@@ -17,6 +21,7 @@ package tb_alu_driver_pkg;
       vif.cb_drv.alu_op <= trans.alu_op;
       vif.cb_drv.in_a <= trans.in_a;
       vif.cb_drv.in_b <= trans.in_b;
+
       //tell monitor the drive is done
       ->drv_done;
     endtask

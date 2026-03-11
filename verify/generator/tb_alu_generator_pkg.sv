@@ -25,11 +25,11 @@ package tb_alu_generator_pkg;
         [WORD_ALL_ZEROS  : WORD_ALL_ONES]  :/ 2
       };
       in_b dist {
-        WORD_ALL_ZEROS                           := 3,
-        WORD_ALT_ONES_55                         := 3,
-        WORD_ALT_ONES_AA                         := 3,
-        WORD_ALL_ONES                            := 3,
-        [WORD_ALL_ZEROS  : WORD_ALL_ONES]         :/ 2
+        WORD_ALL_ZEROS                     := 3,
+        WORD_ALT_ONES_55                   := 3,
+        WORD_ALT_ONES_AA                   := 3,
+        WORD_ALL_ONES                      := 3,
+        [WORD_ALL_ZEROS  : WORD_ALL_ONES]  :/ 2
       };
     };
   endclass

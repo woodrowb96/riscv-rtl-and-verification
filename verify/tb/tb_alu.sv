@@ -35,21 +35,13 @@ module tb_alu();
   /************ COVERAGE *******************/
   alu_coverage coverage;
 
-  // task test_invalid_op(alu_trans trans);
-  //   trans.alu_op = alu_op_t'(4'b1111);    //make it invalid
-  //   drive(trans);
-  //   @(posedge clk);
-  //   monitor(trans);
-  //   score(trans);
-  //   coverage.sample();
-  // endtask
-
-
+  /***************************************************/
   /**************  TESTING ***************************/
-  alu_full_rand_test       test_full_rand;
-  alu_add_corner_walk_test test_add_corner_walk;
-  alu_sub_corner_walk_test test_sub_corner_walk;
-  alu_invalid_op_test      test_invalid_op;
+  /***************************************************/
+  alu_full_rand_test       test_full_rand;        //test all operations randomly
+  alu_add_corner_walk_test test_add_corner_walk;  //walk through all combos of add corners and add
+  alu_sub_corner_walk_test test_sub_corner_walk;  //walk through all combos of sub corners and sub
+  alu_invalid_op_test      test_invalid_op;       //test invalid operations
 
   initial begin
     coverage = new();
@@ -59,14 +51,13 @@ module tb_alu();
     test_sub_corner_walk = new(intf, coverage);
     test_invalid_op      = new(intf, coverage);
 
+    //run tests
     test_full_rand.run(1000);
-
     test_add_corner_walk.run();
-
     test_sub_corner_walk.run();
-
     test_invalid_op.run(10);
 
+    //print results
     test_full_rand.print_results();
     test_add_corner_walk.print_results();
     test_sub_corner_walk.print_results();
