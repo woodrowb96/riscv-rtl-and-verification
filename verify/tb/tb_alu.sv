@@ -35,9 +35,8 @@ module tb_alu();
   /************ COVERAGE *******************/
   alu_coverage coverage;
 
-  /***************************************************/
   /**************  TESTING ***************************/
-  /***************************************************/
+
   alu_full_rand_test       test_full_rand;        //test all operations randomly
   alu_add_corner_walk_test test_add_corner_walk;  //walk through all combos of add corners and add
   alu_sub_corner_walk_test test_sub_corner_walk;  //walk through all combos of sub corners and sub

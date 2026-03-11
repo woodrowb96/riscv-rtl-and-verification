@@ -1,14 +1,16 @@
 package tb_reg_file_transaction_pkg;
+  import base_transaction_pkg::*;
   import rv32i_defs_pkg::*;
   import verify_const_pkg::*;
 
-  class reg_file_trans;
+  class reg_file_trans extends base_transaction;
     //DUT input
     rand logic wr_en;
     rand rf_addr_t rd_reg_1;
     rand rf_addr_t rd_reg_2;
     rand rf_addr_t wr_reg;
     rand word_t wr_data;
+
     //DUT output
     word_t rd_data_1;
     word_t rd_data_2;

@@ -1,24 +1,20 @@
-import tb_reg_file_transaction_pkg::*;
-import tb_reg_file_generator_pkg::*;
-import reg_file_ref_model_pkg::*;
+import tb_reg_file_tests_pkg::*;
 import tb_reg_file_coverage_pkg::*;
-import rv32i_defs_pkg::*;
 
 module tb_reg_file();
   localparam CLK_PERIOD = 10;
-  localparam PROPAGATION_DELAY = 3;
 
-  //clock
-  logic clk;
+  /*********** CLK *************/
+  bit clk;
   initial begin
     clk = 0;
     forever #(CLK_PERIOD/2) clk = ~clk;
   end
 
-  /************  INTERFACE ************/
-  reg_file_intf intf(clk);
+  /*********** INTERFACE *************/
+  reg_file_intf intf(.clk);
 
-  /************  DUT ************/
+  /*********** DUT *************/
   reg_file dut(.clk(clk),
               .wr_en(intf.wr_en),
               .rd_reg_1(intf.rd_reg_1),
@@ -29,86 +25,25 @@ module tb_reg_file();
               .rd_data_2(intf.rd_data_2)
               );
 
-  /************  BIND ASSERTIONS ************/
+  /*********** BIND ASSERTIONS *************/
   bind tb_reg_file.dut reg_file_assert dut_assert(.*);
 
-  /************  COVERAGE ************/
+  /************ COVERAGE *******************/
   tb_reg_file_coverage coverage;
 
-  /************  REFERENCE REG_FILE ************/
-  reg_file_ref_model ref_reg_file;
-
-  /************  TASKS ************/
-
-  task drive(reg_file_trans trans);
-    intf.wr_en <= trans.wr_en;
-    intf.wr_reg <= trans.wr_reg;
-    intf.wr_data <= trans.wr_data;
-    intf.rd_reg_1 <= trans.rd_reg_1;
-    intf.rd_reg_2 <= trans.rd_reg_2;
-  endtask
-
-  task monitor(reg_file_trans trans);
-    trans.rd_data_1 = intf.rd_data_1;
-    trans.rd_data_2 = intf.rd_data_2;
-  endtask
-
-  int num_tests = 0;
-  int num_fails = 0;
-
-  function automatic void score(reg_file_trans actual);
-    reg_file_trans expected = new();
-    expected.wr_en = actual.wr_en;
-    expected.wr_reg = actual.wr_reg;
-    expected.wr_data = actual.wr_data;
-    expected.rd_reg_1 = actual.rd_reg_1;
-    expected.rd_reg_2 = actual.rd_reg_2;
-
-    expected.rd_data_1 = ref_reg_file.read(actual.rd_reg_1);
-    expected.rd_data_2 = ref_reg_file.read(actual.rd_reg_2);
-
-    if(!expected.compare(actual)) begin
-      $display("----------------");
-      $error("REG_FILE_TB: test fail");
-      expected.print("EXPECTED");
-      actual.print("ACTUAL");
-      num_fails++;
-    end
-
-    num_tests++;
-  endfunction
-
-  task test(reg_file_trans trans);
-    drive(trans);
-    #PROPAGATION_DELAY            //let the combinatorial reads propagate
-    monitor(trans);
-    score(trans);
-    coverage.sample();
-    @(posedge clk);               //clk the writes in and update the reference model
-    ref_reg_file.update(trans);
-  endtask
-
-  task print_test_results();
-    $display("----------------");
-    $display("Test results:");
-    $display("Total tests ran: %0d", num_tests);
-    $display("Total tests failed: %0d", num_fails);
-    $display("----------------");
-  endtask
-
-  /*********** TESTING ******************/
-  tb_reg_file_generator generator;
+  /**************  TESTING ***************************/
+  reg_file_full_rand_test test_full_rand;
 
   initial begin
-    coverage = new(intf.monitor);
-    ref_reg_file = new();
-    generator = new();
+    coverage = new();
 
-    repeat(1500) begin
-      test(generator.gen_trans());
-    end
+    test_full_rand = new(intf, coverage);
 
-    print_test_results();
+    //run tests
+    test_full_rand.run(1500);
+
+    //print results
+    test_full_rand.print_results();
 
     $stop(1);
   end
