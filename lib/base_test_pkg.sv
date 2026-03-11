@@ -1,21 +1,39 @@
-package base_test_pkg;
-  import base_generator_pkg::*;
-  import base_driver_pkg::*;
-  import base_monitor_pkg::*;
-  import base_scoreboard_pkg::*;
+/*
+    Base test class for the verification library.
 
-  virtual class base_test #(parameter type TRANS_T);
+    Usage:
+          In your child tests new():
+              1. Call super.new() first (this creates the mailboxes)
+              2. Construct and assign gen, drv, mon, scb (pass mailboxes from super)
+              3. Do any additional wiring for custom child level stuff (events, custom mailboxes ...)
+
+    Pure Virtual Functions: NONE
+
+    Member Functions:
+          - run(int num_tests = -1)
+                - run the test
+                - Tests will run until:
+                    - The number of transactions generated == num_tests OR
+                    - gen.finished is set (if users dont specify a num_tests) OR
+                    - we timeout
+          - print_results(string msg = "")
+                - print total number of tests ran and total number of failed tests
+*/
+package base_test_pkg;
+
+  virtual class base_test #(parameter type TRANS_T, GEN_T, DRV_T, MON_T, SCB_T);
     typedef mailbox #(TRANS_T) mailbox_t;
     mailbox_t gen_to_drv_mbx;
     mailbox_t mon_to_scb_mbx;
 
     string tag;
+
     int timeout;
 
-    base_generator  #(TRANS_T) gen;
-    base_driver     #(TRANS_T) drv;
-    base_monitor    #(TRANS_T) mon;
-    base_scoreboard #(TRANS_T) scb;
+    GEN_T gen;
+    DRV_T drv;
+    MON_T mon;
+    SCB_T scb;
 
     protected function new(string tag, int timeout = 1000000);
       this.tag = tag;
@@ -25,27 +43,29 @@ package base_test_pkg;
     endfunction
 
     task run(int num_tests = -1);
-      fork  //run the tests
-        if(num_tests >= 0) repeat(num_tests)    gen.run();
-        else              while(!gen.finished) gen.run();
-        forever           drv.run();
-        forever           mon.run();
-        forever           scb.run();
+      //run the tests
+      fork
+        if(num_tests >= 0) repeat(num_tests)    gen.run();  //leave fork after we gen num_tests
+        else               while(!gen.finished) gen.run();  //OR gen sets the finished flag
+        forever drv.run();
+        forever mon.run();
+        forever scb.run();
         #timeout $fatal(1, "[%s]: Timeout during base_test.run(), scb.num_tests=%0d", tag, scb.num_tests);
       join_any
 
-      fork  //wait till we score everthing or timeout
+      //wait till we score everything or timeout
+      fork
         wait(scb.num_tests == gen.num_transactions);
         #timeout $fatal(1, "[%s]: Timeout waiting for scoreboard, scb.num_tests=%0d", tag, scb.num_tests);
       join_any
 
-      disable fork;   //cleanup all the remaining processes
+      //cleanup remaining processes
+      disable fork;
     endtask
 
-    function void print_results();
-      scb.print_results(tag);
+    function void print_results(string msg = "");
+      scb.print_results(this.tag, msg);
     endfunction
-
   endclass
 
 endpackage

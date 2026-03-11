@@ -1,5 +1,16 @@
 /*
-    A base monitor class users can use to derive there module specific monitors from.
+    Base monitor class for the verification library.
+
+    Pure Virtual Functions:
+      - monitor()
+          - User defined interface into the run() function
+          - Users use this function to write the DUT sampling logic.
+          - Users sample the DUT into a transaction
+          - This function will run once per run() (mon.run() is being looped in the base_test)
+    Member Functions:
+        - run()
+            - Calls monitor to read a trans from the DUT, passes the trans to the scoreboard, increments num_transactions
+            - Called and looped in the base_test
 */
 package base_monitor_pkg;
 

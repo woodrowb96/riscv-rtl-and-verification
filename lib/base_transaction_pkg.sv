@@ -1,5 +1,8 @@
 /*
-    Virtual base transaction class providing users can derive there own transaction from.
+    Base transaction class for the verification library.
+
+    Pure Virtual Functions:
+      function void print(string msg = "")
 */
 package base_transaction_pkg;
 

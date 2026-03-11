@@ -16,7 +16,7 @@ package tb_alu_scoreboard_pkg;
       ref_alu = new();
     endfunction
 
-    function bit compare(input alu_trans actual);
+    function bit score(input alu_trans actual);
       alu_out_t expected_out;
       bit passed = 1;
 

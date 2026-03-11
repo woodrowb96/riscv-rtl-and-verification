@@ -8,30 +8,18 @@ package tb_alu_tests_pkg;
   import tb_alu_coverage_pkg::*;
 
   /*=============================== BASE TEST ==================================*/
-  virtual class alu_base_test #(type GEN_T) extends base_test #(alu_trans);
-    virtual alu_intf vif;
-    alu_coverage coverage;
-    event drv_done;
+  virtual class alu_base_test #(type GEN_T) extends base_test #(
+      alu_trans, GEN_T, alu_driver, alu_monitor, alu_scoreboard);
 
     protected function new(virtual alu_intf vif, alu_coverage coverage, string tag = "ALU_BASE_TEST");
-      alu_driver     alu_drv;
-      alu_monitor    alu_mon;
-      alu_scoreboard alu_scb;
-      GEN_T          alu_gen;
+      super.new(tag);
 
-      super.new(tag);                                //setup base_test
+      gen = new(gen_to_drv_mbx);
+      drv = new(vif, "ALU_DRV", gen_to_drv_mbx);
+      mon = new(vif, "ALU_MON", mon_to_scb_mbx);
+      scb = new(coverage, "ALU_SCB", mon_to_scb_mbx);
 
-      alu_gen = new(gen_to_drv_mbx);                 //create the test components
-      alu_drv = new(vif, "ALU_DRV", gen_to_drv_mbx);
-      alu_mon = new(vif, "ALU_MON", mon_to_scb_mbx);
-      alu_scb = new(coverage, "ALU_SCB", mon_to_scb_mbx);
-
-      alu_mon.drv_done = alu_drv.drv_done;           //connect the events up
-
-      drv = alu_drv;                                 //connect components to the parents
-      mon = alu_mon;
-      scb = alu_scb;
-      gen = alu_gen;
+      mon.drv_done = drv.drv_done;
     endfunction
   endclass
 
