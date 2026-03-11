@@ -22,10 +22,10 @@ package tb_reg_file_generator_pkg;
   /*------------------------------ GENERATOR -------------------------------------*/
   /*==============================================================================*/
 
-  class reg_file_full_rand_gen extends base_generator #(reg_file_trans);
+  class reg_file_default_gen extends base_generator #(reg_file_trans);
 
     function new(mailbox_t gen_to_drv_mbx);
-      super.new("REG_FILE_FULL_RAND_GEN", gen_to_drv_mbx);
+      super.new("REG_FILE_DEFAULT_GEN", gen_to_drv_mbx);
     endfunction
 
     function reg_file_trans gen_trans();

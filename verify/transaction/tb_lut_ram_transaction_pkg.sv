@@ -1,6 +1,8 @@
 package tb_lut_ram_transaction_pkg;
+  import base_transaction_pkg::*;
 
-  class lut_ram_trans #(parameter int LUT_WIDTH = 32, parameter int LUT_DEPTH = 256);
+  class lut_ram_trans #(parameter int LUT_WIDTH = 32, parameter int LUT_DEPTH = 256)
+    extends base_transaction;
     rand logic wr_en;
     rand logic [$clog2(LUT_DEPTH)-1:0] wr_addr;
     rand logic [$clog2(LUT_DEPTH)-1:0] rd_addr;

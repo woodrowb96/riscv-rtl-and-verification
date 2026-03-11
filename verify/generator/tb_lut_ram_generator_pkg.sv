@@ -1,4 +1,5 @@
 package tb_lut_ram_generator_pkg;
+  import base_generator_pkg::*;
   import tb_lut_ram_transaction_pkg::*;
 
   /******************  NOTE ***********************************/
@@ -94,7 +95,9 @@ package tb_lut_ram_generator_pkg;
   endclass
 
   /************************** GENERATOR ************************************/
-  class tb_lut_ram_generator #(parameter int LUT_WIDTH = 32, parameter int LUT_DEPTH = 256);
+  class lut_ram_default_gen #(parameter int LUT_WIDTH = 32, parameter int LUT_DEPTH = 256)
+    extends base_generator #(lut_ram_trans #(LUT_WIDTH, LUT_DEPTH));
+
     typedef lut_ram_trans_prev_written #(LUT_WIDTH, LUT_DEPTH)    trans_prev_written_t;
     typedef lut_ram_trans_corners #(LUT_WIDTH, LUT_DEPTH)         trans_corners_t;
     typedef lut_ram_trans_full_addr_range #(LUT_WIDTH, LUT_DEPTH) trans_full_addr_range_t;
@@ -103,6 +106,10 @@ package tb_lut_ram_generator_pkg;
 
     //generator needs to keep track of generated transactions
     addr_t prev_written_addr [$] = {0};
+
+    function new(mailbox_t gen_to_drv_mbx);
+      super.new("LUT_RAM_DEFAULT_GEN", gen_to_drv_mbx);
+    endfunction
 
     //the tb can call this to clear the generated wr_addr history if it needs to
     function void reset_prev_written_addr();

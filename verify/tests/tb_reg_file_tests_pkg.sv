@@ -23,11 +23,11 @@ package tb_reg_file_tests_pkg;
 
   /*=============================== CHILD TESTS ==================================*/
 
-  //test all inputs randomly
+  //default test: exercises all inputs with constrained random values
   //(see the generator for full details on randomization)
-  class reg_file_full_rand_test extends reg_file_base_test #(reg_file_full_rand_gen);
+  class reg_file_default_test extends reg_file_base_test #(reg_file_default_gen);
     function new(virtual reg_file_intf vif, tb_reg_file_coverage coverage);
-      super.new(vif, coverage, "REG_FILE_FULL_RAND_TEST");
+      super.new(vif, coverage, "REG_FILE_DEFAULT_TEST");
     endfunction
   endclass
 

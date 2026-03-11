@@ -32,18 +32,19 @@ module tb_reg_file();
   tb_reg_file_coverage coverage;
 
   /**************  TESTING ***************************/
-  reg_file_full_rand_test test_full_rand;
+  //test all inputs randomly, with some constraints to hit coverage
+  reg_file_default_test test_default;
 
   initial begin
     coverage = new();
 
-    test_full_rand = new(intf, coverage);
+    test_default = new(intf, coverage);
 
     //run tests
-    test_full_rand.run(1500);
+    test_default.run(1500);
 
     //print results
-    test_full_rand.print_results();
+    test_default.print_results();
 
     $stop(1);
   end

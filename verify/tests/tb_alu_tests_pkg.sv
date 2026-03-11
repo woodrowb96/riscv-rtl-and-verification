@@ -23,11 +23,11 @@ package tb_alu_tests_pkg;
 
   /*=============================== CHILD TESTS ==================================*/
 
-  //test all operations randomly
+  //default test: exercises all operations with constrained random inputs
   //(see the generator for full details on randomization)
-  class alu_full_rand_test extends alu_base_test #(alu_full_rand_gen);
+  class alu_default_test extends alu_base_test #(alu_default_gen);
     function new(virtual alu_intf vif, alu_coverage coverage);
-      super.new(vif, coverage, "ALU_FULL_RAND_TEST");
+      super.new(vif, coverage, "ALU_DEFAULT_TEST");
     endfunction
   endclass
 

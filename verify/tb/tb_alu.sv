@@ -37,7 +37,7 @@ module tb_alu();
 
   /**************  TESTING ***************************/
 
-  alu_full_rand_test       test_full_rand;        //test all operations randomly
+  alu_default_test       test_default;            //default test: test all ops with some contraits to target coverage
   alu_add_corner_walk_test test_add_corner_walk;  //walk through all combos of add corners and add
   alu_sub_corner_walk_test test_sub_corner_walk;  //walk through all combos of sub corners and sub
   alu_invalid_op_test      test_invalid_op;       //test invalid operations
@@ -45,19 +45,19 @@ module tb_alu();
   initial begin
     coverage = new();
 
-    test_full_rand       = new(intf, coverage);
+    test_default       = new(intf, coverage);
     test_add_corner_walk = new(intf, coverage);
     test_sub_corner_walk = new(intf, coverage);
     test_invalid_op      = new(intf, coverage);
 
     //run tests
-    test_full_rand.run(1000);
+    test_default.run(1000);
     test_add_corner_walk.run();
     test_sub_corner_walk.run();
     test_invalid_op.run(10);
 
     //print results
-    test_full_rand.print_results();
+    test_default.print_results();
     test_add_corner_walk.print_results();
     test_sub_corner_walk.print_results();
     test_invalid_op.print_results();

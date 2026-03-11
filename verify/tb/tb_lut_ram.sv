@@ -1,7 +1,5 @@
 import rv32i_defs_pkg::*;
-import tb_lut_ram_transaction_pkg::*;
-import tb_lut_ram_generator_pkg::*;
-import lut_ram_ref_model_pkg::*;
+import tb_lut_ram_tests_pkg::*;
 import tb_lut_ram_coverage_pkg::*;
 
 module tb_lut_ram();
@@ -9,119 +7,45 @@ module tb_lut_ram();
   localparam MEM_DEPTH = 1000;
   localparam MEM_WIDTH = XLEN;
 
-  typedef tb_lut_ram_generator #(MEM_WIDTH, MEM_DEPTH) generator_t;
-  typedef lut_ram_trans #(MEM_WIDTH, MEM_DEPTH) trans_t;
-
-  //clk
-  logic clk;
+  /*********** CLK *************/
+  bit clk;
   initial begin
     clk = 0;
     forever #(CLK_PERIOD/2) clk = ~clk;
   end
 
-  /************ INTERFACE ***********/
-  lut_ram_intf #(.LUT_WIDTH(MEM_WIDTH), .LUT_DEPTH(MEM_DEPTH)) intf(clk);
+  /*********** INTERFACE *************/
+  lut_ram_intf #(.LUT_WIDTH(MEM_WIDTH), .LUT_DEPTH(MEM_DEPTH)) intf(.clk);
 
-  /**********  DUT ***************/
-  lut_ram #(.LUT_WIDTH(MEM_WIDTH), .LUT_DEPTH(MEM_DEPTH)) dut (.clk(intf.clk),
-                                                                .wr_en(intf.wr_en),
-                                                                .wr_addr(intf.wr_addr),
-                                                                .rd_addr(intf.rd_addr),
-                                                                .wr_data(intf.wr_data),
-                                                                .rd_data(intf.rd_data)
-                                                              );
-  /**********  BIND ASSERTIONS *****************/
+  /*********** DUT *************/
+  lut_ram #(.LUT_WIDTH(MEM_WIDTH), .LUT_DEPTH(MEM_DEPTH)) dut (
+    .clk(clk),
+    .wr_en(intf.wr_en),
+    .wr_addr(intf.wr_addr),
+    .rd_addr(intf.rd_addr),
+    .wr_data(intf.wr_data),
+    .rd_data(intf.rd_data)
+  );
+
+  /*********** BIND ASSERTIONS *************/
   bind tb_lut_ram.dut lut_ram_assert #(.LUT_WIDTH(LUT_WIDTH), .LUT_DEPTH(LUT_DEPTH)) dut_assert(.*);
 
-  /********  COVERAGE **************************/
+  /************ COVERAGE *******************/
   tb_lut_ram_coverage #(MEM_WIDTH, MEM_DEPTH) coverage;
 
-  /*********  LUT REFERENCE MODEL ***************/
-  lut_ram_ref_model #(MEM_WIDTH, MEM_DEPTH) ref_lut_ram;
-
-  /********** TASKS ***********/
-
-  task drive(trans_t trans);
-    intf.wr_en <= trans.wr_en;
-    intf.wr_addr <= trans.wr_addr;
-    intf.rd_addr <= trans.rd_addr;
-    intf.wr_data <= trans.wr_data;
-  endtask
-
-  task monitor(trans_t trans);
-    trans.rd_data = intf.rd_data;
-  endtask
-
-  int num_tests = 0;
-  int num_fails = 0;
-
-  function automatic void score(trans_t actual);
-    trans_t expected = new();
-    expected.wr_en = actual.wr_en;
-    expected.wr_addr = actual.wr_addr;
-    expected.rd_addr = actual.rd_addr;
-    expected.wr_data = actual.wr_data;
-
-    expected.rd_data = ref_lut_ram.read(actual.rd_addr);
-
-    if(!expected.compare(actual)) begin
-      $display("----------------");
-      $error("LUT_RAM_TB: test fail");
-      expected.print("EXPECTED");
-      actual.print("ACTUAL");
-      num_fails++;
-    end
-
-    num_tests++;
-  endfunction
-
-  //test with same cycle reads.
-  //Output is monitored BEFORE wr_data has been clocked into the dut
-  task test_monitor_before_write(trans_t trans);
-    drive(trans);               //drive the inputs
-    #1                          //let rd_addr propogate to rd_data
-    monitor(trans);             //monitor and score the combinatorial reads, before next clk edge
-    score(trans);
-    @(posedge clk)              //clk the wr_data into memory, update the reference model with the new writes
-    ref_lut_ram.update(trans);
-  endtask
-
-  //test with next cycle reads.
-  //Output is monitored AFTER wr_data has been clocked into the dut
-  task test_monitor_after_write(trans_t trans);
-    drive(trans);                //drive the inputs
-    @(posedge clk)               //clk the wr_data into memory, update the reference model with the new writes
-    ref_lut_ram.update(trans);
-    #1                           //let the combinatorial outputs settle
-    monitor(trans);              //monitor and score the combinatorial reads AFTER the writes were written in
-    score(trans);
-  endtask
-
-  function void print_test_results();
-    $display("----------------");
-    $display("Test results:");
-    $display("Total tests ran: %0d", num_tests);
-    $display("Total tests failed: %0d", num_fails);
-    $display("----------------");
-  endfunction
-
-  /************  TESTING ********/
-  generator_t gen;
+  /**************  TESTING ***************************/
+  lut_ram_default_test #(MEM_WIDTH, MEM_DEPTH) test_default; //test all inputs randomly, with some constraints to hit coverage
 
   initial begin
-    ref_lut_ram = new();
-    coverage = new(intf.monitor);
-    gen = new();
+    coverage = new();
 
-    coverage.start();
+    test_default = new(intf, coverage);
 
-    for(int i = 0; i < 1000; i++) begin
-      test_monitor_before_write(gen.gen_trans());
-    end
+    //run tests
+    test_default.run(1000);
 
-    coverage.stop();
-
-    print_test_results();
+    //print results
+    test_default.print_results();
 
     $stop(1);
   end

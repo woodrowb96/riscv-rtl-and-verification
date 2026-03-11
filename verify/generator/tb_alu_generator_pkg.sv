@@ -97,10 +97,10 @@ package tb_alu_generator_pkg;
   /*------------------------------ GENERATOR -------------------------------------*/
   /*==============================================================================*/
 
-  class alu_full_rand_gen extends base_generator #(alu_trans);
+  class alu_default_gen extends base_generator #(alu_trans);
 
     function new(mailbox_t gen_to_drv_mbx);
-      super.new("ALU_FULL_RAND_GEN", gen_to_drv_mbx);
+      super.new("ALU_DEFAULT_GEN", gen_to_drv_mbx);
     endfunction
 
     function alu_trans gen_trans();
