@@ -1,8 +1,9 @@
 package tb_inst_mem_transaction_pkg;
+  import base_transaction_pkg::*;
   import rv32i_defs_pkg::*;
   import rv32i_config_pkg::*;
 
-  class inst_mem_trans;
+  class inst_mem_trans extends base_transaction;
     //DUT input
     rand word_t inst_addr;
     //DUT output

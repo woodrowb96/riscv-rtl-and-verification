@@ -1,10 +1,19 @@
+/*
+  Coverage for this module is collected manually through the sample() function.
+
+  COVERAGE SAMPLING ASSUMPTIONS:
+        - sample() is being called AFTER inst_addr has been driven onto the DUT
+          and AFTER the combinatorial inst output has had time to settle.
+*/
 package tb_inst_mem_coverage_pkg;
   import rv32i_config_pkg::*;
   import rv32i_defs_pkg::*;
   import verify_const_pkg::*;
+  import tb_inst_mem_transaction_pkg::*;
 
   class tb_inst_mem_coverage;
-    virtual inst_mem_intf.monitor vif;
+
+    inst_mem_trans trans;
 
     function bit misaligned_addr(word_t inst_addr);
       return inst_addr[1:0] != 2'b00 ? 1 : 0;
@@ -18,7 +27,7 @@ package tb_inst_mem_coverage_pkg;
     covergroup cg;
 
       /************* INST_ADDR COVERAGE *****************/
-      inst_addr: coverpoint vif.inst_addr {
+      inst_addr: coverpoint trans.inst_addr {
         bins first_addr          = {INST_MEM_FIRST_ADDR};
         bins second_addr         = {INST_MEM_FIRST_ADDR + 'd4};
         bins second_to_last_addr = {INST_MEM_LAST_ADDR - 'd4};
@@ -28,20 +37,20 @@ package tb_inst_mem_coverage_pkg;
 
       //My implementation assumes alligned access, but the module is supposed
       //to handle the misaligned case silently so we'll cover it.
-      misaligned_access: coverpoint misaligned_addr(vif.inst_addr){
+      misaligned_access: coverpoint misaligned_addr(trans.inst_addr){
         bins aligned = {0};
         bins misaligned = {1};
       }
 
       //My implementation assumes inbound access, but the module is supposed
       //to handle the out-of-bound case silently so well cover it.
-      out_of_bound_access: coverpoint out_of_bound_addr(vif.inst_addr){
+      out_of_bound_access: coverpoint out_of_bound_addr(trans.inst_addr){
         bins in_bound = {0};
         bins out_of_bound = {1};
       }
 
       /************* INST COVERAGE *****************/
-      inst: coverpoint vif.inst {
+      inst: coverpoint trans.inst {
         bins all_zeros =  {WORD_ALL_ZEROS};
         bins all_ones =   {WORD_ALL_ONES};
         bins non_corner = {[WORD_ALL_ZEROS + 1 : WORD_ALL_ONES - 1]};
@@ -49,12 +58,12 @@ package tb_inst_mem_coverage_pkg;
 
     endgroup
 
-    function void sample();
+    function void sample(inst_mem_trans trans);
+      this.trans = trans;
       cg.sample();
     endfunction
 
-    function new(virtual inst_mem_intf.monitor vif);
-      this.vif = vif;
+    function new();
       this.cg = new();
     endfunction
   endclass

@@ -1,4 +1,5 @@
 package tb_inst_mem_generator_pkg;
+  import base_generator_pkg::*;
   import tb_inst_mem_transaction_pkg::*;
   import rv32i_config_pkg::*;
 
@@ -24,10 +25,23 @@ package tb_inst_mem_generator_pkg;
     }
   endclass
 
+  class inst_mem_trans_misaligned extends inst_mem_trans;
 
+    //override the word_aligned constraint to force a non-zero byte offset
+    constraint word_aligned {
+      inst_addr[1:0] != 2'b00;
+    }
+  endclass
 
-  /****************** GENERATOR *****************************/
-  class tb_inst_mem_generator;
+  /*==============================================================================*/
+  /*------------------------------ DEFAULT GENERATOR -----------------------------*/
+  /*==============================================================================*/
+
+  class inst_mem_default_gen extends base_generator #(inst_mem_trans);
+
+    function new(mailbox_t gen_to_drv_mbx);
+      super.new("INST_MEM_DEFAULT_GEN", gen_to_drv_mbx);
+    endfunction
 
     //use randcase to either gen a transaction that hits the corner addresses
     //or one that hits the full address range
@@ -38,7 +52,7 @@ package tb_inst_mem_generator_pkg;
           inst_mem_trans_corner_addr trans_corner_addr = new();
 
           assert(trans_corner_addr.randomize()) else
-            $fatal(1, "[TB_INST_MEM_GENERATOR]: gen_trans() randomization failed, trans_corner_addr");
+            $fatal(1, "[%s]: gen_trans() randomization failed, trans_corner_addr", tag);
 
           trans = trans_corner_addr;
         end
@@ -46,36 +60,53 @@ package tb_inst_mem_generator_pkg;
           inst_mem_trans trans_full_addr_range = new();
 
           assert(trans_full_addr_range.randomize()) else
-            $fatal(1, "[TB_INST_MEM_GENERATOR]: gen_trans() randomization failed, trans_full_addr_range");
+            $fatal(1, "[%s]: gen_trans() randomization failed, trans_full_addr_range", tag);
 
           trans = trans_full_addr_range;
         end
       endcase
       return trans;
     endfunction
+  endclass
 
-    //a generator to generate out of bound transaction
-    function inst_mem_trans gen_oob_trans;
-      inst_mem_trans_oob trans = new();
+  /*==============================================================================*/
+  /*------------------------------ MISALIGNED GENERATOR --------------------------*/
+  /*==============================================================================*/
 
-      assert(trans.randomize()) else
-        $fatal(1, "[TB_INST_MEM_GENERATOR]: gen_oob_trans() randomization failed");
+  class inst_mem_misaligned_gen extends base_generator #(inst_mem_trans);
 
-      return trans;
+    function new(mailbox_t gen_to_drv_mbx);
+      super.new("INST_MEM_MISALIGNED_GEN", gen_to_drv_mbx);
     endfunction
 
-    //a generator to generate misaligned transactions
-    function inst_mem_trans gen_misaligned_trans;
-      inst_mem_trans trans = new();
+    function inst_mem_trans gen_trans();
+      inst_mem_trans_misaligned trans = new();
 
       assert(trans.randomize()) else
-        $fatal(1, "[TB_INST_MEM_GENERATOR]: gen_misaligned_trans() randomization failed");
-
-      //Add a misaligned offset to the random inst_addr 
-      //(inst_addr is constrained to 2'b00 in the inst_mem_trans class)
-      trans.inst_addr = trans.inst_addr + $urandom_range(1, 3);
+        $fatal(1, "[%s]: gen_trans() randomization failed", tag);
 
       return trans;
     endfunction
   endclass
+
+  /*==============================================================================*/
+  /*------------------------------ OOB GENERATOR ---------------------------------*/
+  /*==============================================================================*/
+
+  class inst_mem_oob_gen extends base_generator #(inst_mem_trans);
+
+    function new(mailbox_t gen_to_drv_mbx);
+      super.new("INST_MEM_OOB_GEN", gen_to_drv_mbx);
+    endfunction
+
+    function inst_mem_trans gen_trans();
+      inst_mem_trans_oob trans = new();
+
+      assert(trans.randomize()) else
+        $fatal(1, "[%s]: gen_trans() randomization failed", tag);
+
+      return trans;
+    endfunction
+  endclass
+
 endpackage
