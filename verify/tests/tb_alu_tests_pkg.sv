@@ -18,8 +18,6 @@ package tb_alu_tests_pkg;
       drv = new(vif, "ALU_DRV", gen_to_drv_mbx);
       mon = new(vif, "ALU_MON", mon_to_scb_mbx);
       scb = new(coverage, "ALU_SCB", mon_to_scb_mbx);
-
-      mon.drv_done = drv.drv_done;
     endfunction
   endclass
 

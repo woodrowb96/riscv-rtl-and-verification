@@ -4,11 +4,15 @@ package tb_alu_monitor_pkg;
 
   class alu_monitor extends base_monitor #(alu_trans);
     virtual alu_intf vif;
-    event drv_done;
 
+    //NOTE:
+    //  - alu is purely combinatorial, but the testing is synced to the tb's
+    //    clock through the interface. Using the interfaces cb_mon clocking
+    //    block ensures we are sampling slightly before the next drives get
+    //    driven. It also gives the previous drives inputs time to propagate
+    //    to the outputs for sampling.
     task monitor(output alu_trans trans);
-      @(drv_done);    //wait till the drive
-      @(vif.cb_mon);  //then monitor with the input skew before the next clk
+      @(vif.cb_mon);
       trans = new();
       trans.alu_op = vif.cb_mon.alu_op;
       trans.in_a = vif.cb_mon.in_a;

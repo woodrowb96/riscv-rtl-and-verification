@@ -16,6 +16,10 @@
                     - The number of transactions generated == num_tests OR
                     - gen.finished is set (if users dont specify a num_tests) OR
                     - we timeout
+                - NOTE:
+                  - mon.run() is not called at the same time as the other .run() functions.
+                  - we wait until after the first drive transaction has been driven
+                    into the DUT to call mon.run()
           - print_results(string msg = "")
                 - print total number of tests ran and total number of failed tests
 */
@@ -48,7 +52,10 @@ package base_test_pkg;
         if(num_tests >= 0) repeat(num_tests)    gen.run();  //leave fork after we gen num_tests
         else               while(!gen.finished) gen.run();  //OR gen sets the finished flag
         forever drv.run();
-        forever mon.run();
+        begin
+          wait(drv.drv_started); //dont start monitoring till the first drives been driven into dut
+          forever mon.run();
+        end
         forever scb.run();
         #timeout $fatal(1, "[%s]: Timeout during base_test.run(), scb.num_tests=%0d", tag, scb.num_tests);
       join_any
