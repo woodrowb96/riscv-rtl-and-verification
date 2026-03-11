@@ -12,7 +12,6 @@ Each RTL module is being developed alongside a full coverage-driven verification
 - SVA assertions
 
 Note: I am actively developing this project.
-Current development can be viewed on the single_cycle branch.
 
 ## Project Structure
 
@@ -26,15 +25,27 @@ Current development can be viewed on the single_cycle branch.
 │   ├── inst_mem.sv     # Read-only instruction memory (ROM)
 │   └── imm_gen.sv      # Immediate generation unit
 │
+├── common/
+│   ├── base_transaction_pkg.sv  # Virtual base transaction class
+│   ├── base_generator_pkg.sv   # Virtual base generator class
+│   ├── base_driver_pkg.sv      # Virtual base driver class
+│   ├── base_monitor_pkg.sv     # Virtual base monitor class
+│   ├── base_scoreboard_pkg.sv  # Virtual base scoreboard class
+│   └── base_test_pkg.sv        # Virtual base test class (orchestrates fork/join)
+│
 ├── verify/
 │   ├── tb/             # Top-level testbenches
+│   ├── tests/          # Test classes (wire up components, configure test scenarios)
 │   ├── transaction/    # Transaction classes (randomizable stimulus)
-│   ├── generator/      # Constrained random generators
+│   ├── generator/      # Constrained random and directed corner-walk generators
+│   ├── driver/         # Drive transactions into the DUT through the interface
+│   ├── monitor/        # Capture DUT output through the interface
+│   ├── scoreboard/     # Score DUT output against reference models
 │   ├── ref_model/      # Behavioral reference models (SV and C++ via DPI-C)
 │   ├── coverage/       # Functional coverage
 │   ├── assert/         # SVA assertion modules (bound into RTL)
-│   ├── interface/      # SystemVerilog interfaces
-│   ├── package/        # Verification config (test program paths, etc.)
+│   ├── interface/      # SystemVerilog interfaces with clocking blocks
+│   ├── package/        # Verification constants and utility functions
 │   └── programs/       # Hex program files loaded into instruction memory
 │
 ├── scripts/
@@ -64,22 +75,21 @@ consisting of:
 - a Functional Coverage Model
 - SVA assertions
 
-### Testbench
+### Testbench Architecture
 
-Testbenches are built around a sequential generate->drive->monitor->score loop.
+Testbenches use a parallel architecture built on `fork/join_any`, mailboxes, and clocking blocks.
 
-Transactions are generated, driven into the DUT, monitored, and finally scored against the DUT's reference model.
+Generator, driver, monitor, and scoreboard run as concurrent processes connected by mailboxes,
+coordinated through a reusable base class library (`common/`).
 
-- **Transactions** — randomizable stimulus/response pair
-- **Generator** — Randomize transactions using constraints. Constraints are chosen to hit full coverage.
-- **Driver** — Drive the randomized transaction into the DUT through the interface
-- **Monitor** — Capture the DUT's output through the interface
-- **Scoreboard** — Use the DUT's reference model to score the DUT's output
+- **Base Class Library** — Parameterized virtual base classes (`base_generator`, `base_driver`, `base_monitor`, `base_scoreboard`, `base_test`) that provide the parallel orchestration. Module-specific verification components extend these base classes.
+- **Transactions** — Randomizable stimulus/response pairs extending `base_transaction`
+- **Generator** — Generates transactions using constrained random or directed corner-walk strategies. Multiple generator types per DUT target different coverage goals.
+- **Driver** — Drives transactions into the DUT through clocking blocks on the interface
+- **Monitor** — Captures DUT output through clocking blocks, synchronized to the driver via events
+- **Scoreboard** — Scores DUT output against the reference model, tracks pass/fail, and samples functional coverage on pass
+- **Tests** — Wire up components and configure test scenarios. A parameterized base test class allows new tests to be created by simply swapping in a different generator.
 - **Reference Models** — Behavioral reference models used to score tests. Either written in SystemVerilog or written in C++ and integrated into the testing environment via DPI-C.
-
-Note: I intentionally do not use any parallel processes in my testbenches.
-I wanted to keep my custom verification environment relatively simple in that regard,
-so intentionally limited myself to not using forked classes for generate, drive, monitor and score.
 
 ### Functional Coverage
 
@@ -151,8 +161,8 @@ Prerequisites
 ## Next Steps
 
 - Short Term:
-    - Continue implementing and verifying RTL.
-    - Currently working towards the implementation and verification of a single-cycle version of the RV32I Core.
+    - Convert remaining module testbenches to the parallel architecture.
+    - Continue implementing and verifying RTL modules towards a single-cycle RV32I Core.
 
 - Long Term:
     - Implement 5-stage pipelining with forwarding, hazard detection and branch prediction.
@@ -161,5 +171,4 @@ Prerequisites
     - Get a version of the core running on an FPGA.
 
 I am actively developing the project.
-Current work can be seen on the single_cycle branch.
 
