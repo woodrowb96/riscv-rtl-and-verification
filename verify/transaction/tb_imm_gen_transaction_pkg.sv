@@ -1,7 +1,8 @@
 package tb_imm_gen_transaction_pkg;
+  import base_transaction_pkg::*;
   import rv32i_defs_pkg::*;
 
-  class imm_gen_trans;
+  class imm_gen_trans extends base_transaction;
     //DUT input
     rand word_t inst;
     //DUT output

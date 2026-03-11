@@ -1,4 +1,5 @@
 package tb_imm_gen_generator_pkg;
+  import base_generator_pkg::*;
   import rv32i_defs_pkg::*;
   import verify_const_pkg::*;
   import tb_imm_gen_transaction_pkg::*;
@@ -134,7 +135,11 @@ package tb_imm_gen_generator_pkg;
   endclass
 
   /************************* GENERATOR *****************************/
-  class tb_imm_gen_generator;
+  class imm_gen_default_gen extends base_generator #(imm_gen_trans);
+
+    function new(mailbox_t gen_to_drv_mbx);
+      super.new("IMM_GEN_DEFAULT_GEN", gen_to_drv_mbx);
+    endfunction
 
     function imm_gen_trans gen_trans();
       imm_gen_trans trans;

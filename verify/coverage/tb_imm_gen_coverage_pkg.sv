@@ -1,15 +1,23 @@
+/*
+  Coverage for this module is collected manually through the sample() function.
+
+  COVERAGE SAMPLING ASSUMPTIONS:
+        - sample() is being called AFTER inst has been driven onto the DUT
+          and AFTER the combinatorial imm output has had time to settle.
+*/
 package tb_imm_gen_coverage_pkg;
   import rv32i_defs_pkg::*;
   import verify_const_pkg::*;
+  import tb_imm_gen_transaction_pkg::*;
 
   class tb_imm_gen_coverage;
 
-    virtual imm_gen_intf.monitor vif;
+    imm_gen_trans trans;
 
     covergroup cg;
       /********************* OPCODE COVERAGE **************************/
       //we want to cover each opcode
-      opcode: coverpoint vif.inst[6:0] {
+      opcode: coverpoint trans.inst[6:0] {
         bins op_reg    = {OP_REG};
         bins op_imm    = {OP_IMM};
         bins op_load   = {OP_LOAD};
@@ -24,7 +32,7 @@ package tb_imm_gen_coverage_pkg;
 
       /********************** SIGN COVERAGE ****************************/
       //inst[31] is the sign bit for all immediate formats.
-      sign: coverpoint vif.inst[31] {
+      sign: coverpoint trans.inst[31] {
         bins pos = {1'b0};
         bins neg = {1'b1};
       }
@@ -38,8 +46,8 @@ package tb_imm_gen_coverage_pkg;
       //      Covering it once in the opcode coverpoint is sufficient.
 
       //I-type encoded immediate (inst[30:20]), excluding the sign bit (inst[31])
-      i_type_corners: coverpoint vif.inst[30:20]
-        iff(vif.inst[6:0] inside {OP_IMM, OP_LOAD, OP_JALR}) {
+      i_type_corners: coverpoint trans.inst[30:20]
+        iff(trans.inst[6:0] inside {OP_IMM, OP_LOAD, OP_JALR}) {
           bins all_zeros = {IMM_11_ALL_ZEROS};
           bins all_ones  = {IMM_11_ALL_ONES};
           bins other = default;
@@ -52,8 +60,8 @@ package tb_imm_gen_coverage_pkg;
       }
 
       //S-type encoded immediate {inst[30:25],inst[11:7]} excluding sign bit inst[31]
-      s_type_corners: coverpoint {vif.inst[30:25], vif.inst[11:7]}
-        iff(vif.inst[6:0] inside {OP_STORE}) {
+      s_type_corners: coverpoint {trans.inst[30:25], trans.inst[11:7]}
+        iff(trans.inst[6:0] inside {OP_STORE}) {
           bins all_zeros = {IMM_11_ALL_ZEROS};
           bins all_ones  = {IMM_11_ALL_ONES};
           bins alt_55    = {IMM_11_ALT_55};     //the pattern 0101 repeated
@@ -62,8 +70,8 @@ package tb_imm_gen_coverage_pkg;
       }
 
       //B-type encoded immediate {inst[7],inst[30:25],inst[11:8]} excluding the sign bit
-      b_type_corners: coverpoint {vif.inst[7], vif.inst[30:25], vif.inst[11:8]}
-        iff(vif.inst[6:0] inside {OP_BRANCH}) {
+      b_type_corners: coverpoint {trans.inst[7], trans.inst[30:25], trans.inst[11:8]}
+        iff(trans.inst[6:0] inside {OP_BRANCH}) {
           bins all_zeros = {IMM_11_ALL_ZEROS};
           bins all_ones  = {IMM_11_ALL_ONES};
           bins alt_55    = {IMM_11_ALT_55};     //the pattern 0101 repeated
@@ -72,18 +80,18 @@ package tb_imm_gen_coverage_pkg;
       }
 
       //U-type encoded immediate {inst[31:12]}
-      //NOTE: U-types dont sign extend so im including the sign bit here and 
+      //NOTE: U-types dont sign extend so im including the sign bit here and
       //      wont cross it later.
-      u_type_corners: coverpoint vif.inst[31:12]
-        iff(vif.inst[6:0] inside {OP_LUI, OP_AUIPC}) {
+      u_type_corners: coverpoint trans.inst[31:12]
+        iff(trans.inst[6:0] inside {OP_LUI, OP_AUIPC}) {
           bins all_zeros = {IMM_20_ALL_ZEROS};
           bins all_ones  = {IMM_20_ALL_ONES};
           bins other = default;
       }
 
       //J-type encoded immediate {inst[19:12],inst[20], inst[30:21]}, excluding sign bit
-      j_type_corners: coverpoint {vif.inst[19:12], vif.inst[20], vif.inst[30:21]}
-        iff(vif.inst[6:0] inside {OP_JAL}) {
+      j_type_corners: coverpoint {trans.inst[19:12], trans.inst[20], trans.inst[30:21]}
+        iff(trans.inst[6:0] inside {OP_JAL}) {
           bins all_zeros = {IMM_19_ALL_ZEROS};
           bins all_ones  = {IMM_19_ALL_ONES};
           bins alt_55    = {IMM_19_ALT_55};     //the pattern 0101 repeated
@@ -107,12 +115,12 @@ package tb_imm_gen_coverage_pkg;
       sign_x_j_type_corners: cross sign, j_type_corners;
     endgroup
 
-    function void sample();
+    function void sample(imm_gen_trans trans);
+      this.trans = trans;
       cg.sample();
     endfunction
 
-    function new(virtual imm_gen_intf.monitor vif);
-      this.vif = vif;
+    function new();
       this.cg = new();
     endfunction
 
