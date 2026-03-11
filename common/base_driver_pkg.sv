@@ -7,7 +7,10 @@ package base_driver_pkg;
     typedef mailbox #(TRANS_T) mailbox_t;
     mailbox_t gen_to_drv_mbx;
 
-    protected function new(mailbox_t gen_to_drv_mbx);
+    string tag;
+
+    protected function new(string tag, mailbox_t gen_to_drv_mbx);
+      this.tag = tag;
       this.gen_to_drv_mbx = gen_to_drv_mbx;
     endfunction
 

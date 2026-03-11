@@ -17,8 +17,8 @@ package tb_alu_monitor_pkg;
       trans.zero = vif.cb_mon.zero;
     endtask
 
-    function new(virtual alu_intf vif, mailbox_t mon_to_scb_mbx);
-      super.new(mon_to_scb_mbx);
+    function new(virtual alu_intf vif, string tag, mailbox_t mon_to_scb_mbx);
+      super.new(tag, mon_to_scb_mbx);
       this.vif = vif;
     endfunction
   endclass

@@ -7,9 +7,11 @@ package base_monitor_pkg;
     typedef mailbox #(TRANS_T) mailbox_t;
     mailbox_t mon_to_scb_mbx;
 
+    string tag;
     int num_transactions = 0;
 
-    protected function new(mailbox_t mon_to_scb_mbx);
+    protected function new(string tag, mailbox_t mon_to_scb_mbx);
+      this.tag = tag;
       this.mon_to_scb_mbx = mon_to_scb_mbx;
     endfunction
 

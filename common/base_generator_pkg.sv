@@ -7,7 +7,10 @@ package base_generator_pkg;
     typedef mailbox #(TRANS_T) mailbox_t;
     mailbox_t gen_to_drv_mbx;
 
+    string tag;
+
     int num_transactions = 0;
+    int finished = 0;
 
     pure virtual function TRANS_T gen_trans();
 
@@ -17,7 +20,8 @@ package base_generator_pkg;
       gen_to_drv_mbx.put(trans);
     endtask
 
-    protected function new(mailbox_t gen_to_drv_mbx);
+    protected function new(string tag, mailbox_t gen_to_drv_mbx);
+      this.tag = tag;
       this.gen_to_drv_mbx = gen_to_drv_mbx;
     endfunction
   endclass

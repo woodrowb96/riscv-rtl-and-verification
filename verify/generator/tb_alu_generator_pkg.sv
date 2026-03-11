@@ -80,14 +80,27 @@ package tb_alu_generator_pkg;
     };
   endclass
 
+  class alu_trans_invalid_op extends alu_trans;
+    rand logic [$bits(alu_op)-1:0] invalid_op;
+
+    constraint invalid_alu_op {
+      !(invalid_op inside {ALU_AND, ALU_OR, ALU_ADD, ALU_SUB});
+    }
+
+    function void post_randomize();
+      super.post_randomize();
+      alu_op = alu_op_t'(invalid_op);
+    endfunction
+  endclass
+
   /*==============================================================================*/
   /*------------------------------ GENERATOR -------------------------------------*/
   /*==============================================================================*/
 
-  class alu_full_rand_generator extends base_generator #(alu_trans);
+  class alu_full_rand_gen extends base_generator #(alu_trans);
 
     function new(mailbox_t gen_to_drv_mbx);
-      super.new(gen_to_drv_mbx);
+      super.new("ALU_FULL_RAND_GEN", gen_to_drv_mbx);
     endfunction
 
     function alu_trans gen_trans();
@@ -99,7 +112,7 @@ package tb_alu_generator_pkg;
           alu_trans_logical_ops trans_logical = new();
 
           assert(trans_logical.randomize()) else
-            $fatal(1, "TB_ALU_GENERATOR: gen_trans() randomization failed, logical trans");
+            $fatal(1, "[%s]: gen_trans() randomization failed, logical trans", tag);
 
           trans = trans_logical;
         end
@@ -109,21 +122,139 @@ package tb_alu_generator_pkg;
           alu_trans_add_op trans_add = new();
 
           assert(trans_add.randomize()) else
-            $fatal(1, "TB_ALU_GENERATOR: gen_trans() randomization failed, add trans");
+            $fatal(1, "[%s]: gen_trans() randomization failed, add trans", tag);
 
           trans = trans_add;
         end
 
         //sub operation
-        7: begin
+        3: begin
           alu_trans_sub_op trans_sub = new();
 
           assert(trans_sub.randomize()) else
-            $fatal(1, "TB_ALU_GENERATOR: gen_trans() randomization failed, sub trans");
+            $fatal(1, "[%s]: gen_trans() randomization failed, sub trans", tag);
 
           trans = trans_sub;
         end
       endcase
+
+      return trans;
+    endfunction
+
+  endclass
+
+  /*==============================================================================*/
+  /*--------------------------- ADD_CORNERS_GENERATOR ----------------------------*/
+  /*==============================================================================*/
+
+  class alu_add_corner_walk_gen extends base_generator #(alu_trans);
+    word_t corners[] = '{
+      WORD_UNSIGNED_ZERO,
+      WORD_UNSIGNED_ONE,
+      WORD_MAX_UNSIGNED,
+      unsigned_urandom_range(WORD_UNSIGNED_ZERO + 1,       UNSIGNED_LOWER_THIRD),
+      unsigned_urandom_range(UNSIGNED_LOWER_THIRD + 1,   UNSIGNED_LOWER_TWO_THIRD),
+      unsigned_urandom_range(UNSIGNED_LOWER_TWO_THIRD + 1, WORD_MAX_UNSIGNED - 1)
+    };
+    int i = 0;
+    int j = 0;
+
+    function new(mailbox_t gen_to_drv_mbx);
+      super.new("ALU_ADD_CORNER_WALK_GEN", gen_to_drv_mbx);
+    endfunction
+
+    function alu_trans gen_trans();
+      alu_trans trans = new();
+
+      //if we have walked through all corner combos set finished
+      if (i >= corners.size()) begin
+        finished = 1;
+        i = corners.size() - 1;
+        j = corners.size() - 1;
+      end
+
+      //build the trans
+      trans.alu_op = ALU_ADD;
+      trans.in_a   = corners[i];
+      trans.in_b   = corners[j];
+
+      //iterate through the double loop
+      j++;
+      if (j >= corners.size()) begin
+        j = 0;
+        i++;
+      end
+
+      return trans;
+    endfunction
+
+  endclass
+
+  /*==============================================================================*/
+  /*--------------------------- SUB_CORNERS_GENERATOR ----------------------------*/
+  /*==============================================================================*/
+
+  class alu_sub_corner_walk_gen extends base_generator #(alu_trans);
+    word_t corners[] = '{
+      WORD_SIGNED_ZERO,
+      WORD_SIGNED_POS_ONE,
+      WORD_SIGNED_NEG_ONE,
+      WORD_MAX_SIGNED_POS,
+      WORD_MIN_SIGNED_NEG,
+      $urandom_range(WORD_SIGNED_POS_ONE   + 1, SIGNED_POS_LOWER_HALF),
+      $urandom_range(SIGNED_POS_LOWER_HALF + 1, WORD_MAX_SIGNED_POS   - 1),
+      $urandom_range(SIGNED_NEG_LOWER_HALF,     WORD_SIGNED_NEG_ONE   - 1),
+      $urandom_range(WORD_MIN_SIGNED_NEG   + 1, SIGNED_NEG_LOWER_HALF - 1)
+    };
+    int i = 0;
+    int j = 0;
+
+    function new(mailbox_t gen_to_drv_mbx);
+      super.new("ALU_SUB_CORNER_WALK_GEN", gen_to_drv_mbx);
+    endfunction
+
+    function alu_trans gen_trans();
+      alu_trans trans = new();
+
+      //if we have walked through all corner combos set finished
+      if (i >= corners.size()) begin
+        finished = 1;
+        i = corners.size() - 1;
+        j = corners.size() - 1;
+      end
+
+      //build the trans
+      trans.alu_op = ALU_SUB;
+      trans.in_a   = corners[i];
+      trans.in_b   = corners[j];
+
+      //iterate through the double loop
+      j++;
+      if (j >= corners.size()) begin
+        j = 0;
+        i++;
+      end
+
+      return trans;
+    endfunction
+
+  endclass
+
+  /*==============================================================================*/
+  /*--------------------------- INVALID_OP_GENERATOR ----------------------------*/
+  /*==============================================================================*/
+
+  class alu_invalid_op_gen extends base_generator #(alu_trans);
+
+    function new(mailbox_t gen_to_drv_mbx);
+      super.new("ALU_INVALID_OP_GEN", gen_to_drv_mbx);
+    endfunction
+
+    function alu_trans gen_trans();
+      alu_trans_invalid_op trans = new();
+
+      assert(trans.randomize()) else
+        $fatal(1, "[%s]: gen_trans() randomization failed", tag);
 
       return trans;
     endfunction

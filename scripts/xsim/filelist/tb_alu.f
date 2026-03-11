@@ -18,8 +18,8 @@ verify/ref_model/alu_ref_model.cpp
 verify/package/verify_const_pkg.sv
 verify/interface/alu_intf.sv
 verify/assert/alu_assert.sv
-verify/coverage/tb_alu_coverage_pkg.sv
 verify/transaction/tb_alu_transaction_pkg.sv
+verify/coverage/tb_alu_coverage_pkg.sv
 verify/generator/tb_alu_generator_pkg.sv
 verify/ref_model/alu_ref_model_pkg.sv
 verify/driver/tb_alu_driver_pkg.sv

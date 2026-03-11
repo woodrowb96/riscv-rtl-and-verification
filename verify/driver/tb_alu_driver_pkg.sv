@@ -6,8 +6,8 @@ package tb_alu_driver_pkg;
     virtual alu_intf vif;
     event drv_done;  //help sync monitor and driver (we dont want to start monitoring until AFTER weve driven)
 
-    function new(virtual alu_intf vif, mailbox_t gen_to_drv_mbx);
-      super.new(gen_to_drv_mbx);
+    function new(virtual alu_intf vif, string tag, mailbox_t gen_to_drv_mbx);
+      super.new(tag, gen_to_drv_mbx);
       this.vif = vif;
     endfunction
 

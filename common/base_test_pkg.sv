@@ -24,16 +24,18 @@ package base_test_pkg;
       mon_to_scb_mbx = new();
     endfunction
 
-    task run(int num_tests);
+    task run(int num_tests = -1);
       fork  //run the tests
-        repeat(num_tests) gen.run();
+        if(num_tests >= 0) repeat(num_tests)    gen.run();
+        else              while(!gen.finished) gen.run();
         forever           drv.run();
         forever           mon.run();
         forever           scb.run();
+        #timeout $fatal(1, "[%s]: Timeout during base_test.run(), scb.num_tests=%0d", tag, scb.num_tests);
       join_any
 
       fork  //wait till we score everthing or timeout
-        wait(scb.num_tests == num_tests);
+        wait(scb.num_tests == gen.num_transactions);
         #timeout $fatal(1, "[%s]: Timeout waiting for scoreboard, scb.num_tests=%0d", tag, scb.num_tests);
       join_any
 
