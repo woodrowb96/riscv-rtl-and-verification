@@ -1,10 +1,11 @@
 package tb_data_mem_transaction_pkg;
+  import base_transaction_pkg::*;
   import rv32i_defs_pkg::*;
   import rv32i_config_pkg::*;
   import rv32i_control_pkg::*;
   import verify_const_pkg::*;
 
-  class data_mem_trans;
+  class data_mem_trans extends base_transaction;
     rand byte_sel_t wr_sel;
     rand word_t addr;
     rand word_t wr_data;

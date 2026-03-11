@@ -1,4 +1,5 @@
 package tb_data_mem_generator_pkg;
+  import base_generator_pkg::*;
   import rv32i_defs_pkg::*;
   import rv32i_config_pkg::*;
   import verify_const_pkg::*;
@@ -6,7 +7,6 @@ package tb_data_mem_generator_pkg;
 
   //SEE THE NOTE IN: tb_lut_ram_generator_pkg.sv for why im using child trans
   //classes instead of just inlining this stuff in the generator
-  
 
   //data and wr_sel are going to be constrained the same in all the other
   //classes so lets just make this class the common parent
@@ -57,11 +57,15 @@ package tb_data_mem_generator_pkg;
   endclass
 
   /************************* GENERATOR    *******************************************/
-  class tb_data_mem_generator;
+  class data_mem_default_gen extends base_generator #(data_mem_trans);
 
     //queue to keep track of our prev written addresses
     //  -I init to 0 so the solver never tries to inside {empty_queue}
     word_t prev_written_addr [$] = {0};
+
+    function new(mailbox_t gen_to_drv_mbx);
+      super.new("DATA_MEM_DEFAULT_GEN", gen_to_drv_mbx);
+    endfunction
 
     function void reset_prev_written_addr();
       prev_written_addr = {0};
