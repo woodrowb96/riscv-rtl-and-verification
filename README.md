@@ -25,7 +25,7 @@ Note: I am actively developing this project.
 │   ├── inst_mem.sv     # Read-only instruction memory (ROM)
 │   └── imm_gen.sv      # Immediate generation unit
 │
-├── common/
+├── lib/
 │   ├── base_transaction_pkg.sv  # Virtual base transaction class
 │   ├── base_generator_pkg.sv   # Virtual base generator class
 │   ├── base_driver_pkg.sv      # Virtual base driver class
@@ -80,7 +80,7 @@ consisting of:
 Testbenches use a parallel architecture built on `fork/join_any`, mailboxes, and clocking blocks.
 
 Generator, driver, monitor, and scoreboard run as concurrent processes connected by mailboxes,
-coordinated through a reusable base class library (`common/`).
+coordinated through a reusable base class library (`lib/`).
 
 - **Base Class Library** — Parameterized virtual base classes (`base_generator`, `base_driver`, `base_monitor`, `base_scoreboard`, `base_test`) that provide the parallel orchestration. Module-specific verification components extend these base classes.
 - **Transactions** — Randomizable stimulus/response pairs extending `base_transaction`

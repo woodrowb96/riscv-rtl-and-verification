@@ -1,10 +1,10 @@
 #LIB
-common/base_transaction_pkg.sv
-common/base_generator_pkg.sv
-common/base_driver_pkg.sv
-common/base_monitor_pkg.sv
-common/base_scoreboard_pkg.sv
-common/base_test_pkg.sv
+lib/base_transaction_pkg.sv
+lib/base_generator_pkg.sv
+lib/base_driver_pkg.sv
+lib/base_monitor_pkg.sv
+lib/base_scoreboard_pkg.sv
+lib/base_test_pkg.sv
 
 # RTL
 rtl/package/rv32i_defs_pkg.sv
