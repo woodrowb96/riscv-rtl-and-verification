@@ -49,9 +49,11 @@ module if_stage #(parameter string PROGRAM = NO_PROGRAM) (
 );
   word_t pc_reg;
   word_t pc_next;
+  word_t inst_mem_out;
 
-  /************* CONNECT OUTPUT ************************/
+  /************* CALC OUTPUT ************************/
   assign pc = pc_reg;
+  assign inst = inst_mem_out;
 
   /************ CALC NEXT PC *******************/
   always_comb begin
@@ -76,7 +78,7 @@ module if_stage #(parameter string PROGRAM = NO_PROGRAM) (
   /***********  INSTRUCTION ACCESS ****************/
   inst_mem #(.PROGRAM(PROGRAM)) u_inst_mem (
     .inst_addr(pc_reg),
-    .inst(inst)
+    .inst(inst_out)
   );
 
 endmodule
