@@ -191,6 +191,6 @@ Below are example results from the ALU verification environment.
 
 ### Functional Coverage Report
 
-<img width="400" alt="coverage" src="https://github.com/user-attachments/assets/a8bbe944-8b40-4de4-8706-f27f423fdb4d" />
+<img width="1024" height="1684" alt="alu_coverage" src="https://github.com/user-attachments/assets/0b7d0fba-8e15-43b8-ba9b-b2101dbb6e38" />
 
 
