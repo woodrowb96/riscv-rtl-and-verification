@@ -137,7 +137,7 @@ just duplicating the same bugs in both. Ideally a completely different person wo
 the verification for each module than the one who wrote the RTL, but obviously that's not
 possible with a personal project.
 
-### Scripts
+## Scripts
 
 - `scripts/gen/gen_rand_inst_mem.py`
     - Generates randomized instruction memory contents with weighted corner-case values for use in constrained random testing.
