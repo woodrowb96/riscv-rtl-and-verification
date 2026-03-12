@@ -57,12 +57,9 @@ module data_path #(parameter string PROGRAM = "NO_INST_MEM_PROGRAM_SPECIFIED")(
   /*--------------------------- INSTRUCTION FETCH -----------------------------------*/
   /*=================================================================================*/
 
-  // /******* PC ********/
-  // always_ff @(posedge clk) begin
-  //   if(~reset_n) begin
-  //     p
-  //   end
-  // end
+  //TO DO
+  //  - Im going to implement and verify each stage as individule modules then
+  //    hook them up in here
 
 
 endmodule

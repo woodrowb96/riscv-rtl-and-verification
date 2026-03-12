@@ -21,7 +21,7 @@ NOTE:
 import rv32i_defs_pkg::*;
 import rv32i_config_pkg::*;
 
-module inst_mem #(parameter string PROGRAM = "NO_INST_MEM_PROGRAM_SPECIFIED") (
+module inst_mem #(parameter string PROGRAM = NO_PROGRAM) (
   //input
   input word_t inst_addr,
 
