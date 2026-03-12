@@ -19,4 +19,16 @@ package rv32i_control_pkg;
     ALU_ADD = 4'b0010,
     ALU_SUB = 4'b0110
   } alu_op_t;
+
+  /******************* FLOW CONTROL *************************/
+
+  typedef enum logic {
+    REG = 1'b0,
+    IMM = 1'b1
+  } alu_src_sel_t;
+
+  typedef enum logic {
+    MEM = 1'b0,
+    ALU = 1'b1
+  } wb_sel_t;
 endpackage
