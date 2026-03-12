@@ -47,20 +47,29 @@ module if_stage #(parameter string PROGRAM = NO_PROGRAM) (
   output word_t pc,
   output word_t inst
 );
-
-  /************ PROGRAM COUNTER ***************/
   word_t pc_reg;
+  word_t pc_next;
+
+  /************* CONNECT OUTPUT ************************/
   assign pc = pc_reg;
 
+  /************ CALC NEXT PC *******************/
+  always_comb begin
+    if(branch) begin
+      pc_next = branch_target;
+    end
+    else begin
+      pc_next = pc_reg + word_t'(4);
+    end
+  end
+
+  /************ PROGRAM COUNTER ***************/
   always_ff @(posedge clk) begin
     if(~reset_n) begin
       pc_reg <= PC_RESET;
     end
-    else if(branch) begin
-      pc_reg <= branch_target;
-    end
     else begin
-      pc_reg <= pc_reg + word_t'(4);
+      pc_reg <= pc_next;
     end
   end
 
