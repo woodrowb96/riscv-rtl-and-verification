@@ -12,7 +12,7 @@ Each RTL module is being developed alongside a full coverage-driven verification
 - SVA assertions
 - Class based parallel testing environments (built using a custom verification library)
 
-To aid in verification I have also developed a custom class-based parallel verification library (located in `lib/`) that provides a reusable base infrastructure for running generator, driver, monitor, and scoreboard as concurrent processes, bundled together in user-written directed/constrained-random tests.
+To aid in verification I have also developed a custom class-based parallel verification library (located in `lib/`) that provides a reusable base infrastructure for writing generator, driver, monitor, and scoreboards that run as concurrent processes, bundled together in user-written directed/constrained-random tests.
 
 Note: I am actively developing this project.
 
@@ -20,7 +20,7 @@ Note: I am actively developing this project.
 
 ```
 ├── rtl/
-│   ├── package/        # Type definitions, config, control enumerations
+│   ├── package/        # Typedefs, config, control enumerations
 │   ├── alu.sv          # Arithmetic logic unit
 │   ├── reg_file.sv     # 32x32 register file
 │   ├── lut_ram.sv      # Generic parameterized LUT-RAM
@@ -56,7 +56,7 @@ Note: I am actively developing this project.
 ```
 
 ## RTL Modules
-I've currently implemented and verified the following modules:
+I've currently implemented and verified the following moduleles with 100% code coverage:
 - ALU
 - Register File
 - LUT RAM
