@@ -2,7 +2,7 @@
 
 RTL Design and Verification of a RISC-V RV32I implementation.
 
-Special emphasis has been put on verification.
+A special emphasis has been put on verification.
 My goal is to not only design and implement an RV32I Core, but to also fully and professionally verify that implementation.
 
 Each RTL module is being developed alongside a full coverage-driven verification environment consisting of:
@@ -10,6 +10,9 @@ Each RTL module is being developed alongside a full coverage-driven verification
 - Constrained random stimulus
 - Behavioral reference models
 - SVA assertions
+- Class based parallel testing environments (built using a custom verification library)
+
+To aid in verification I have also developed a custom class-based parallel verification library (located in `lib/`) that provides a reusable base infrastructure for running generator, driver, monitor, and scoreboard as concurrent processes, bundled together in user-written directed/constrained-random tests.
 
 Note: I am actively developing this project.
 
@@ -25,28 +28,22 @@ Note: I am actively developing this project.
 │   ├── inst_mem.sv     # Read-only instruction memory (ROM)
 │   └── imm_gen.sv      # Immediate generation unit
 │
-├── lib/
-│   ├── base_transaction_pkg.sv  # Virtual base transaction class
-│   ├── base_generator_pkg.sv   # Virtual base generator class
-│   ├── base_driver_pkg.sv      # Virtual base driver class
-│   ├── base_monitor_pkg.sv     # Virtual base monitor class
-│   ├── base_scoreboard_pkg.sv  # Virtual base scoreboard class
-│   └── base_test_pkg.sv        # Virtual base test class (orchestrates fork/join)
+├── lib/                # Class-based parallel verification library
 │
 ├── verify/
 │   ├── tb/             # Top-level testbenches
-│   ├── tests/          # Test classes (wire up components, configure test scenarios)
+│   ├── tests/          # Directed/Constrained-Random tests
 │   ├── transaction/    # Transaction classes (randomizable stimulus)
-│   ├── generator/      # Constrained random and directed corner-walk generators
-│   ├── driver/         # Drive transactions into the DUT through the interface
-│   ├── monitor/        # Capture DUT output through the interface
-│   ├── scoreboard/     # Score DUT output against reference models
+│   ├── generator/      # Directed/Constrained-Random generators
+│   ├── driver/         # Drivers
+│   ├── monitor/        # Monitors
+│   ├── scoreboard/     # Test scoring
 │   ├── ref_model/      # Behavioral reference models (SV and C++ via DPI-C)
 │   ├── coverage/       # Functional coverage
 │   ├── assert/         # SVA assertion modules (bound into RTL)
-│   ├── interface/      # SystemVerilog interfaces with clocking blocks
+│   ├── interface/      # Interfaces with clocking blocks
 │   ├── package/        # Verification constants and utility functions
-│   └── programs/       # Hex program files loaded into instruction memory
+│   └── programs/       # Hex memory files used in testing
 │
 ├── scripts/
 │   ├── xsim/
@@ -86,7 +83,7 @@ coordinated through a reusable base class library (`lib/`).
 - **Transactions** — Randomizable stimulus/response pairs extending `base_transaction`
 - **Generator** — Generates transactions using constrained random or directed corner-walk strategies. Multiple generator types per DUT target different coverage goals.
 - **Driver** — Drives transactions into the DUT through clocking blocks on the interface
-- **Monitor** — Captures DUT output through clocking blocks, synchronized to the driver via events
+- **Monitor** — Captures DUT output through clocking blocks. Automatically gated by `base_test` to wait until the driver has started before monitoring
 - **Scoreboard** — Scores DUT output against the reference model, tracks pass/fail, and samples functional coverage on pass
 - **Tests** — Wire up components and configure test scenarios. A parameterized base test class allows new tests to be created by simply swapping in a different generator.
 - **Reference Models** — Behavioral reference models used to score tests. Either written in SystemVerilog or written in C++ and integrated into the testing environment via DPI-C.
@@ -161,8 +158,8 @@ Prerequisites
 ## Next Steps
 
 - Short Term:
-    - Convert remaining module testbenches to the parallel architecture.
     - Continue implementing and verifying RTL modules towards a single-cycle RV32I Core.
+    - Second pass on SVA assertions across all modules.
 
 - Long Term:
     - Implement 5-stage pipelining with forwarding, hazard detection and branch prediction.
