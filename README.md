@@ -187,10 +187,10 @@ Below are example results from the ALU verification environment.
 
 ### Test Output
 
-<img width="650" height="1116" alt="alu_test_output" src="https://github.com/user-attachments/assets/de2a3af2-4959-4123-abd8-41d84298c638" />
+<img width="400" alt="alu_test_output" src="https://github.com/user-attachments/assets/de2a3af2-4959-4123-abd8-41d84298c638" />
 
 ### Functional Coverage Report
 
-<img width="872" height="1732" alt="coverage" src="https://github.com/user-attachments/assets/a8bbe944-8b40-4de4-8706-f27f423fdb4d" />
+<img width="400" alt="coverage" src="https://github.com/user-attachments/assets/a8bbe944-8b40-4de4-8706-f27f423fdb4d" />
 
 
