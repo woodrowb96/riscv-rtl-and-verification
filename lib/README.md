@@ -7,7 +7,7 @@ their transactions, generators, drivers, monitors, scoreboards and tests.
 
 ## Architecture
 
-*Architecture diagram coming soon.*
+<img width="1768" height="772" alt="diagram" src="https://github.com/user-attachments/assets/3e51f2a6-ee10-47ff-819a-a61489cbdc1b" />
 
 ## Base Classes
 
