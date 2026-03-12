@@ -5,13 +5,15 @@ Control:
   wr_en:    active high write enable signal
 
 Input:
-  wr_reg:   adress we are writting to   (syncronous)
-  rd_reg:   adress we are reading from  (asyncronous)
+  wr_reg: adress we are writting to (syncronous)
+  rd_reg: adress we are reading from (asyncronous)
 
-  wr_data:  write data, clocked in @(posedge clk)
+  wr_data: write data
+            - clocked in @(posedge clk)
 
 Output:
-  rd_data:  read data, read out asyncrounously
+  rd_data: read data
+            - read out asyncrounously
 */
 module lut_ram #(
   parameter LUT_WIDTH = 32,
