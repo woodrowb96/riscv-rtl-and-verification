@@ -5,19 +5,18 @@ RTL Design and Verification of a RISC-V RV32I implementation.
 A special emphasis has been put on verification.
 My goal is to not only design and implement an RV32I Core, but to also fully and professionally verify that implementation.
 
-Each RTL module is being developed alongside a full coverage-driven verification environment consisting of:
+Each RTL module is being developed alongside a full coverage-driven class-based, concurrent verification environment consisting of:
 - Functional coverage
 - Constrained random stimulus
 - Behavioral reference models (SystemVerilog and C++ via DPI-C)
-- SVA assertions
-- Class based parallel testing environments (built using a custom verification library)
+- SystemVerilog assertions
+- Directed and constrained-random tests (written with my custom verification library)
 
-To aid in verification I have also developed a custom class-based parallel verification library (located in `lib/`) that provides a reusable base infrastructure for writing generator, driver, monitor, and scoreboards that run as concurrent processes, bundled together in user-written directed/constrained-random tests.
-
+To aid in verification I have also developed a class-based concurrent verification
+library (located in `lib/`), providing a reusable base class infrastructure (transaction, generator, driver, monitor, scoreboard, test) for writing module-specific directed and constrained-random tests. 
+See [lib/README.md](lib/) for more details.
 
 Note: I am actively developing this project.
-
-Note: See [lib/README.md](lib/) for details on the custom verification library.
 
 ## Project Structure
 
@@ -31,7 +30,7 @@ Note: See [lib/README.md](lib/) for details on the custom verification library.
 │   ├── inst_mem.sv     # Read-only instruction memory (ROM)
 │   └── imm_gen.sv      # Immediate generation unit
 │
-├── lib/                # Class-based parallel verification library
+├── lib/                # Class-based concurrent verification library
 │
 ├── verify/
 │   ├── tb/             # Top-level testbenches
@@ -73,7 +72,7 @@ Each RTL module is paired with an accompanying coverage-driven verification envi
 consisting of:
 - Functional Coverage Models
 - Behavioral Reference Models (SystemVerilog and C++ via DPI-C)
-- SVA assertions
+- Assertions (SVA)
 - Tests (directed or constrained-random) targeting different coverage elements
 - Testbenches to run and coordinate tests
 
@@ -83,14 +82,14 @@ Testbenches instantiate and connect the DUTs, interfaces, coverages, assertions 
 
 ### Tests
 
-Tests are class-based parallel verification environments bundling a generator, driver, monitor, and scoreboard
+Tests are class-based concurrent verification environments bundling a generator, driver, monitor, and scoreboard
 which together implement a single directed or constrained-random test.
 
 Test components:
 - **Generator** — Generates a sequence of transactions which implement a constrained-random or directed test.
 - **Driver** — Drives generated transactions into the DUT (typically done through interface clocking blocks)
-- **Monitor** — Monitors the DUT I/O ports to sample a single transaction (once again typically through interface clocking blocks)
-- **Scoreboard** — Score monitored transactions against a reference model, track total pass/fails, adds passing transactions to functional coverage
+- **Monitor** — Monitors the DUT I/O ports to sample a single transaction (also typically through interface clocking blocks)
+- **Scoreboard** — Scores monitored transactions against a reference model, tracks total pass/fails, adds passing transactions to functional coverage
 
 Each testbench contains one or more tests, each targeting a different part of coverage.
 
@@ -98,58 +97,59 @@ Tests are implemented using the custom verification library (see [lib/README.md]
 
 ### Functional Coverage
 
-Each module is accompanied by a functional coverage model defining the functions
-each module must exercise at some point during testing to be considered verified.
+Each module is accompanied by a functional coverage model defining the nominal
+and corner-case behavior each module must exercise at some point during testing
+to be considered verified.
 
-Coverage is written using SystemVerilog coverpoints and crosses which describe corner-values/scenarios
-and key operational interactions (transitions, boundary computations, overflows, read-after-writes ...)
+Coverage is written using SystemVerilog coverpoints and crosses describing
+key values and scenarios (transitions, boundary computations, overflows, read-after-writes ...)
 
-A large part of the verification process for each module consists of going back and forth
-between the coverage model and generator, looking at the coverage model and rewriting constraints,
-until the testbench is hitting 100% coverage. If needed a separate directed test may be required
-to hit a certain coverage criterion.
+For a module to be considered verified the testbench must hit 100% coverage.
+A large part of the verification process involves going back and forth between
+the generators and coverage, tuning the constraints until we are hitting 100%.
+If needed a separate directed test may be required to hit certain coverage elements.
 
-### SVA Assertions
+
+### Assertions (SVA)
 
 Each RTL module is paired with an assertion module that is bound directly into the RTL.
 
-Once bound, assertions run alongside the RTL during simulation, providing a passive secondary check
-of individual functionality within the RTL itself.
+Once bound, assertions run alongside the RTL during simulation and provide a passive
+secondary check of individual properties and functionalities within the RTL.
 
 Assertions can be used hierarchically just like the RTL — child module assertions can be bound inside parent
-assertion modules. For example, my data_mem assertions include the assertions for lut_ram inside them.
+assertion modules. For example data_mem_assert instantiates the lut_ram's lut_ram_assert 
+module directly inside itself.
 
 ### Reference Models
 
-Each module has a behavioral reference model used by the scoreboard to verify the DUT's output.
+Each module has a behavioral reference model (written in SystemVerilog or C++ via DPI-C) used by the scoreboard to verify the DUT's output.
 
-Reference models are written either in SystemVerilog or C++.
+Reference model implementations are intentionally kept as independent as possible from the RTL.
+This is done by using either a different implementation than the RTL
+or by writing the reference model in a completely different language (C or C++)
+and integrating it into SystemVerilog via a Programming Interface (DPI-C).
 
-C++ reference models are integrated into the rest of the verification environment through
-DPI-C.
-
-Reference model implementations are intentionally kept as independent as possible from the RTL, either
-by using a different implementation than the RTL or by writing
-the reference model in a completely different language. 
-
-Maximizing the difference between RTL and reference model implementations helps ensure that we are not
-just duplicating the same bugs in both. Ideally a completely different person would write
-the verification for each module than the one who wrote the RTL, but obviously that's not
-possible with a personal project.
+Maximizing the difference between RTL and reference model implementations helps ensure 
+that we are not just duplicating the same bugs in both. 
+Ideally a completely different person would write the verification for each module than 
+the one who wrote the RTL, but obviously that's not possible with a personal project.
 
 ## Scripts
 
 - `scripts/gen/gen_rand_inst_mem.py`
-    - Generates randomized instruction memory contents with weighted corner-case values for use in constrained random testing.
+    - Generates weighted-random 32-bit values to fill test instruction memories for testing.
 - `xsim_comp.sh`
-    - Compiles a SystemVerilog file and its filelist dependencies using Xilinx xvlog.
+    - Compiles SystemVerilog files
+    - Looks for an optional filelist (located in `scripts/xsim/filelist/module_name.f`) listing
+      dependencies and compiles those too.
     - Automatically compiles any C++ DPI-C files found in the filelist using xsc.
 - `xsim_sim.sh`
-    - Compiles, elaborates, and simulates a testbench using Xilinx xvlog, xelab and xsim.
+    - Compiles, elaborates, and simulates a testbench.
+    - Supports filelist dependencies in the same way the compilation script does.
     - Automatically compiles and links C++ DPI-C files found in the filelist using xsc.
     - By default, the script looks for a TCL script named `<testbench>.tcl` to run the sim, but a custom TCL script can be specified with `-t`.
     - Supports CLI and GUI (`-g`) modes.
-
 
 ## How to Compile and Run Simulations
 
@@ -160,11 +160,14 @@ Prerequisites
 # Compile a testbench and its dependencies
 ./xsim_comp.sh verify/tb/tb_data_mem.sv
 
-# Run simulation (CLI mode)
+# Run simulation (CLI mode) (uses default tcl file scripts/xsim/tb_data_mem.tcl)
 ./xsim_sim.sh verify/tb/tb_data_mem.sv
 
-# Run simulation with GUI waveform viewer
+# Run simulation with GUI waveform viewer (uses default tcl file scripts/xsim/tb_data_mem.tcl)
 ./xsim_sim.sh -g verify/tb/tb_data_mem.sv
+
+# Run simulation with GUI and a custom TCL file
+./xsim_sim.sh -g -t scripts/xsim/tb_data_mem_other.tcl verify/tb/tb_data_mem.sv
 
 ```
 
