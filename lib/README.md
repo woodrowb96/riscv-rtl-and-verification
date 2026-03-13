@@ -1,15 +1,16 @@
-# Class Based Parallel Verification Library
+# Class Based Concurrent Verification Library
 
-A custom verification library for writing class-based parallel SystemVerilog testbenches.
+A reusable verification library for writing class-based concurrent SystemVerilog testbenches.
 
-This library provides a set of reusable base classes users can use to implement
+This library provides users a set of reusable base classes they can use to implement
 transactions, generators, drivers, monitors, scoreboards and tests.
 
-Each test component runs as a parallel process, forked concurrently during the test.
-Each component executes its own loop, which users can interface into and customize through a set of
-pure virtual functions provided in each component's base class.
+Testbench components run as concurrent testing loops forked by the `base_test` class.
+Interprocess communication and data passing is done through a series of mailboxes.
+Users can interface into the built-in test loops and implement their DUT
+specific testing logic through a series of pure virtual functions and tasks.
 
-See [`verify/`](../verify/) for example implementations using the library.
+See [`verify/`](../verify/) for example implementations written using the library.
 
 ## Architecture
 
@@ -20,27 +21,29 @@ See [`verify/`](../verify/) for example implementations using the library.
 Users are provided the following virtual base classes to implement their tests:
 
 - **base_test:**
-    - Orchestrates parallel testing.
-    - Provides users the `base_test::run(int num_tests)` function which is used to start testing.
+    - Bundles a generator, driver, monitor and scoreboard and orchestrates concurrent testing.
+    - Users are provided the built-in `base_test::run(int num_tests)` function which they can call to start the concurrent test loop.
     - Users can interface into the `run()` function through a set of pure virtual functions
-        they can use to implement their tests.
+        which they use to implement test and DUT-specific logic.
 - **base_transaction:**
     - Collection of DUT signals sent between components.
 - **base_generator:**
     - Generates a sequence of transactions and sends them to the driver.
     - Users are provided the pure virtual `base_generator::gen_trans()` function which
         they can use to write sequence generation logic for their tests.
+    - Sequences typically implement a single directed or constrained-random test targeting
+      a specific part of the DUT's functional coverage model.
 - **base_driver:**
     - Drives transactions into the DUT.
     - Users are provided the pure virtual `base_driver::drive()` function which
-        they can use to implement DUT specific driving logic.
+        they can use to implement DUT-specific driving logic.
 - **base_monitor:**
     - Samples DUT inputs and outputs to construct a single transaction snapshot sent to the scoreboard.
     - Users are provided the pure virtual `base_monitor::monitor()` function which
-        they can use to implement DUT specific monitoring logic.
+        they can use to implement DUT-specific monitoring logic.
 - **base_scoreboard:**
     - Scores each transaction for correctness.
     - Users are provided the pure virtual `base_scoreboard::score()` function which
-        they can use to implement test specific scoring.
+        they can use to implement test-specific scoring.
 
 See the source files for full API implementation details.
