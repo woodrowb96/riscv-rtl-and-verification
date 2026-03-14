@@ -2,18 +2,24 @@
   Generic lut ram module
 
 Control:
-  wr_en:    active high write enable signal
+  wr_en: active high write enable signal
 
 Input:
-  wr_reg: adress we are writting to (syncronous)
-  rd_reg: adress we are reading from (asyncronous)
+  wr_addr: address we are writing to
+            - synchronous
+  rd_addr: address we are reading from
+            - asynchronous
 
   wr_data: write data
+            - synchronous
             - clocked in @(posedge clk)
 
 Output:
   rd_data: read data
-            - read out asyncrounously
+            - read out asynchronously
+
+NOTE: OUT OF BOUNDS ACCESS
+  - Out of bounds access is undefined behavior for this module.
 */
 module lut_ram #(
   parameter LUT_WIDTH = 32,
@@ -27,23 +33,24 @@ module lut_ram #(
 
   //input
   input logic [$clog2(LUT_DEPTH)-1:0] wr_addr,
-  input logic [$clog2(LUT_DEPTH)-1:0] rd_addr,
+  input logic [LUT_WIDTH-1:0]         wr_data,
 
-  input logic [LUT_WIDTH-1:0] wr_data,
+  input logic [$clog2(LUT_DEPTH)-1:0] rd_addr,
 
   //output
   output logic [LUT_WIDTH-1:0] rd_data
 );
-  //our mem array
-  reg [LUT_WIDTH-1:0] mem [0:LUT_DEPTH-1];
+  /***************** MEMORY ARRAY *************************/
+  logic [LUT_WIDTH-1:0] mem [0:LUT_DEPTH-1];
 
-  //syncronous writes
+  /***************** SYNCHRONOUS WRITES *******************/
   always_ff @(posedge clk) begin
     if(wr_en) begin
       mem[wr_addr] <= wr_data;
     end
   end
 
-  //asyncronous reads
+  /**************** ASYNCHRONOUS READS *******************/
   assign rd_data = mem[rd_addr];
+
 endmodule
