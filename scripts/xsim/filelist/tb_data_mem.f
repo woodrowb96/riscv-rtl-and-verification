@@ -7,14 +7,14 @@ lib/base_scoreboard_pkg.sv
 lib/base_test_pkg.sv
 
 # RTL
-rtl/package/rv32i_defs_pkg.sv
-rtl/package/rv32i_control_pkg.sv
-rtl/package/rv32i_config_pkg.sv
+rtl/common/rv32i_defs_pkg.sv
+rtl/common/rv32i_control_pkg.sv
+rtl/common/rv32i_config_pkg.sv
 rtl/lut_ram.sv
 rtl/data_mem.sv
 
 # Verification
-verify/package/verify_const_pkg.sv
+verify/common/verify_const_pkg.sv
 verify/interface/data_mem_intf.sv
 verify/assert/data_mem_assert.sv
 verify/transaction/tb_lut_ram_transaction_pkg.sv

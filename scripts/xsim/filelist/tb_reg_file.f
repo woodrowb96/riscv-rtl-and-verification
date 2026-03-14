@@ -7,11 +7,11 @@ lib/base_scoreboard_pkg.sv
 lib/base_test_pkg.sv
 
 #RTL
-rtl/package/rv32i_defs_pkg.sv
+rtl/common/rv32i_defs_pkg.sv
 rtl/reg_file.sv
 
 #Verification
-verify/package/verify_const_pkg.sv
+verify/common/verify_const_pkg.sv
 verify/interface/reg_file_intf.sv
 verify/assert/reg_file_assert.sv
 verify/transaction/tb_reg_file_transaction_pkg.sv

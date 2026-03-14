@@ -7,15 +7,15 @@ lib/base_scoreboard_pkg.sv
 lib/base_test_pkg.sv
 
 # RTL
-rtl/package/rv32i_defs_pkg.sv
-rtl/package/rv32i_control_pkg.sv
+rtl/common/rv32i_defs_pkg.sv
+rtl/common/rv32i_control_pkg.sv
 rtl/alu.sv
 
 #CPP
 verify/ref_model/alu_ref_model.cpp
 
 #Verification
-verify/package/verify_const_pkg.sv
+verify/common/verify_const_pkg.sv
 verify/interface/alu_intf.sv
 verify/assert/alu_assert.sv
 verify/transaction/tb_alu_transaction_pkg.sv

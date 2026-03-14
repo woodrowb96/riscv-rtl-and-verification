@@ -22,7 +22,7 @@ Note: I am actively developing this project.
 
 ```
 ├── rtl/
-│   ├── package/        # Typedefs, config, control enumerations
+│   ├── common/         # Typedefs, config, control enumerations
 │   ├── alu.sv          # Arithmetic logic unit
 │   ├── reg_file.sv     # 32x32 register file
 │   ├── lut_ram.sv      # Generic parameterized LUT-RAM
@@ -44,7 +44,7 @@ Note: I am actively developing this project.
 │   ├── coverage/       # Functional coverage
 │   ├── assert/         # SVA assertion modules (bound into RTL)
 │   ├── interface/      # Interfaces with clocking blocks
-│   ├── package/        # Verification constants and utility functions
+│   ├── common/         # Verification constants and utility functions
 │   └── programs/       # Hex memory files used in testing
 │
 ├── scripts/

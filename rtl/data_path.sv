@@ -18,7 +18,7 @@ Control:
 
   - alu_op:
       - used to select the current alu operation
-      - See ./package/rv32i_control_pkg.sv and ./alu.sv for full details
+      - See ./common/rv32i_control_pkg.sv and ./alu.sv for full details
 
   WRITE ENABLES:
 

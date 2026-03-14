@@ -7,7 +7,7 @@ lib/base_scoreboard_pkg.sv
 lib/base_test_pkg.sv
 
 #RTL
-rtl/package/rv32i_defs_pkg.sv
+rtl/common/rv32i_defs_pkg.sv
 rtl/lut_ram.sv
 
 #Verification

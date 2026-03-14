@@ -7,14 +7,14 @@ lib/base_scoreboard_pkg.sv
 lib/base_test_pkg.sv
 
 #RTL
-rtl/package/rv32i_defs_pkg.sv
+rtl/common/rv32i_defs_pkg.sv
 rtl/imm_gen.sv
 
 #CPP
 verify/ref_model/imm_gen_ref_model.cpp
 
 #VERIFICATION
-verify/package/verify_const_pkg.sv
+verify/common/verify_const_pkg.sv
 verify/interface/imm_gen_intf.sv
 verify/assert/imm_gen_assert.sv
 verify/transaction/tb_imm_gen_transaction_pkg.sv
