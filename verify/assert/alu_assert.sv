@@ -14,65 +14,84 @@ module alu_assert(
   input word_t result,
   input logic zero
 );
-  /************** ZERO FLAG ASSERTIONS *************************/
+  /*=============================================================================*/
+  /*--------------------------  ZERO FLAG CHECK ---------------------------------*/
+  /*=============================================================================*/
 
   //make sure zero flag gets asserted properly
-  always @(posedge tb_clk) begin
-    if(result == '0) begin
-      assert(zero == 1'b1) else
-        $error("[ALU_ASSERT] zero flag not set, result:%0h, zero:%0b", result, zero);
-    end
-  end
+  property zero_set_prop;
+    @(posedge tb_clk)
+    (result == '0) |-> (zero == 1'b1);
+  endproperty
+
+  zero_set_assert:
+    assert property(zero_set_prop) else
+      $error("[ALU_ASSERT] zero flag not set, result:%0h, zero:%0b", result, zero);
 
   //make sure zero flag gets deasserted properly
-  always @(posedge tb_clk) begin
-    if(result != '0) begin
-      assert(zero == 1'b0) else
-        $error("[ALU_ASSERT] zero flag set incorrectly, result:%0h, zero:%0b", result, zero);
-    end
-  end
+  property zero_clear_prop;
+    @(posedge tb_clk)
+    (result != '0) |-> (zero == 1'b0);
+  endproperty
 
-  /************** ALU OP ASSERTIONS *************************/
+  zero_clear_assert:
+    assert property(zero_clear_prop) else
+      $error("[ALU_ASSERT] zero flag set incorrectly, result:%0h, zero:%0b", result, zero);
+
+  /*=============================================================================*/
+  /*--------------------------  ALU OP CHECK ------------------------------------*/
+  /*=============================================================================*/
   //make sure we do the correct operation for each ALU_OP
 
   //ALU_AND
-  always @(posedge tb_clk) begin
-    if(alu_op == ALU_AND) begin
-      assert(result == (in_a & in_b)) else
-        $error("[ALU_ASSERT] AND result mismatch, in_a:%h, in_b:%h, result:%h", in_a, in_b, result);
-    end
-  end
+  property alu_and_prop;
+    @(posedge tb_clk)
+    (alu_op == ALU_AND) |-> (result == (in_a & in_b));
+  endproperty
+
+  alu_and_assert:
+    assert property(alu_and_prop) else
+      $error("[ALU_ASSERT] AND result mismatch, in_a:%h, in_b:%h, result:%h", in_a, in_b, result);
 
   //ALU_OR
-  always @(posedge tb_clk) begin
-    if(alu_op == ALU_OR) begin
-      assert(result == (in_a | in_b)) else
-        $error("[ALU_ASSERT] OR result mismatch, in_a:%h, in_b:%h, result:%h", in_a, in_b, result);
-    end
-  end
+  property alu_or_prop;
+    @(posedge tb_clk)
+    (alu_op == ALU_OR) |-> (result == (in_a | in_b));
+  endproperty
+
+  alu_or_assert:
+    assert property(alu_or_prop) else
+      $error("[ALU_ASSERT] OR result mismatch, in_a:%h, in_b:%h, result:%h", in_a, in_b, result);
 
   //ALU_ADD
-  always @(posedge tb_clk) begin
-    if(alu_op == ALU_ADD) begin
-      assert(result == (in_a + in_b)) else
-        $error("[ALU_ASSERT] ADD result mismatch, in_a:%h, in_b:%h, result:%h", in_a, in_b, result);
-    end
-  end
+  property alu_add_prop;
+    @(posedge tb_clk)
+    (alu_op == ALU_ADD) |-> (result == (in_a + in_b));
+  endproperty
+
+  alu_add_assert:
+    assert property(alu_add_prop) else
+      $error("[ALU_ASSERT] ADD result mismatch, in_a:%h, in_b:%h, result:%h", in_a, in_b, result);
 
   //ALU_SUB
-  always @(posedge tb_clk) begin
-    if(alu_op == ALU_SUB) begin
-      assert(result == (in_a - in_b)) else
-        $error("[ALU_ASSERT] SUB result mismatch, in_a:%h, in_b:%h, result:%h", in_a, in_b, result);
-    end
-  end
+  property alu_sub_prop;
+    @(posedge tb_clk)
+    (alu_op == ALU_SUB) |-> (result == (in_a - in_b));
+  endproperty
+
+  alu_sub_assert:
+    assert property(alu_sub_prop) else
+      $error("[ALU_ASSERT] SUB result mismatch, in_a:%h, in_b:%h, result:%h", in_a, in_b, result);
 
   //INVALID OP: result should be zero
-  always @(posedge tb_clk) begin
-    if(!(alu_op inside {ALU_AND, ALU_OR, ALU_ADD, ALU_SUB})) begin
-      assert(result == '0) else
-        $error("[ALU_ASSERT] invalid op result not zero, alu_op:%0b, in_a:%h, in_b:%h, result:%h",
-                alu_op, in_a, in_b, result);
-    end
-  end
+  property alu_invalid_op_prop;
+    @(posedge tb_clk)
+    !(alu_op inside {ALU_AND, ALU_OR, ALU_ADD, ALU_SUB}) |-> (result == '0);
+  endproperty
+
+  alu_invalid_op_assert:
+    assert property(alu_invalid_op_prop) else
+      $error("[ALU_ASSERT] invalid op result not zero, alu_op:%0b, in_a:%h, in_b:%h, result:%h",
+              alu_op, in_a, in_b, result);
+
 endmodule
