@@ -31,10 +31,8 @@ import rv32i_defs_pkg::*;
 import rv32i_config_pkg::*;
 
 module if_stage #(parameter string PROGRAM = NO_PROGRAM) (
-  //clk
+  //clk and reset
   input logic clk,
-
-  //reset
   input logic reset_n,
 
   //control
@@ -47,13 +45,7 @@ module if_stage #(parameter string PROGRAM = NO_PROGRAM) (
   output word_t pc,
   output word_t inst
 );
-  word_t pc_reg;
   word_t pc_next;
-  word_t inst_mem_out;
-
-  /************* CALC OUTPUT ************************/
-  assign pc = pc_reg;
-  assign inst = inst_mem_out;
 
   /************ CALC NEXT PC *******************/
   always_comb begin
@@ -61,24 +53,24 @@ module if_stage #(parameter string PROGRAM = NO_PROGRAM) (
       pc_next = branch_target;
     end
     else begin
-      pc_next = pc_reg + word_t'(4);
+      pc_next = pc + word_t'(4);
     end
   end
 
   /************ PROGRAM COUNTER ***************/
   always_ff @(posedge clk) begin
     if(~reset_n) begin
-      pc_reg <= PC_RESET;
+      pc <= PC_RESET;
     end
     else begin
-      pc_reg <= pc_next;
+      pc <= pc_next;
     end
   end
 
   /***********  INSTRUCTION ACCESS ****************/
   inst_mem #(.PROGRAM(PROGRAM)) u_inst_mem (
-    .inst_addr(pc_reg),
-    .inst(inst_out)
+    .inst_addr(pc),
+    .inst(inst)
   );
 
 endmodule
