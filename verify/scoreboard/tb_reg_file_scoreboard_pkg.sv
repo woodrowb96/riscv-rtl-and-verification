@@ -35,7 +35,7 @@ package tb_reg_file_scoreboard_pkg;
 
       //handle pass/fail
       if(passed) begin
-        coverage.sample(actual);    //collect coverage on ONLY passing transactions
+        coverage.sample(actual);  //collect coverage on ONLY passing transactions
       end
       else begin
         print_fail(actual, expected);

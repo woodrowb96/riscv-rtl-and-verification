@@ -3,10 +3,10 @@
       (currently a single cycle implementation)
 
 CLK:
-  - syncronous operations are synced to the posedge of the clk
+  - synchronous operations are synced to the posedge of the clk
 
 RESET:
-  - reset_n: synchrounous reset signal
+  - reset_n: synchronous reset signal
       - resets the following signals:
           - PC <= 0
 CONTROL

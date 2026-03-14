@@ -41,22 +41,20 @@ module reg_file (
   output word_t rd_data_1,
   output word_t rd_data_2
 );
-
-  //reg file
+  /************ REGISTER FILE ***********************/
   word_t reg_file [0:RF_DEPTH-1];
   initial reg_file[X0] = '0; //for sim
 
-  //synchronous writes
+  /************ SYNCHRONOUS WRITES *******************/
   always_ff @(posedge clk) begin
     if(wr_en && (wr_reg != X0)) begin //make sure we dont write to x0
       reg_file[wr_reg] <= wr_data;
     end
   end
 
-  //asynchronous reads
+  /************ ASYNCHRONOUS READS *******************/
   always_comb begin
     rd_data_1 = (rd_reg_1 == X0) ? '0 : reg_file[rd_reg_1];
     rd_data_2 = (rd_reg_2 == X0) ? '0 : reg_file[rd_reg_2];
   end
-
 endmodule

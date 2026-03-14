@@ -26,15 +26,40 @@ package tb_reg_file_coverage_pkg;
 
     reg_file_trans trans;
 
-    /*==============================  COVERGROUP  =================================*/
-
     //We want to keep track of some stuff to help us collect coverage
     bit [RF_DEPTH-1:0] written; //track which registers have been written to
     logic prev_wr_en;
     rf_addr_t prev_wr_reg;
 
+    function new();
+      this.cg = new();
+      this.reset_state();
+    endfunction
+
+    function void update_state();
+      if(trans.wr_en) begin
+        written[trans.wr_reg] = 1'b1;
+      end
+      prev_wr_en = trans.wr_en;
+      prev_wr_reg = trans.wr_reg;
+    endfunction
+
+    //if DUT ever gets reset in a test, we can call this to keep coverage in sync
+    function void reset_state();
+      written = '0;     //none of the registers have been written yet
+      prev_wr_en = '0;  //we didnt write previously
+      prev_wr_reg = 'x; //we have no past wr_reg
+    endfunction
+
+    function void sample(reg_file_trans trans);
+      this.trans = trans;
+      cg.sample();
+      update_state(); //update state after we sample
+    endfunction
+
+    /*==============================  COVERGROUP  =================================*/
     covergroup cg;
-      /********************** WRITE COVERAGE *********************/
+      /************************** WRITE COVERAGE ************************/
 
       wr_en: coverpoint trans.wr_en{
         bins write = {1'b1};
@@ -67,7 +92,7 @@ package tb_reg_file_coverage_pkg;
       wr_data_x_wr_reg: cross wr_data, wr_reg;
 
 
-      /******************* READ COVERAGE **********************/
+      /*********************** READ COVERAGE ***************************/
 
       //Cover the read registers ONLY AFTER they have been written into.
       //  - NOTE: iff(written[rd_reg])
@@ -158,7 +183,7 @@ package tb_reg_file_coverage_pkg;
       }
 
 
-      /**************** X0 COVERAGE *********************/
+      /************************* X0 COVERAGE ******************************/
 
       //We want to cover exercising x0s write immunity behavior
       // - Note: iff(wr_data != 0)
@@ -172,34 +197,6 @@ package tb_reg_file_coverage_pkg;
       x0_rd_reg_1: coverpoint (trans.rd_reg_1 == X0);
       x0_rd_reg_2: coverpoint (trans.rd_reg_2 == X0);
     endgroup
-
-    /*========================= MEMBER FUNCTIONS ==============================*/
-
-    function void update_state();
-      if(trans.wr_en) begin
-        written[trans.wr_reg] = 1'b1;
-      end
-      prev_wr_en = trans.wr_en;
-      prev_wr_reg = trans.wr_reg;
-    endfunction
-
-    //if DUT ever gets reset in a test, we can call this to keep coverage in sync
-    function void reset_state();
-      written = '0;     //none of the registers have been written yet
-      prev_wr_en = '0;  //we didnt write previously
-      prev_wr_reg = 'x; //we have no past wr_reg
-    endfunction
-
-    function void sample(reg_file_trans trans);
-      this.trans = trans;
-      cg.sample();
-      update_state(); //update state after we sample
-    endfunction
-
-    function new();
-      this.cg = new();
-      this.reset_state();
-    endfunction
   endclass
 
 endpackage
