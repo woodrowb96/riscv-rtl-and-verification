@@ -43,7 +43,7 @@ module reg_file (
 );
   /************ REGISTER FILE ***********************/
   word_t reg_file [0:RF_DEPTH-1];
-  initial reg_file[X0] = '0; //for sim
+  initial reg_file[X0] = '0; //for sim, to help make assertions easier to write
 
   /************ SYNCHRONOUS WRITES *******************/
   always_ff @(posedge clk) begin

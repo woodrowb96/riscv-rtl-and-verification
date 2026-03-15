@@ -117,10 +117,10 @@ module data_mem (
       // - wr_sel/data routed to: {byte_lane_3, byte_lane_2, byte_lane_1, byte_lane_0}
       // - rd_data formed from:   {byte_lane_3, byte_lane_2, byte_lane_1, byte_lane_0}
       2'b00: begin
-        byte_3_addr = addr[XLEN-1:2]; //most significant byte
-        byte_2_addr = addr[XLEN-1:2];
-        byte_1_addr = addr[XLEN-1:2];
-        byte_0_addr = addr[XLEN-1:2]; //least significant byte
+        byte_3_addr = lut_addr_t'(addr[XLEN-1:2]); //most significant byte
+        byte_2_addr = lut_addr_t'(addr[XLEN-1:2]);
+        byte_1_addr = lut_addr_t'(addr[XLEN-1:2]);
+        byte_0_addr = lut_addr_t'(addr[XLEN-1:2]); //least significant byte
 
         lut_ram_wr_en   = {wr_sel[3], wr_sel[2], wr_sel[1], wr_sel[0]};
         lut_ram_wr_data = {wr_data_byte_3, wr_data_byte_2, wr_data_byte_1, wr_data_byte_0};
@@ -135,10 +135,10 @@ module data_mem (
       // - wr_sel/data routed to: {byte_lane_2, byte_lane_1, byte_lane_0, byte_lane_3}
       // - rd_data formed from:   {byte_lane_0, byte_lane_3, byte_lane_2, byte_lane_1}
       2'b01: begin
-        byte_0_addr = addr[XLEN-1:2] + 'd1; //MSB
-        byte_3_addr = addr[XLEN-1:2];
-        byte_2_addr = addr[XLEN-1:2];
-        byte_1_addr = addr[XLEN-1:2];       //LSB
+        byte_0_addr = lut_addr_t'(addr[XLEN-1:2]) + 'd1; //MSB
+        byte_3_addr = lut_addr_t'(addr[XLEN-1:2]);
+        byte_2_addr = lut_addr_t'(addr[XLEN-1:2]);
+        byte_1_addr = lut_addr_t'(addr[XLEN-1:2]);       //LSB
 
         lut_ram_wr_en   = {wr_sel[2], wr_sel[1], wr_sel[0], wr_sel[3]};
         lut_ram_wr_data = {wr_data_byte_2, wr_data_byte_1, wr_data_byte_0, wr_data_byte_3};
@@ -153,10 +153,10 @@ module data_mem (
       // - wr_sel/data routed to: {byte_lane_1, byte_lane_0, byte_lane_3, byte_lane_2}
       // - rd_data formed from:   {byte_lane_1, byte_lane_0, byte_lane_3, byte_lane_2}
       2'b10: begin
-        byte_1_addr = addr[XLEN-1:2] + 'd1;   //MSB
-        byte_0_addr = addr[XLEN-1:2] + 'd1;
-        byte_3_addr = addr[XLEN-1:2];
-        byte_2_addr = addr[XLEN-1:2];         //LSB
+        byte_1_addr = lut_addr_t'(addr[XLEN-1:2]) + 'd1;   //MSB
+        byte_0_addr = lut_addr_t'(addr[XLEN-1:2]) + 'd1;
+        byte_3_addr = lut_addr_t'(addr[XLEN-1:2]);
+        byte_2_addr = lut_addr_t'(addr[XLEN-1:2]);         //LSB
 
         lut_ram_wr_en   = {wr_sel[1], wr_sel[0], wr_sel[3], wr_sel[2]};
         lut_ram_wr_data = {wr_data_byte_1, wr_data_byte_0, wr_data_byte_3, wr_data_byte_2};
@@ -171,10 +171,10 @@ module data_mem (
       // - wr_sel/data routed to: {byte_lane_0, byte_lane_3, byte_lane_2, byte_lane_1}
       // - rd_data formed from:   {byte_lane_2, byte_lane_1, byte_lane_0, byte_lane_3}
       2'b11: begin
-        byte_2_addr = addr[XLEN-1:2] + 'd1;    //MSB
-        byte_1_addr = addr[XLEN-1:2] + 'd1;
-        byte_0_addr = addr[XLEN-1:2] + 'd1;
-        byte_3_addr = addr[XLEN-1:2];          //LSB
+        byte_2_addr = lut_addr_t'(addr[XLEN-1:2]) + 'd1;    //MSB
+        byte_1_addr = lut_addr_t'(addr[XLEN-1:2]) + 'd1;
+        byte_0_addr = lut_addr_t'(addr[XLEN-1:2]) + 'd1;
+        byte_3_addr = lut_addr_t'(addr[XLEN-1:2]);          //LSB
 
         lut_ram_wr_en   = {wr_sel[0], wr_sel[3], wr_sel[2], wr_sel[1]};
         lut_ram_wr_data = {wr_data_byte_0, wr_data_byte_3, wr_data_byte_2, wr_data_byte_1};
