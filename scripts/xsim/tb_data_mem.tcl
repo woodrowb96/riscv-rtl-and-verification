@@ -13,15 +13,9 @@ add_wave -radix hex tb_data_mem/dut/byte_3_addr
 add_wave_divider
 add_wave -radix bin tb_data_mem/dut/lut_ram_wr_en
 add_wave_divider
-add_wave -radix hex tb_data_mem/dut/byte_0_rd
-add_wave -radix hex tb_data_mem/dut/byte_1_rd
-add_wave -radix hex tb_data_mem/dut/byte_2_rd
-add_wave -radix hex tb_data_mem/dut/byte_3_rd
+add_wave -radix hex tb_data_mem/dut/lut_ram_rd_data
 add_wave_divider
-add_wave -radix hex tb_data_mem/dut/byte_0_wr
-add_wave -radix hex tb_data_mem/dut/byte_1_wr
-add_wave -radix hex tb_data_mem/dut/byte_2_wr
-add_wave -radix hex tb_data_mem/dut/byte_3_wr
+add_wave -radix hex tb_data_mem/dut/lut_ram_wr_data
 add_wave_divider
 add_wave -radix hex tb_data_mem/dut/u_byte_0/mem
 add_wave -radix hex tb_data_mem/dut/u_byte_1/mem
