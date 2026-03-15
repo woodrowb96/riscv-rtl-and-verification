@@ -47,27 +47,33 @@ package base_test_pkg;
     endfunction
 
     task run(int num_tests = -1);
-      //run the tests
-      fork
-        if(num_tests >= 0) repeat(num_tests)    gen.run();  //leave fork after we gen num_tests
-        else               while(!gen.finished) gen.run();  //OR gen sets the finished flag
-        forever drv.run();
-        begin
-          wait(drv.drv_started); //dont start monitoring till the first drives been driven into dut
-          forever mon.run();
-        end
-        forever scb.run();
-        #timeout $fatal(1, "[%s]: Timeout during base_test.run(), scb.num_tests=%0d", tag, scb.num_tests);
-      join_any
+      fork begin
 
-      //wait till we score everything or timeout
-      fork
-        wait(scb.num_tests == gen.num_transactions);
-        #timeout $fatal(1, "[%s]: Timeout waiting for scoreboard, scb.num_tests=%0d", tag, scb.num_tests);
-      join_any
+        //run the tests
+        fork
+          if(num_tests >= 0) repeat(num_tests)    gen.run();  //leave fork after we gen num_tests
+          else               while(!gen.finished) gen.run();  //OR gen sets the finished flag
+          forever drv.run();
+          begin
+            wait(drv.drv_started); //dont start monitoring till the first drives been driven into dut
+            forever mon.run();
+          end
+          forever scb.run();
+          #timeout $fatal(1, "[%s]: Timeout during base_test.run(), scb.num_tests=%0d",
+                          tag, scb.num_tests);
+        join_any
 
-      //cleanup remaining processes
-      disable fork;
+        //wait till we score everything or timeout
+        fork
+          wait(scb.num_tests == gen.num_transactions);
+          #timeout $fatal(1, "[%s]: Timeout waiting for scoreboard, scb.num_tests=%0d",
+                          tag, scb.num_tests);
+        join_any
+
+        //cleanup the remaining forks
+        disable fork; //(only disables whats in this main fork-join block)
+
+      end join
     endtask
 
     function void print_results(string msg = "");
