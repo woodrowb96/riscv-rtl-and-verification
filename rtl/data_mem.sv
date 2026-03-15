@@ -26,8 +26,8 @@ Output:
               leave the sub byte selection to the datapath.
 
 NOTE:  OUT_OF_BOUND ACCESS
-  I let out of bounds addresses silently wrap around to the start of memory.
-  I dont handle that or prevent it in this module, and leave that to other parts of the implementation
+  Out of bound access silently wraps around to the start of memory.
+  This module doesnt throw a flag or error and leaves that to other parts of the implementation.
 */
 import rv32i_defs_pkg::*;
 import rv32i_config_pkg::*;
@@ -47,81 +47,120 @@ module data_mem (
   //output
   output word_t rd_data
 );
-  //Signals to hook up the 4 lut_rams
   typedef logic [$clog2(DATA_MEM_DEPTH)-1:0] lut_addr_t;
+
   lut_addr_t byte_0_addr, byte_1_addr, byte_2_addr, byte_3_addr;
   byte_t     byte_0_rd, byte_1_rd, byte_2_rd, byte_3_rd;
   byte_t     byte_0_wr, byte_1_wr, byte_2_wr, byte_3_wr;
   byte_sel_t lut_ram_wr_en;
 
-  //Data_mem depth needs to be a power of 2.
-  //This is needed to ensure the addresses naturally wrap silently
+  /*************** ENFORCE POWER OF 2 DEPTH *************************/
+  //Depth needs to be a power of 2, so addresses wrap properly
+  /******************************************************************/
   initial assert((DATA_MEM_DEPTH & (DATA_MEM_DEPTH - 1)) == 0) else
     $fatal("DATA_MEM_DEPTH must be power of 2");
 
-  always_comb begin
 
-    //look at the byte offset and:
-    //  - calculate the correct line in memory each byte should come from
-    //  - route the rd_data, wr_data and wr_sel signals to the proper bytes
+  /**************************** MEMORY ********************************/
+  // Data Memory is a word wide but we need byte addressing, so we give
+  // each byte in memory its own memory element.
+  //
+  // A word-aligned read is formed from the byte lanes as:
+  //    {byte_lane_3, byte_lane_2, byte_lane_1, byte_lane_0}
+  /********************************************************************/
+
+  //byte lane 3 (Word-aligned Most Sig Byte)
+  lut_ram #(.LUT_DEPTH(DATA_MEM_DEPTH), .LUT_WIDTH(BYTE_LEN))
+    u_byte_3 (.clk(clk), .wr_en(lut_ram_wr_en[3]), .wr_addr(byte_3_addr), .rd_addr(byte_3_addr), .wr_data(byte_3_wr), .rd_data(byte_3_rd));
+
+  //byte lane 2
+  lut_ram #(.LUT_DEPTH(DATA_MEM_DEPTH), .LUT_WIDTH(BYTE_LEN))
+    u_byte_2 (.clk(clk), .wr_en(lut_ram_wr_en[2]), .wr_addr(byte_2_addr), .rd_addr(byte_2_addr), .wr_data(byte_2_wr), .rd_data(byte_2_rd));
+
+  //byte lane 1
+  lut_ram #(.LUT_DEPTH(DATA_MEM_DEPTH), .LUT_WIDTH(BYTE_LEN))
+    u_byte_1 (.clk(clk), .wr_en(lut_ram_wr_en[1]), .wr_addr(byte_1_addr), .rd_addr(byte_1_addr), .wr_data(byte_1_wr), .rd_data(byte_1_rd));
+
+  //byte lane 0 (Word-aligned Least Sig Byte)
+  lut_ram #(.LUT_DEPTH(DATA_MEM_DEPTH), .LUT_WIDTH(BYTE_LEN))
+    u_byte_0 (.clk(clk), .wr_en(lut_ram_wr_en[0]), .wr_addr(byte_0_addr), .rd_addr(byte_0_addr), .wr_data(byte_0_wr), .rd_data(byte_0_rd));
+
+
+  /********************** SIGNAL ROUTING ******************************/
+  //look at the byte offset and:
+  //  - calc the correct line in memory each byte_lane should point to
+  //  - route wr_data bytes and wr_sel bits to the proper byte_lanes
+  //  - route byte_lane output bytes to form the correct rd_data
+  /*******************************************************************/
+  always_comb begin
     case(addr[1:0])
 
-      /*** offset 0 — rd/wr_data: {byte_3, byte_2, byte_1, byte_0} ***/
+      /******* offset 0 ******/
+      //We are word aligned
+      // - Byte_lane 0 is the LSB
+      // - Byte_lane 3 is the MSB
+      // - wr_sel     : {byte_lane_3, byte_lane_2, byte_lane_1, byte_lane_0}
+      // - wr/rd_data : {byte_lane_3, byte_lane_2, byte_lane_1, byte_lane_0}
       2'b00: begin
-        byte_3_addr = addr[XLEN-1:2];
+        byte_3_addr = addr[XLEN-1:2]; //most significant byte
         byte_2_addr = addr[XLEN-1:2];
         byte_1_addr = addr[XLEN-1:2];
-        byte_0_addr = addr[XLEN-1:2];
+        byte_0_addr = addr[XLEN-1:2]; //least significant byte
 
-        //everything is aligned with the words stored in memory
-        //so we dont need to shift the wr_sel over
         lut_ram_wr_en = {wr_sel[3], wr_sel[2], wr_sel[1], wr_sel[0]};
+        {byte_3_wr, byte_2_wr, byte_1_wr, byte_0_wr} = wr_data;
 
         rd_data = {byte_3_rd, byte_2_rd, byte_1_rd, byte_0_rd};
-        {byte_3_wr, byte_2_wr, byte_1_wr, byte_0_wr} = wr_data;
       end
 
-      /*** offset 1 — rd/wr_data: {byte_0, byte_3, byte_2, byte_1} ***/
+      /******* offset 1 ******/
+      //We are shifted over a byte
+      // - Byte_lane 1 is now the LSB
+      // - Byte_lane 0 is now the MSB and gets bumped to the next line
+      // - wr_sel     : {byte_lane_2, byte_lane_1, byte_lane_0, byte_lane_3}
+      // - wr/rd_data : {byte_lane_0, byte_lane_3, byte_lane_2, byte_lane_1}
       2'b01: begin
-        //we are shifted over by 1 byte,
-        //so byte 0 gets bumped to the next line in memory
+        byte_0_addr = addr[XLEN-1:2] + 'd1; //MSB
         byte_3_addr = addr[XLEN-1:2];
         byte_2_addr = addr[XLEN-1:2];
-        byte_1_addr = addr[XLEN-1:2];
-        byte_0_addr = addr[XLEN-1:2] + 'd1;
+        byte_1_addr = addr[XLEN-1:2];       //LSB
 
-        //we are reading starting at byte 1 now,
-        //so we need to rotate the wr_sel one to the left
         lut_ram_wr_en = {wr_sel[2], wr_sel[1], wr_sel[0], wr_sel[3]};
 
         rd_data = {byte_0_rd, byte_3_rd, byte_2_rd, byte_1_rd};
         {byte_0_wr, byte_3_wr, byte_2_wr, byte_1_wr} = wr_data;
       end
 
-      /*** offset 2 — rd/wr_data: {byte_1, byte_0, byte_3, byte_2} ***/
+      /******* offset 2 ******/
+      //We are shifted over two bytes
+      // - Byte_lane 2 is now the LSB
+      // - Byte_lane 1 is now the MSB and gets bumped to the next line
+      // - wr_sel     : {byte_lane_1, byte_lane_0, byte_lane_3, byte_lane_2}
+      // - wr/rd_data : {byte_lane_1, byte_lane_0, byte_lane_3, byte_lane_2}
       2'b10: begin
-        //bytes 0 and 1 spill over to the next line in mem
-        byte_3_addr = addr[XLEN-1:2];
-        byte_2_addr = addr[XLEN-1:2];
-        byte_1_addr = addr[XLEN-1:2] + 'd1;
+        byte_1_addr = addr[XLEN-1:2] + 'd1;   //MSB
         byte_0_addr = addr[XLEN-1:2] + 'd1;
+        byte_3_addr = addr[XLEN-1:2];
+        byte_2_addr = addr[XLEN-1:2];         //LSB
 
-        //shift the wr_sel signal over by two
         lut_ram_wr_en = {wr_sel[1], wr_sel[0], wr_sel[3], wr_sel[2]};
 
         rd_data = {byte_1_rd, byte_0_rd, byte_3_rd, byte_2_rd};
         {byte_1_wr, byte_0_wr, byte_3_wr, byte_2_wr} = wr_data;
       end
 
-      /*** offset 3 — rd/wr_data: {byte_2, byte_1, byte_0, byte_3} ***/
+      /******* offset 3 ******/
+      //We are shifted over three bytes
+      // - Byte_lane 3 is now the LSB
+      // - Byte_lane 2 is now the MSB and gets bumped to the next line
+      // - wr_sel     : {byte_lane_0, byte_lane_3, byte_lane_2, byte_lane_1}
+      // - wr/rd_data : {byte_lane_2, byte_lane_1, byte_lane_0, byte_lane_3}
       2'b11: begin
-        //bytes 0,1,2 spill over to the next line in mem
-        byte_3_addr = addr[XLEN-1:2];
-        byte_2_addr = addr[XLEN-1:2] + 'd1;
+        byte_2_addr = addr[XLEN-1:2] + 'd1;    //MSB
         byte_1_addr = addr[XLEN-1:2] + 'd1;
         byte_0_addr = addr[XLEN-1:2] + 'd1;
+        byte_3_addr = addr[XLEN-1:2];          //LSB
 
-        //shift the wr_sel signal over by three
         lut_ram_wr_en = {wr_sel[0], wr_sel[3], wr_sel[2], wr_sel[1]};
 
         rd_data = {byte_2_rd, byte_1_rd, byte_0_rd, byte_3_rd};
@@ -129,17 +168,4 @@ module data_mem (
       end
     endcase
   end
-
-  //Data memory is a word wide, but we can acess it by byte, so we give each
-  //byte lane its own memory.
-  //A word length line in memory is (from most significant byte, to least significant byte):
-  //  {byte_3, byte_2, byte_1, byte_0}
-  lut_ram #(.LUT_DEPTH(DATA_MEM_DEPTH), .LUT_WIDTH(BYTE_LEN))
-    u_byte_3 (.clk(clk), .wr_en(lut_ram_wr_en[3]), .wr_addr(byte_3_addr), .rd_addr(byte_3_addr), .wr_data(byte_3_wr), .rd_data(byte_3_rd));
-  lut_ram #(.LUT_DEPTH(DATA_MEM_DEPTH), .LUT_WIDTH(BYTE_LEN))
-    u_byte_2 (.clk(clk), .wr_en(lut_ram_wr_en[2]), .wr_addr(byte_2_addr), .rd_addr(byte_2_addr), .wr_data(byte_2_wr), .rd_data(byte_2_rd));
-  lut_ram #(.LUT_DEPTH(DATA_MEM_DEPTH), .LUT_WIDTH(BYTE_LEN))
-    u_byte_1 (.clk(clk), .wr_en(lut_ram_wr_en[1]), .wr_addr(byte_1_addr), .rd_addr(byte_1_addr), .wr_data(byte_1_wr), .rd_data(byte_1_rd));
-  lut_ram #(.LUT_DEPTH(DATA_MEM_DEPTH), .LUT_WIDTH(BYTE_LEN))
-    u_byte_0 (.clk(clk), .wr_en(lut_ram_wr_en[0]), .wr_addr(byte_0_addr), .rd_addr(byte_0_addr), .wr_data(byte_0_wr), .rd_data(byte_0_rd));
 endmodule
