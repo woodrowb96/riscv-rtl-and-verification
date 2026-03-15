@@ -8,18 +8,21 @@ package tb_lut_ram_tests_pkg;
   import tb_lut_ram_coverage_pkg::*;
 
   /*=============================== BASE TEST ==================================*/
-  virtual class lut_ram_base_test #(parameter int LUT_WIDTH = 32, parameter int LUT_DEPTH = 256, type GEN_T)
-    extends base_test #(
+  virtual class lut_ram_base_test #(
+    parameter int LUT_WIDTH = 32,
+    parameter int LUT_DEPTH = 256,
+    type GEN_T
+  ) extends base_test #(
       lut_ram_trans      #(LUT_WIDTH, LUT_DEPTH),
       GEN_T,
       lut_ram_driver     #(LUT_WIDTH, LUT_DEPTH),
       lut_ram_monitor    #(LUT_WIDTH, LUT_DEPTH),
       lut_ram_scoreboard #(LUT_WIDTH, LUT_DEPTH)
-    );
+  );
 
     protected function new(
-        virtual lut_ram_intf #(.LUT_WIDTH(LUT_WIDTH), .LUT_DEPTH(LUT_DEPTH)) vif,
-        tb_lut_ram_coverage  #(LUT_WIDTH, LUT_DEPTH)                         coverage,
+        virtual lut_ram_intf #(LUT_WIDTH, LUT_DEPTH) vif,
+        tb_lut_ram_coverage  #(LUT_WIDTH, LUT_DEPTH) coverage,
         string tag = "LUT_RAM_BASE_TEST"
     );
       super.new(tag);
@@ -35,11 +38,19 @@ package tb_lut_ram_tests_pkg;
 
   //default test: exercises all inputs with constrained random values
   //(see the generator for full details on randomization)
-  class lut_ram_default_test #(parameter int LUT_WIDTH = 32, parameter int LUT_DEPTH = 256)
-    extends lut_ram_base_test #(LUT_WIDTH, LUT_DEPTH, lut_ram_default_gen #(LUT_WIDTH, LUT_DEPTH));
+  class lut_ram_default_test #(
+    parameter int LUT_WIDTH = 32,
+    parameter int LUT_DEPTH = 256
+  ) extends lut_ram_base_test #(
+    LUT_WIDTH,
+    LUT_DEPTH,
+    lut_ram_default_gen #(LUT_WIDTH, LUT_DEPTH)
+  );
 
-    function new(virtual lut_ram_intf #(.LUT_WIDTH(LUT_WIDTH), .LUT_DEPTH(LUT_DEPTH)) vif,
-                 tb_lut_ram_coverage #(LUT_WIDTH, LUT_DEPTH) coverage);
+    function new(
+      virtual lut_ram_intf #(LUT_WIDTH, LUT_DEPTH) vif,
+      tb_lut_ram_coverage #(LUT_WIDTH, LUT_DEPTH) coverage
+    );
       super.new(vif, coverage, "LUT_RAM_DEFAULT_TEST");
     endfunction
   endclass

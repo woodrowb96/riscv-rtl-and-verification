@@ -1,13 +1,16 @@
+/*
+  NOTE: Out of bounds behavior is undefined in the rtl, so the reference model
+        will issue a warning then do the read/write with the undefined behavior.
+*/
 package lut_ram_ref_model_pkg;
   import tb_lut_ram_transaction_pkg::*;
 
   class lut_ram_ref_model #(parameter int LUT_WIDTH = 32, parameter int LUT_DEPTH = 256);
-    typedef logic [$clog2(LUT_DEPTH)-1:0] addr_t;
-    typedef logic [LUT_WIDTH-1:0]         data_t;
-
+    typedef logic [$clog2(LUT_DEPTH)-1:0]         addr_t;
+    typedef logic [LUT_WIDTH-1:0]                 data_t;
     typedef lut_ram_trans #(LUT_WIDTH, LUT_DEPTH) trans_t;
 
-    data_t mem [LUT_DEPTH-1:0];
+    data_t mem [0:LUT_DEPTH-1];
 
     function data_t read(addr_t rd_addr);
       if(rd_addr >= LUT_DEPTH) begin

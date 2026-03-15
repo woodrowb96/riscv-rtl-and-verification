@@ -60,7 +60,6 @@ package tb_reg_file_coverage_pkg;
     /*==============================  COVERGROUP  =================================*/
     covergroup cg;
       /************************** WRITE COVERAGE ************************/
-
       wr_en: coverpoint trans.wr_en{
         bins write = {1'b1};
         bins no_write = {1'b0};
@@ -79,8 +78,7 @@ package tb_reg_file_coverage_pkg;
       }
 
       //Note: iff(trans.wr_en && trans.wr_reg)
-      //  - Coverage on wr_data functionality is only relevant when we are
-      //    actually writing (wr_en asserted) into writable (non-x0) registers.
+      //  - (wr_en && wr_reg != X0): we only want to collect when we are writing into a writable register
       wr_data: coverpoint trans.wr_data
         iff(trans.wr_en && trans.wr_reg != X0) {
           bins zeros      = {WORD_ALL_ZEROS};

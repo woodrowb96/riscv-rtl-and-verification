@@ -2,13 +2,18 @@ package tb_lut_ram_monitor_pkg;
   import base_monitor_pkg::*;
   import tb_lut_ram_transaction_pkg::*;
 
-  class lut_ram_monitor #(parameter int LUT_WIDTH = 32, parameter int LUT_DEPTH = 256)
-    extends base_monitor #(lut_ram_trans #(LUT_WIDTH, LUT_DEPTH));
+  class lut_ram_monitor #(
+    parameter int LUT_WIDTH = 32,
+    parameter int LUT_DEPTH = 256
+  ) extends base_monitor #(lut_ram_trans #(LUT_WIDTH, LUT_DEPTH));
 
-    virtual lut_ram_intf #(.LUT_WIDTH(LUT_WIDTH), .LUT_DEPTH(LUT_DEPTH)) vif;
+    virtual lut_ram_intf #(LUT_WIDTH, LUT_DEPTH) vif;
 
-    function new(virtual lut_ram_intf #(.LUT_WIDTH(LUT_WIDTH), .LUT_DEPTH(LUT_DEPTH)) vif,
-                 string tag, mailbox_t mon_to_scb_mbx);
+    function new(
+      virtual lut_ram_intf #(LUT_WIDTH, LUT_DEPTH) vif,
+      string tag,
+      mailbox_t mon_to_scb_mbx
+    );
       super.new(tag, mon_to_scb_mbx);
       this.vif = vif;
     endfunction
@@ -16,7 +21,7 @@ package tb_lut_ram_monitor_pkg;
     //NOTE:
     //  - DUT reads are combinatorial (rd_data = mem[rd_addr]).
     //    We are syncing sampling to the clk through the cb_mon block, so
-    //    the output we are reading coresponds to the inputs driven at the
+    //    the output we are reading corresponds to the inputs driven at the
     //    previous clk (with cb_drv in the driver)
     task monitor(output lut_ram_trans #(LUT_WIDTH, LUT_DEPTH) trans);
       @(vif.cb_mon);
