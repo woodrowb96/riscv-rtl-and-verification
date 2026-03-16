@@ -14,49 +14,59 @@ NOTE:
       to catch and handle that scenario.
 
   - Misaligned access:
-      This module assumes word aligned access and silently rounds non-zero byte offests 
-      down to the next lower word. It doesnt throw a flag or error Ill leave the catching
+      This module assumes word aligned access and silently rounds non-zero byte offsets
+      down to the next lower word. It doesnt throw a flag or error I'll leave the catching
       and handling of misaligned access to other parts of the riscv implementation.
 */
 import rv32i_defs_pkg::*;
 import rv32i_config_pkg::*;
 
-module inst_mem #(parameter string PROGRAM = NO_PROGRAM) (
+module inst_mem #(parameter string PROGRAM = "") (
   //input
   input word_t inst_addr,
 
   //output
   output word_t inst
 );
-  /********************************************************************/
-  //Make sure our instruction memory is a power of 2.
-  //This ensures the addresses will wrap back to 0 with no extra logic.
-  /********************************************************************/
-  initial assert((INST_MEM_DEPTH & (INST_MEM_DEPTH - 1)) == 0) else
-    $fatal("INST_MEM_DEPTH must be a power of 2");
-
-
-  /***************  ROM **********************************************/
-
   typedef logic [$clog2(INST_MEM_DEPTH)-1:0] rom_addr_t;
-  rom_addr_t rom_addr;
+
+  rom_addr_t rom_addr; //address sized to match the rom
+
+
+  /*************** ENFORCE POWER OF 2 DEPTH *************************/
+  //Depth needs to be a power of 2, so addresses wrap properly
+  /******************************************************************/
+
+  generate
+  //We want this to fail for both synthesis and simulation so Im using
+  //the generate block to kill it during compilation.
+    if(((INST_MEM_DEPTH & (INST_MEM_DEPTH - 1)) != 0)) begin
+      $error("INST_MEM_DEPTH must be power of 2");
+    end
+  endgenerate
+
+
+  /************************** ROM ***********************************/
 
   logic [XLEN-1:0] inst_rom [0:INST_MEM_DEPTH-1];
 
-  //initialize the rom for simulation
-  //(may need to use another way for synthesis onto an fpga)
+  //Initialize the rom for simulation (may need a diff method for synthesis onto an FPGA)
   initial begin
     $readmemh(PROGRAM, inst_rom);
+
+    //This assertion only fires during simulation.
+    //Thats fine users might have a different way to program the mem for synthesis
     assert(inst_rom[0] !== 'x) else
       $fatal(1, "Failed to load program: %s", PROGRAM);
   end
 
-  /*************** READ OUT INSTRUCTION *****************************/
 
-  //truncate the addr to fit in the rom_addr port
-  //and drop the bottom 2bits (the byte offset)
+  /********************* MEMORY ACCESS *****************************/
+
+  //drop the bottom byte offset, then truncate the inst_addr to fit in the rom_addr port
   assign rom_addr = rom_addr_t'(inst_addr >> 2);
 
+  //read out the instruction
   assign inst = inst_rom[rom_addr];
 
 endmodule
