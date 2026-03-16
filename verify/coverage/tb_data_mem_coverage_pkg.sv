@@ -44,14 +44,11 @@ package tb_data_mem_coverage_pkg;
     endfunction
 
     function update_state();
-      if(!written.exists(trans.addr)) begin
-        //if this is the first write to the address, then the current wr_sel
-        //tells us which bytes were written
-        written[trans.addr] = trans.wr_sel;
+      if(!written.exists(trans.addr)) begin   //if this is the first write to an address
+        written[trans.addr] = trans.wr_sel;   //wr_sel tells us which bytes are being written
       end
-      else begin
-        //else we can OR with the new wr_sel to get any new writes
-        written[trans.addr] |= trans.wr_sel;
+      else begin                              //else if we've already written to the address
+        written[trans.addr] |= trans.wr_sel;  //a bitwise OR with wr_sel will capture which additional bytes have been written
       end
       prev_wr_sel = trans.wr_sel;
       prev_addr   = trans.addr;
@@ -92,14 +89,13 @@ package tb_data_mem_coverage_pkg;
 
       /********************* WRITE COVERAGE *********************/
 
-      //We want to cover the specific wr_sel patterns the rv32i implementation
-      //will exercise during operation.
-      // - store byte, store half-word, store word and no-write
+      //We want to cover the specific wr_sel patterns that will be
+      //exercised during rv32i operation
       wr_sel: coverpoint trans.wr_sel{
-        bins no_write = {4'b0000};
-        bins sb       = {4'b0001};
-        bins sh       = {4'b0011};
-        bins sw       = {4'b1111};
+        bins no_write = {4'b0000};   //not writing
+        bins sb       = {4'b0001};   //store-byte
+        bins sh       = {4'b0011};   //store-halfword
+        bins sw       = {4'b1111};   //store-word
         bins others   = default;
       }
 
@@ -113,14 +109,14 @@ package tb_data_mem_coverage_pkg;
       }
 
       //We want to do write all 1s and all 0s to each corner addr, with each type of wr_sel
-      //  - NOTE: we don't want to collect the wr_data cross when we are not writing
       wr_sel_x_addr_x_wr_data: cross addr, wr_sel, wr_data {
+        //don't collect the cross when we aren't writing
         ignore_bins no_write_x_wr_data = binsof(wr_sel.no_write) && binsof(wr_data);
       }
 
       //We want to write all 1s and all 0s across each byte_offset, with each type of wr_sel
-      //  - NOTE: we don't want to collect the wr_data cross when we are not writing
       wr_sel_x_byte_offset_x_wr_data: cross byte_offset, wr_sel, wr_data {
+        //don't collect the cross when we aren't writing
         ignore_bins no_write_x_wr_data = binsof(wr_sel.no_write) && binsof(wr_data);
       }
 
@@ -135,16 +131,16 @@ package tb_data_mem_coverage_pkg;
       //       - Writes are byte granular, so we need to see which bytes in
       //         the wr_sel signals are getting hit back to back.
       // - iff(trans.addr == prev_addr)
-      //       - Only collect coverage when we are hitting the same address
-      //         back to back. Nothing gets overwritten (most likely) if they are different.
+      //       - Back-to-back writes can only happen when we are hitting
+      //         the same address back to back.
       back_to_back_write: coverpoint (trans.wr_sel & prev_wr_sel)
         iff (trans.addr == prev_addr) {
           wildcard bins byte_0 = {4'b???1};
           wildcard bins byte_1 = {4'b??1?};
           wildcard bins byte_2 = {4'b?1??};
           wildcard bins byte_3 = {4'b1???};
-          //Writes are byte granular, so we bin back-to-back-write
-          //functionality on each byte separately.
+          //Writes are byte-granular so we bin
+          //back-to-back writes on each byte separately.
           //  - NOTE: Im using wildcard bins. So consecutive wr_sel == 1111 will
           //          hit all 4 bins. This is the desired coverage we want. We
           //          just want to make sure there was overlap on each byte lane
@@ -157,14 +153,19 @@ package tb_data_mem_coverage_pkg;
 
       /********************* READ COVERAGE *********************/
 
-      //We read a word out at a time, but because writes are byte granular not
-      //every byte in that word will necessarily have been written to.
-      //This coverpoint will be used in read coverage crosses to make sure
-      //each read coverpoint covers reading each byte in the word.
-      //(see the addr_x_written_bytes and byte_offset_x_written_bytes)
+      //Writes are byte-granular so not every byte in a read word will have
+      //been written.
+      //
+      //We only want to collect read coverage on reads to bytes that have been
+      //written already. Reading back unwritten data is not the interesting
+      //functionality we are after.
+      //
+      //We use the following coverpoint in crosses with the addr and
+      //byte_offset to capture coverage on which bytes in the read word have
+      //been written to before the read.
       written_bytes: coverpoint (written[trans.addr])
-        iff(written.exists(trans.addr)) {  //make sure the written entry exists first
-          wildcard bins byte_0 = {4'b???1};
+        iff(written.exists(trans.addr)) {   //make sure the written entry exists first
+          wildcard bins byte_0 = {4'b???1}; //then use wildcard bins to cover which bytes have been written
           wildcard bins byte_1 = {4'b??1?};
           wildcard bins byte_2 = {4'b?1??};
           wildcard bins byte_3 = {4'b1???};
@@ -173,8 +174,7 @@ package tb_data_mem_coverage_pkg;
       //We want to read written data out of each byte of each corner address
       addr_x_written_bytes: cross addr, written_bytes;
 
-      //We want to read written data out of each byte in a word, from each
-      //byte offset
+      //We want to read written data out of each byte in a word, from each byte offset
       byte_offset_x_written_bytes: cross byte_offset, written_bytes;
 
       rd_data: coverpoint trans.rd_data {
@@ -189,10 +189,13 @@ package tb_data_mem_coverage_pkg;
       //we want to read corner data out of each byte offset
       rd_data_x_byte_offset: cross rd_data, byte_offset;
 
-      //The write and read address are always the same, so all reads are reads
-      //during write (if wr_sel != 0). Writes are byte granular though, so we
+
+      /************** READ DURING WRITE COVERAGE *********************/
+
+      //Reads and writes use the same address, so as long as wr_sel != 0 all
+      //reads are during a write. Writes are byte granular though, so we
       //need the wildcard bins to make sure we did a read_during_write while
-      //writing to each byte.
+      //each byte was being written.
       read_during_write: coverpoint (trans.wr_sel) {
         wildcard bins byte_0 = {4'b???1};
         wildcard bins byte_1 = {4'b??1?};
@@ -206,7 +209,10 @@ package tb_data_mem_coverage_pkg;
       //we want to do read_during_writes at each byte_offset
       read_during_write_x_byte_offset: cross read_during_write, byte_offset;
 
-      //We want to cover reading the clk immediately following a write.
+
+      /*********  NEXT CYCLE READ AFTER WRITE COVERAGE *********************/
+
+      //We want to cover reading a write on the clk cycle immediately following a write.
       //Once again, we need to bin each byte separately
       next_cycle_read_after_write: coverpoint prev_wr_sel
         iff(trans.addr == prev_addr) {

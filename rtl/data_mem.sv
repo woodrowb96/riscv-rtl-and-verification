@@ -67,8 +67,13 @@ module data_mem (
   /*************** ENFORCE POWER OF 2 DEPTH *************************/
   //Depth needs to be a power of 2, so addresses wrap properly
   /******************************************************************/
-  initial assert((DATA_MEM_DEPTH & (DATA_MEM_DEPTH - 1)) == 0) else
-    $fatal("DATA_MEM_DEPTH must be power of 2");
+  generate
+  //We want this to fail for both synthesis and simulation so Im using
+  //the generate block to kill it during compilation.
+    if(((DATA_MEM_DEPTH & (DATA_MEM_DEPTH - 1)) != 0)) begin
+      $error("DATA_MEM_DEPTH must be power of 2");
+    end
+  endgenerate
 
 
   /**************************** MEMORY ********************************/
