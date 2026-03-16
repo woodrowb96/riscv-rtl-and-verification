@@ -40,7 +40,7 @@ module tb_data_mem();
     test_default = new(intf, coverage);
 
     //run tests
-    test_default.run(1000);
+    test_default.run(4000);
 
     //print results
     test_default.print_results();

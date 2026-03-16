@@ -3,6 +3,11 @@
 */
 package verify_const_pkg;
   import rv32i_defs_pkg::*;
+  import rv32i_config_pkg::*;
+  /*********************** DATA_MEM *******************************/
+  parameter int unsigned DATA_MEM_FIRST_ADDR = 0;                          //first address in mem (also the first byte and first word)
+  parameter int unsigned DATA_MEM_LAST_ADDR = (DATA_MEM_DEPTH * 4) - 1;    //the last address in memory (so the last byte)
+  parameter int unsigned DATA_MEM_LAST_WORD_ADDR = DATA_MEM_LAST_ADDR - 4; //the last full word stored in memory
 
   /*********************** IMM_GEN *********************************/
 

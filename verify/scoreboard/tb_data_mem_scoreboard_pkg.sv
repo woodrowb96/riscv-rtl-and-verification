@@ -7,7 +7,7 @@ package tb_data_mem_scoreboard_pkg;
   class data_mem_scoreboard extends base_scoreboard #(data_mem_trans);
     data_mem_ref_model ref_data_mem;
 
-    tb_data_mem_coverage coverage;
+    tb_data_mem_coverage coverage;   //we are collecting coverage in the scoreboard
 
     function new(tb_data_mem_coverage coverage, string tag, mailbox_t mon_to_scb_mbx);
       super.new(tag, mon_to_scb_mbx);
@@ -32,7 +32,7 @@ package tb_data_mem_scoreboard_pkg;
 
       //handle pass/fail
       if(passed) begin
-        coverage.sample(actual);
+        coverage.sample(actual);  //only collect coverage on passed transactions
       end
       else begin
         print_fail(actual, expected);

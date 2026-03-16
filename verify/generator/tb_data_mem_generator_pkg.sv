@@ -8,25 +8,20 @@ package tb_data_mem_generator_pkg;
   //SEE THE NOTE IN: tb_lut_ram_generator_pkg.sv for why im using child trans
   //classes instead of just inlining this stuff in the generator
 
-  //data and wr_sel are going to be constrained the same in all the other
-  //classes so lets just make this class the common parent
-  class data_mem_trans_base_contraints extends data_mem_trans;
+  class data_mem_trans_base_constraints extends data_mem_trans;
     constraint general_corners {
-      //Im just going to constrain the wr_sel to only test the scenarios it
-      //will actually incounter in the rv32i scenarion (no_write, SB, SH and SW)
-      //
-      //  -NOTE: My rtl can handle the other wr_sel (ie 4'b1001, 4'b0101 ...)
-      //         but for now im just going to test the rv32i scenarios.
-      //         Normally I try and verify the full function of all the modules, but
-      //         for now I want to keep the generator simple and just focus
-      //         on rv32i functionality for wr_sel.
+
+      //Im going to constrain wr_sel to only the scenarios its going to hit
+      //during riscv operation. For now I am choosing not to hit the non-riscv
+      //operations.
       wr_sel dist {
-        4'b0000 := 1,
-        4'b0001 := 2,
-        4'b0011 := 2,
-        4'b1111 := 2
+        4'b0000 := 1, //no_write
+        4'b0001 := 3, //sb
+        4'b0011 := 3, //sh
+        4'b1111 := 3  //sw
       };
 
+      //hit the data corners, but also get some full range values in too
       wr_data dist {
         WORD_ALL_ZEROS                 := 1,
         WORD_ALL_ONES                  := 1,
@@ -35,32 +30,45 @@ package tb_data_mem_generator_pkg;
     };
   endclass
 
-  //constraint the trans to just hit address corners
-  class data_mem_trans_corner_addr extends data_mem_trans_base_contraints;
+  //constrain the trans to just hit address corners
+  class data_mem_trans_corner_addr extends data_mem_trans_base_constraints;
     constraint addr_corners {
-      addr dist {
-        DATA_MEM_FIRST_ADDR         := 1,
-        DATA_MEM_LAST_WORD_ADDR     := 1,
-        DATA_MEM_LAST_WORD_ADDR + 1 := 1,
-        DATA_MEM_LAST_WORD_ADDR + 2 := 1,
-        DATA_MEM_LAST_ADDR          := 1
+      addr inside {
+        //first word
+        DATA_MEM_FIRST_ADDR,
+        DATA_MEM_FIRST_ADDR + 1,
+        DATA_MEM_FIRST_ADDR + 2,
+        DATA_MEM_FIRST_ADDR + 3,
+        //last word
+        DATA_MEM_LAST_WORD_ADDR,
+        DATA_MEM_LAST_WORD_ADDR + 1,
+        DATA_MEM_LAST_WORD_ADDR + 2,
+        DATA_MEM_LAST_ADDR
       };
     };
   endclass
 
-  class data_mem_trans_prev_written extends data_mem_trans_base_contraints;
-    word_t prev_written_addr [$] = {0};
+  class data_mem_trans_prev_written extends data_mem_trans_base_constraints;
+    word_t prev_written_addr [$];
+
+    function new(word_t prev_written_addr [$]);
+      super.new();
+      this.prev_written_addr = prev_written_addr;
+    endfunction
 
     constraint prev_written {
       addr inside {prev_written_addr};
     }
   endclass
 
-  /************************* GENERATOR    *******************************************/
+  /*==============================================================================*/
+  /*------------------------------ GENERATOR -------------------------------------*/
+  /*==============================================================================*/
   class data_mem_default_gen extends base_generator #(data_mem_trans);
 
-    //queue to keep track of our prev written addresses
-    //  -I init to 0 so the solver never tries to inside {empty_queue}
+    //use a dynamic queue to keep track of previously written addresses
+    //  - Note: I init with 0, so the solver never tries to solve a 
+    //          constraint with an empty queue in it
     word_t prev_written_addr [$] = {0};
 
     function new(mailbox_t gen_to_drv_mbx);
@@ -71,10 +79,21 @@ package tb_data_mem_generator_pkg;
       prev_written_addr = {0};
     endfunction
 
+    function void update_prev_written_addr(data_mem_trans trans);
+      if(trans.wr_sel) begin
+        prev_written_addr.push_back(trans.addr);
+      end
+    endfunction
+
     function data_mem_trans gen_trans();
       data_mem_trans trans;
+
+      //We want to randomly choose a transaction that hits either
+      //the corner addresses, previously written addresses, or the full range of addresses
       randcase
-        1: begin
+
+        //corner addresses
+        4: begin
           data_mem_trans_corner_addr trans_corner_addr = new();
 
           assert(trans_corner_addr.randomize()) else
@@ -82,19 +101,20 @@ package tb_data_mem_generator_pkg;
 
           trans = trans_corner_addr;
         end
-        5: begin
-          data_mem_trans_prev_written trans_prev_written = new();
 
-          //give the trans the current set of prev written addresses
-          trans_prev_written.prev_written_addr = prev_written_addr;
+        //previously written addresses
+        5: begin
+          data_mem_trans_prev_written trans_prev_written = new(prev_written_addr);
 
           assert(trans_prev_written.randomize()) else
             $fatal(1, "TB_DATA_MEM_GENERATOR: gen_trans() randomization failed, prev_written");
 
           trans = trans_prev_written;
         end
+
+        //full range of addresses
         3: begin
-          data_mem_trans_base_contraints trans_full_range = new();
+          data_mem_trans_base_constraints trans_full_range = new();
 
           assert(trans_full_range.randomize()) else
             $fatal(1, "TB_DATA_MEM_GENERATOR: gen_trans() randomization failed, full_range");
@@ -103,12 +123,10 @@ package tb_data_mem_generator_pkg;
         end
       endcase
 
-      if(trans.wr_sel != 0) begin
-        prev_written_addr.push_back(trans.addr);
-      end
-
-      // trans.print("TB_DATA_MEM_GENERATOR");
+      //update previously written addresses and return
+      update_prev_written_addr(trans);
       return trans;
     endfunction
   endclass
+
 endpackage
