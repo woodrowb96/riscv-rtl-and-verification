@@ -26,6 +26,26 @@ OUTPUT
   - inst: 32bit instruction
       - The instruction that PC is currently pointing to in instruction memory
       - sent to the ID stage and Control Unit to be decoded
+
+
+NOTE: EXCEPTION HANDLING (deferred)
+  - I am waiting to implement exceptions until after I get the pipelined core up and
+    running without them. I will then go back and add the proper exception handling
+    functionality to the core.
+
+  - For now the following behavior happens silently for each exception:
+
+    INSTRUCTION ADDRESS MISALIGNED:
+      Non-word-aligned branch_target addresses (branch_target[1:0] != 2'b00) are
+      silently rounded down to the next lowest word aligned address (this happens
+      inside u_inst_mem). Each proceeding PC after a misaligned branch will also be
+      misaligned, but this is not a problem since those too will get rounded down.
+
+    INSTRUCTION ACCESS FAULT:
+      Currently the only access fault defined in this implementation is trying to
+      access an out-of-bounds instruction address (inst_addr >= INST_MEM_DEPTH).
+      Out-of-bounds addresses silently wrap around to the start of memory
+      (inst_addr == INST_MEM_DEPTH + 50 becomes inst_addr == 50).
 */
 import rv32i_defs_pkg::*;
 import rv32i_config_pkg::*;
