@@ -6,6 +6,7 @@ package tb_imm_gen_generator_pkg;
 
   //SEE THE NOTE IN: tb_lut_ram_generator_pkg.sv for why im using child trans
   //classes instead of just inlining this stuff in the generator
+  //
   class imm_gen_trans_i_type_corners extends imm_gen_trans;
 
     constraint i_type_opcodes {
@@ -134,7 +135,10 @@ package tb_imm_gen_generator_pkg;
     endfunction
   endclass
 
-  /************************* GENERATOR *****************************/
+  /*==============================================================================*/
+  /*------------------------------ GENERATOR -------------------------------------*/
+  /*==============================================================================*/
+
   class imm_gen_default_gen extends base_generator #(imm_gen_trans);
 
     function new(mailbox_t gen_to_drv_mbx);
@@ -147,7 +151,7 @@ package tb_imm_gen_generator_pkg;
       //We use the randcase to choose which format type to generate.
       //Each format type has its own corner constraints.
       randcase
-        //base transaction (no corner constraints, covers non-corners)
+        //base transaction (randomly choose from each type, data is fully randomized)
         1: begin
           imm_gen_trans trans_base = new();
 
@@ -205,5 +209,7 @@ package tb_imm_gen_generator_pkg;
 
       return trans;
     endfunction
+
   endclass
+
 endpackage

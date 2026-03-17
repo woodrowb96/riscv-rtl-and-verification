@@ -16,6 +16,7 @@ package tb_imm_gen_coverage_pkg;
 
     covergroup cg;
       /********************* OPCODE COVERAGE **************************/
+
       //we want to cover each opcode
       opcode: coverpoint trans.inst[6:0] {
         bins op_reg    = {OP_REG};
@@ -30,12 +31,15 @@ package tb_imm_gen_coverage_pkg;
         illegal_bins invalid = default; //just to help debugging
       }
 
+
       /********************** SIGN COVERAGE ****************************/
+
       //inst[31] is the sign bit for all immediate formats.
       sign: coverpoint trans.inst[31] {
         bins pos = {1'b0};
         bins neg = {1'b1};
       }
+
 
       /**************** ENCODED IMMEDIATE CORNERS *************************/
       //Note: I cover the sign bit separately, so each encoded imm corner is 1 bit
@@ -98,6 +102,7 @@ package tb_imm_gen_coverage_pkg;
           bins alt_aa    = {IMM_19_ALT_AA};     //the pattern 1010 repeated
           bins other = default;
       }
+
 
       /************* SIGN EXTENSION X ENCODED IMMEDIATE CORNERS *****************/
       //we want to cover pos and neg sign extension for each corner
