@@ -21,7 +21,7 @@ module tb_inst_mem();
   inst_mem #(DUT_TEST_MEM) dut(.inst_addr(intf.inst_addr), .inst(intf.inst));
 
   /*********** BIND ASSERTIONS *************/
-  bind tb_inst_mem.dut inst_mem_assert dut_assert(.clk(tb_inst_mem.clk),
+  bind tb_inst_mem.dut inst_mem_assert dut_assert(.tb_clk(tb_inst_mem.clk),
                                                   .inst_addr(inst_addr),
                                                   .inst(inst)
                                                   );
