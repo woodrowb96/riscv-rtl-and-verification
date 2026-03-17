@@ -15,6 +15,15 @@ package tb_inst_mem_coverage_pkg;
 
     inst_mem_trans trans;
 
+    function new();
+      this.cg = new();
+    endfunction
+
+    function void sample(inst_mem_trans trans);
+      this.trans = trans;
+      cg.sample();
+    endfunction
+
     function bit misaligned_addr(word_t inst_addr);
       return inst_addr[1:0] != 2'b00 ? 1 : 0;
     endfunction
@@ -24,15 +33,16 @@ package tb_inst_mem_coverage_pkg;
       return ((inst_addr >> 2) >= INST_MEM_DEPTH) ? 1 : 0;
     endfunction
 
+    /*==============================  COVERGROUP  =================================*/
     covergroup cg;
 
       /************* INST_ADDR COVERAGE *****************/
       inst_addr: coverpoint trans.inst_addr {
         bins first_addr          = {INST_MEM_FIRST_ADDR};
         bins second_addr         = {INST_MEM_FIRST_ADDR + 'd4};
-        bins second_to_last_addr = {INST_MEM_LAST_ADDR - 'd4};
+        bins second_to_last_addr = {INST_MEM_LAST_ADDR  - 'd4};
         bins last_addr           = {INST_MEM_LAST_ADDR};
-        bins non_corner          = {[INST_MEM_FIRST_ADDR + 'd8 : INST_MEM_LAST_ADDR - 'd8]};
+        bins non_corner          = default;
       }
 
       //My implementation assumes alligned access, but the module is supposed
@@ -53,18 +63,10 @@ package tb_inst_mem_coverage_pkg;
       inst: coverpoint trans.inst {
         bins all_zeros =  {WORD_ALL_ZEROS};
         bins all_ones =   {WORD_ALL_ONES};
-        bins non_corner = {[WORD_ALL_ZEROS + 1 : WORD_ALL_ONES - 1]};
+        bins non_corner = default;
       }
 
     endgroup
-
-    function void sample(inst_mem_trans trans);
-      this.trans = trans;
-      cg.sample();
-    endfunction
-
-    function new();
-      this.cg = new();
-    endfunction
   endclass
+
 endpackage

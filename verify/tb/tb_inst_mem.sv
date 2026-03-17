@@ -31,8 +31,8 @@ module tb_inst_mem();
 
   /**************  TESTING ***************************/
   inst_mem_default_test    test_default;    //randomized inst_addr with constraints to hit coverage
-  inst_mem_misaligned_test test_misaligned;
-  inst_mem_oob_test        test_oob;
+  inst_mem_misaligned_test test_misaligned; //test misaligned addresses
+  inst_mem_oob_test        test_oob;        //test out of bounds addresses
 
   initial begin
     coverage = new();

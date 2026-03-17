@@ -7,10 +7,13 @@ package tb_inst_mem_scoreboard_pkg;
   class inst_mem_scoreboard extends base_scoreboard #(inst_mem_trans);
     inst_mem_ref_model ref_inst_mem;
 
-    tb_inst_mem_coverage coverage;
+    tb_inst_mem_coverage coverage;  //we are collecting coverage in this element
 
-    function new(tb_inst_mem_coverage coverage, string tag, mailbox_t mon_to_scb_mbx,
-                 string program_file);
+    function new(tb_inst_mem_coverage coverage,
+                string tag,
+                mailbox_t mon_to_scb_mbx,
+                string program_file
+    );
       super.new(tag, mon_to_scb_mbx);
       this.coverage = coverage;
       ref_inst_mem = new(program_file);
@@ -31,7 +34,7 @@ package tb_inst_mem_scoreboard_pkg;
 
       //handle pass/fail
       if(passed) begin
-        coverage.sample(actual);
+        coverage.sample(actual);    //only collect coverage on passing transactions
       end
       else begin
         print_fail(actual, expected);
@@ -39,6 +42,7 @@ package tb_inst_mem_scoreboard_pkg;
 
       return passed;
     endfunction
+
   endclass
 
 endpackage

@@ -5,29 +5,28 @@ package tb_inst_mem_generator_pkg;
 
   //SEE THE NOTE IN: tb_lut_ram_generator_pkg.sv for why im using child trans
   //classes instead of just inlining this stuff in the generator
+
   class inst_mem_trans_corner_addr extends inst_mem_trans;
     constraint inst_addr_corners {
       inst_addr dist {
-        INST_MEM_FIRST_ADDR     := 1,
-        INST_MEM_FIRST_ADDR + 4 := 1,
-        INST_MEM_LAST_ADDR - 4  := 1,
-        INST_MEM_LAST_ADDR      := 1
+        INST_MEM_FIRST_ADDR     := 1, //first address
+        INST_MEM_FIRST_ADDR + 4 := 1, //second address
+        INST_MEM_LAST_ADDR  - 4 := 1, //second to last address
+        INST_MEM_LAST_ADDR      := 1  //last address
       };
     }
   endclass
 
   class inst_mem_trans_oob extends inst_mem_trans;
-
-    //we are overriding the legal_addr_range const in the base class
-    //so that we will only gen OOB addresses
+    //we are overriding the legal_addr_range constraint in the base class to
+    //get out of bound addresses only
     constraint legal_addr_range {
       inst_addr > INST_MEM_LAST_ADDR;
     }
   endclass
 
   class inst_mem_trans_misaligned extends inst_mem_trans;
-
-    //override the word_aligned constraint to force a non-zero byte offset
+    //override the word_aligned constraint in the base class to get misaligned accesses
     constraint word_aligned {
       inst_addr[1:0] != 2'b00;
     }
@@ -70,9 +69,10 @@ package tb_inst_mem_generator_pkg;
   endclass
 
   /*==============================================================================*/
-  /*------------------------------ MISALIGNED GENERATOR --------------------------*/
+  /*------------------------ MISALIGNED GENERATOR ---------------------------------*/
   /*==============================================================================*/
 
+  //generate only misaligned addresses
   class inst_mem_misaligned_gen extends base_generator #(inst_mem_trans);
 
     function new(mailbox_t gen_to_drv_mbx);
@@ -93,6 +93,7 @@ package tb_inst_mem_generator_pkg;
   /*------------------------------ OOB GENERATOR ---------------------------------*/
   /*==============================================================================*/
 
+  //generate only out of bounds addresses
   class inst_mem_oob_gen extends base_generator #(inst_mem_trans);
 
     function new(mailbox_t gen_to_drv_mbx);
