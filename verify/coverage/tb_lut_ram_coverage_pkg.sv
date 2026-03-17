@@ -54,9 +54,11 @@ package tb_lut_ram_coverage_pkg;
       }
 
       wr_addr: coverpoint trans.wr_addr {
-        bins addr_min =   {MIN_ADDR};
-        bins addr_max =   {MAX_ADDR};
-        bins non_corner = default;
+        bins addr_min            = {MIN_ADDR};
+        bins second_addr         = {MIN_ADDR + 1};
+        bins second_to_last_addr = {MAX_ADDR - 1};
+        bins addr_max            = {MAX_ADDR};
+        bins non_corner          = default;
       }
 
       //we want to write and not write to our corner addresses
@@ -87,9 +89,11 @@ package tb_lut_ram_coverage_pkg;
       //point to x's doesnt verify much and is not the functionality we are interested in covering.
       rd_addr: coverpoint trans.rd_addr
         iff(written.exists(trans.rd_addr)) {
-          bins addr_min =   {MIN_ADDR};
-          bins addr_max =   {MAX_ADDR};
-          bins non_corner = default;
+          bins addr_min            = {MIN_ADDR};
+          bins second_addr         = {MIN_ADDR + 1};
+          bins second_to_last_addr = {MAX_ADDR - 1};
+          bins addr_max            = {MAX_ADDR};
+          bins non_corner          = default;
       }
 
       rd_data: coverpoint trans.rd_data

@@ -47,8 +47,8 @@ package tb_lut_ram_generator_pkg;
     localparam int     unsigned MAX_ADDR = LUT_DEPTH - 1;
 
     constraint lut_ram_const_corners {
-      wr_addr inside { MIN_ADDR, MAX_ADDR };
-      rd_addr inside { MIN_ADDR, MAX_ADDR };
+      wr_addr inside { MIN_ADDR, MIN_ADDR + 1, MAX_ADDR - 1, MAX_ADDR };
+      rd_addr inside { MIN_ADDR, MIN_ADDR + 1, MAX_ADDR - 1, MAX_ADDR };
     };
 
   endclass
