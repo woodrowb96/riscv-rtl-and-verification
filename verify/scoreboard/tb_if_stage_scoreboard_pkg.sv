@@ -27,7 +27,7 @@ package tb_if_stage_scoreboard_pkg;
       expected.inst = ref_if_stage.fetch_inst();
 
       //test
-      passed = actuall.compare(expected);
+      passed = actual.compare(expected);
 
       //handle pass/fail
       if(passed) begin

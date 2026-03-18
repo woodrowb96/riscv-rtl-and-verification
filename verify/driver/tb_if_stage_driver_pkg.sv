@@ -17,14 +17,27 @@ package tb_if_stage_driver_pkg;
       vif.reset_n       <= 0;
       vif.branch        <= 0;
       vif.branch_target <= 0;
-      @(vif.cb_drv);
-      //then after the reset assertion is clocked in
-      //we can go back to using the cb_drv to deassert the reset
-      vif.cb_drv.reset_n <= 1;
+      @(posedge vif.clk);
+
+      //NOTE: This is a bit of a weird way to reset. I dont deassert the reset
+      //      signal here and leave it to drive to bring us out of reset.
+      //      The problem with deasserting here is that the PC will start
+      //      incrementing on the first clk of the drive before any of the
+      //      .cb_drv signals actually get driven in. So basically the first
+      //      transaction will happen at pc = 4, not pc = 0. We want testing
+      //      to start at pc = 0, so we will hold the reset until testing
+      //      actually starts.
+      //
+      //      The main problem this causes is the reference model is getting
+      //      out of sync with the rtl. So one option is making modifications
+      //      to the library architecture (add a base_predictor that runs
+      //      concurrently and runs the ref_model off the interface) but for
+      //      now im gonna continue with verification with the reset like this.
     endtask
 
     task drive(input if_stage_trans trans);
       @(vif.cb_drv)
+      vif.cb_drv.reset_n       <= 1;  //make sure reset is deasserted
       vif.cb_drv.branch        <= trans.branch;
       vif.cb_drv.branch_target <= trans.branch_target;
     endtask
