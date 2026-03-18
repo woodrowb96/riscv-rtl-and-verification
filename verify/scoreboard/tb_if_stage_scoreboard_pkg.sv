@@ -2,15 +2,20 @@ package tb_if_stage_scoreboard_pkg;
   import base_scoreboard_pkg::*;
   import tb_if_stage_transaction_pkg::*;
   import if_stage_ref_model_pkg::*;
+  import tb_if_stage_coverage_pkg::*;
 
   class if_stage_scoreboard extends base_scoreboard #(if_stage_trans);
     if_stage_ref_model ref_if_stage;
 
-    function new(string program_file,
+    tb_if_stage_coverage coverage;    //we are collecting coverage in this component
+
+    function new(tb_if_stage_coverage coverage,
+                 string program_file,
                  string tag,
                  mailbox_t mon_to_scb_mbx
     );
       super.new(tag, mon_to_scb_mbx);
+      this.coverage = coverage;
       ref_if_stage = new(program_file);
     endfunction
 
@@ -31,7 +36,7 @@ package tb_if_stage_scoreboard_pkg;
 
       //handle pass/fail
       if(passed) begin
-        //eventually we will sample coverage here
+        coverage.sample(actual); //only cover the passing transactions
       end
       else begin
         print_fail(actual, expected);

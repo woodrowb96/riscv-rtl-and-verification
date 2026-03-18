@@ -1,5 +1,6 @@
 import tb_if_stage_tests_pkg::*;
 import verify_config_pkg::*;
+import tb_if_stage_coverage_pkg::*;
 
 module tb_if_stage();
   localparam CLK_PERIOD = 10;
@@ -24,11 +25,16 @@ module tb_if_stage();
                                    .inst(intf.inst)
   );
 
+  /******* COVERAGE *************/
+  tb_if_stage_coverage  coverage;
+
   /********** TESTING ********************/
   if_stage_default_test test_default;
 
   initial begin
-    test_default = new(intf, DEFAULT_TEST_MEM);
+    coverage = new();
+
+    test_default = new(intf, coverage, DEFAULT_TEST_MEM);
 
     //run tests
     test_default.drv.reset();
