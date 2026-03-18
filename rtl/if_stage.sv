@@ -16,11 +16,12 @@ CONTROL
           - 1 : pc <= branch_target
           - 0 : pc <= pc + 4
 INPUT
-  - branch_target: 32bit address of the branch target
-      - calculated in the EX stage
+  - branch_target: 32bit unsigned address of the branch target
+      - NOTE: The branch target has already been calculated in the EX stage.
+              This module doesnt need to do any extra-processing on it.
 
 OUTPUT
-  - PC: 32bit address currently in the Program Counter
+  - PC: 32bit unsigned address currently in the Program Counter
       - The current address in the inst_mem we are reading out of
       - PC is sent to the EX stage to aid in branch_target calculation
   - inst: 32bit instruction

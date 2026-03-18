@@ -18,7 +18,7 @@ package tb_inst_mem_tests_pkg;
       gen = new(gen_to_drv_mbx);
       drv = new(vif, "INST_MEM_DRV", gen_to_drv_mbx);
       mon = new(vif, "INST_MEM_MON", mon_to_scb_mbx);
-      scb = new(coverage, "INST_MEM_SCB", mon_to_scb_mbx, program_file);
+      scb = new(coverage, program_file, "INST_MEM_SCB", mon_to_scb_mbx);
     endfunction
   endclass
 

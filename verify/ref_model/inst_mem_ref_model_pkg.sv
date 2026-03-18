@@ -36,6 +36,10 @@ package inst_mem_ref_model_pkg;
       //get rid of the byte offset
       int unsigned ref_inst_addr = inst_addr >> 2;
 
+      if(inst_addr[1:0] != 2'b00) begin
+        $warning("[INST_MEM_REF_MODEL]: misaligned read: inst_addr:%0d", inst_addr);
+      end
+
       //manually wrap out of bounds addresses
       if(ref_inst_addr >= INST_MEM_DEPTH) begin
         $warning("[INST_MEM_REF_MODEL]: out of bound read: depth:%0d, inst_addr:%0d",

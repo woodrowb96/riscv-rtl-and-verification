@@ -10,9 +10,9 @@ package tb_inst_mem_scoreboard_pkg;
     tb_inst_mem_coverage coverage;  //we are collecting coverage in this element
 
     function new(tb_inst_mem_coverage coverage,
+                string program_file,
                 string tag,
-                mailbox_t mon_to_scb_mbx,
-                string program_file
+                mailbox_t mon_to_scb_mbx
     );
       super.new(tag, mon_to_scb_mbx);
       this.coverage = coverage;
