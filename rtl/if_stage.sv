@@ -17,6 +17,7 @@ CONTROL
           - 0 : pc <= pc + 4
 INPUT
   - branch_target: 32bit unsigned address of the branch target
+      - branch_targets are word aligned in this implementation
       - NOTE: The branch target has already been calculated in the EX stage.
               This module doesnt need to do any extra-processing on it.
 

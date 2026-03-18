@@ -9,6 +9,13 @@ package verify_const_pkg;
   parameter int unsigned DATA_MEM_LAST_ADDR = (DATA_MEM_DEPTH * 4) - 1;    //the last address in memory (so the last byte)
   parameter int unsigned DATA_MEM_LAST_WORD_ADDR = DATA_MEM_LAST_ADDR - 4; //the last full word stored in memory
 
+  /********************* INST_MEM **********************************/
+  //first and last address constants are currently in the rv32i_configs_pkg,
+  //I need to move them into here after I finish up the if_stage verification
+
+  parameter int signed MAX_POS_BRANCH_DIST = (INST_MEM_DEPTH - 1) * 4;
+  parameter int signed MAX_NEG_BRANCH_DIST = -MAX_POS_BRANCH_DIST; 
+
   /*********************** IMM_GEN *********************************/
 
   localparam logic[10:0] IMM_11_ALL_ZEROS = '0;
