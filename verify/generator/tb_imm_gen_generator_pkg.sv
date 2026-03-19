@@ -6,7 +6,6 @@ package tb_imm_gen_generator_pkg;
 
   //SEE THE NOTE IN: tb_lut_ram_generator_pkg.sv for why im using child trans
   //classes instead of just inlining this stuff in the generator
-  //
   class imm_gen_trans_i_type_corners extends imm_gen_trans;
 
     constraint i_type_opcodes {
