@@ -39,7 +39,7 @@ Note: I am actively developing this project.
 │   ├── generator/      # Directed/Constrained-Random generators
 │   ├── driver/         # Drivers
 │   ├── monitor/        # Monitors
-│   ├── predictor/      # Predictors (reference model wrappers)
+│   ├── predictor/      # Predictors
 │   ├── scoreboard/     # Test scoring
 │   ├── ref_model/      # Behavioral reference models (SV and C++ via DPI-C)
 │   ├── coverage/       # Functional coverage
