@@ -39,6 +39,7 @@ Note: I am actively developing this project.
 │   ├── generator/      # Directed/Constrained-Random generators
 │   ├── driver/         # Drivers
 │   ├── monitor/        # Monitors
+│   ├── predictor/      # Predictors (reference model wrappers)
 │   ├── scoreboard/     # Test scoring
 │   ├── ref_model/      # Behavioral reference models (SV and C++ via DPI-C)
 │   ├── coverage/       # Functional coverage
@@ -82,14 +83,15 @@ Testbenches instantiate and connect the DUTs, interfaces, coverages, assertions 
 
 ### Tests
 
-Tests are class-based concurrent verification environments bundling a generator, driver, monitor, and scoreboard
+Tests are class-based concurrent verification environments bundling a generator, driver, monitor, predictor and scoreboard
 which together implement a single directed or constrained-random test.
 
 Test components:
 - **Generator** — Generates a sequence of transactions which implement a constrained-random or directed test.
 - **Driver** — Drives generated transactions into the DUT (typically done through interface clocking blocks)
 - **Monitor** — Monitors the DUT I/O ports to sample a single transaction (also typically through interface clocking blocks)
-- **Scoreboard** — Scores monitored transactions against a reference model, tracks total pass/fails, adds passing transactions to functional coverage
+- **Predictor** — Samples the DUT inputs and uses them to predict the expected output using a reference model.
+- **Scoreboard** — Scores the acual transactions from the monitor against the expected transactions from the predictor, tracks total pass/fails, adds passing transactions to functional coverage
 
 Each testbench contains one or more tests, each targeting a different part of coverage.
 
