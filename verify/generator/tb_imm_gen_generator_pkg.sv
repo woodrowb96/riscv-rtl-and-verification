@@ -144,8 +144,7 @@ package tb_imm_gen_generator_pkg;
       super.new("IMM_GEN_DEFAULT_GEN", gen_to_drv_mbx);
     endfunction
 
-    function imm_gen_trans gen_trans();
-      imm_gen_trans trans;
+    task gen_trans(output imm_gen_trans trans);
 
       //We use the randcase to choose which format type to generate.
       //Each format type has its own corner constraints.
@@ -205,9 +204,7 @@ package tb_imm_gen_generator_pkg;
           trans = trans_j;
         end
       endcase
-
-      return trans;
-    endfunction
+    endtask
 
   endclass
 

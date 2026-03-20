@@ -103,8 +103,7 @@ package tb_alu_generator_pkg;
       super.new("ALU_DEFAULT_GEN", gen_to_drv_mbx);
     endfunction
 
-    function alu_trans gen_trans();
-      alu_trans trans;
+    task gen_trans(output alu_trans trans);
 
       randcase
         //logical operations
@@ -137,9 +136,7 @@ package tb_alu_generator_pkg;
           trans = trans_sub;
         end
       endcase
-
-      return trans;
-    endfunction
+    endtask
 
   endclass
 
@@ -163,8 +160,8 @@ package tb_alu_generator_pkg;
       super.new("ALU_ADD_CORNER_WALK_GEN", gen_to_drv_mbx);
     endfunction
 
-    function alu_trans gen_trans();
-      alu_trans trans = new();
+    task gen_trans(output alu_trans trans);
+      trans = new();
 
       //if we have walked through all corner combos set finished
       if (i >= corners.size()) begin
@@ -184,9 +181,7 @@ package tb_alu_generator_pkg;
         j = 0;
         i++;
       end
-
-      return trans;
-    endfunction
+    endtask
 
   endclass
 
@@ -213,8 +208,8 @@ package tb_alu_generator_pkg;
       super.new("ALU_SUB_CORNER_WALK_GEN", gen_to_drv_mbx);
     endfunction
 
-    function alu_trans gen_trans();
-      alu_trans trans = new();
+    task gen_trans(output alu_trans trans);
+      trans = new();
 
       //if we have walked through all corner combos set finished
       if (i >= corners.size()) begin
@@ -234,9 +229,7 @@ package tb_alu_generator_pkg;
         j = 0;
         i++;
       end
-
-      return trans;
-    endfunction
+    endtask
 
   endclass
 
@@ -250,14 +243,14 @@ package tb_alu_generator_pkg;
       super.new("ALU_INVALID_OP_GEN", gen_to_drv_mbx);
     endfunction
 
-    function alu_trans gen_trans();
-      alu_trans_invalid_op trans = new();
+    task gen_trans(output alu_trans trans);
+      alu_trans_invalid_op trans_invalid = new();
 
-      assert(trans.randomize()) else
+      assert(trans_invalid.randomize()) else
         $fatal(1, "[%s]: gen_trans() randomization failed", tag);
 
-      return trans;
-    endfunction
+      trans = trans_invalid;
+    endtask
 
   endclass
 

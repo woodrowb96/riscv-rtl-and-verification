@@ -84,16 +84,16 @@ package tb_if_stage_generator_pkg;
       super.new("IF_STAGE_MAIN_TEST_GEN", gen_to_drv_mbx);
     endfunction
 
-    function if_stage_trans gen_trans();
-      if_stage_trans_main_test trans = new(prev_pc);
+    task gen_trans(output if_stage_trans trans);
+      if_stage_trans_main_test trans_main = new(prev_pc);
 
-      assert(trans.randomize()) else
+      assert(trans_main.randomize()) else
         $fatal("[%s] gen_trans(): randomization failed", tag);
 
-      //update generator state and return the trans
-      update_state(trans);
-      return trans;
-    endfunction
+      //update generator state
+      update_state(trans_main);
+      trans = trans_main;
+    endtask
 
   endclass
 
@@ -131,16 +131,16 @@ package tb_if_stage_generator_pkg;
       super.new("IF_STAGE_BRANCH_CORNERS_GEN", gen_to_drv_mbx);
     endfunction
 
-    function if_stage_trans gen_trans();
-      if_stage_trans_branch_corners trans = new(prev_pc);
+    task gen_trans(output if_stage_trans trans);
+      if_stage_trans_branch_corners trans_corners = new(prev_pc);
 
-      assert(trans.randomize()) else
+      assert(trans_corners.randomize()) else
         $fatal("[%s] gen_trans(): randomization failed", tag);
 
-      //update generator state and return the trans
-      update_state(trans);
-      return trans;
-    endfunction
+      //update generator state
+      update_state(trans_corners);
+      trans = trans_corners;
+    endtask
 
   endclass
 
@@ -206,15 +206,15 @@ package tb_if_stage_generator_pkg;
       super.new("IF_STAGE_OOB_MISALIGNED_GEN", gen_to_drv_mbx);
     endfunction
 
-    function if_stage_trans gen_trans();
-      if_stage_trans_misaligned_oob trans = new(prev_pc);
+    task gen_trans(output if_stage_trans trans);
+      if_stage_trans_misaligned_oob trans_oob = new(prev_pc);
 
-      assert(trans.randomize()) else
+      assert(trans_oob.randomize()) else
         $fatal(1, "[%s]: gen_trans() randomization failed, OOB/Misaligned trans", tag);
 
-      update_state(trans);
-      return trans;
-    endfunction
+      update_state(trans_oob);
+      trans = trans_oob;
+    endtask
   endclass
 
 endpackage

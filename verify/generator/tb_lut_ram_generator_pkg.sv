@@ -107,8 +107,7 @@ package tb_lut_ram_generator_pkg;
 
     /*=================== GEN_TRANS() =================*/
 
-    function trans_base_t gen_trans();
-      trans_base_t trans;
+    task gen_trans(output trans_base_t trans);
 
       //Randomly choose the type of address we want
       //All trans will have the same wr_data weights (see lut_ram_trans_weighted_wr_data above)
@@ -145,10 +144,9 @@ package tb_lut_ram_generator_pkg;
         end
       endcase
 
-      //update the previously writtens and return
+      //update the previously writtens
       update_prev_written_addr(trans);
-      return trans;
-    endfunction
+    endtask
   endclass
 
 endpackage

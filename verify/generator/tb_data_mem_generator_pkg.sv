@@ -85,8 +85,7 @@ package tb_data_mem_generator_pkg;
       end
     endfunction
 
-    function data_mem_trans gen_trans();
-      data_mem_trans trans;
+    task gen_trans(output data_mem_trans trans);
 
       //We want to randomly choose a transaction that hits either
       //the corner addresses, previously written addresses, or the full range of addresses
@@ -123,10 +122,9 @@ package tb_data_mem_generator_pkg;
         end
       endcase
 
-      //update previously written addresses and return
+      //update previously written addresses
       update_prev_written_addr(trans);
-      return trans;
-    endfunction
+    endtask
   endclass
 
 endpackage

@@ -28,8 +28,7 @@ package tb_reg_file_generator_pkg;
       super.new("REG_FILE_DEFAULT_GEN", gen_to_drv_mbx);
     endfunction
 
-    function reg_file_trans gen_trans();
-      reg_file_trans trans;
+    task gen_trans(output reg_file_trans trans);
 
       //Generate with a bias towards corner wr_data values, but also generate
       //fully random wr_data values too
@@ -55,9 +54,7 @@ package tb_reg_file_generator_pkg;
           trans = trans_full_range;
         end
       endcase
-
-      return trans;
-    endfunction
+    endtask
 
   endclass
 
