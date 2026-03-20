@@ -11,6 +11,14 @@
             - Users can set the finished flag to 1 to signal to base_test that the
               generation of transactions is done.
 
+    Virtual tasks:
+        - pre_run()
+          - automatically runs once before the main base_test::run() loop starts
+          - by defualt its empty, but users can override this and add there own logic
+        - post_run()
+            - automatically runs once after the main base_test::run() loop ends
+            - by defualt its empty, but users can override this and add there own logic
+
     Member Functions:
         - run()
             - Calls gen_trans(), sends generated trans to the driver, keeps track of the
@@ -45,6 +53,14 @@ package base_generator_pkg;
     endfunction
 
     pure virtual task gen_trans(output TRANS_T trans);
+
+    virtual task pre_run();
+      //empty by default
+    endtask
+
+    virtual task post_run();
+      //empty by default
+    endtask
 
     task run();
       TRANS_T trans;

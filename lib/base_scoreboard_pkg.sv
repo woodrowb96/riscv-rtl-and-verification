@@ -9,6 +9,15 @@
         - Users modify bit passed to indicate the result:
             - 1 if test passed
             - 0 if test failed
+
+    Virtual tasks:
+        - pre_run()
+            - automatically runs once before the main base_test::run() loop starts
+            - by defualt its empty, but users can override this and add there own logic
+        - post_run()
+            - automatically runs once after the main base_test::run() loop ends
+            - by defualt its empty, but users can override this and add there own logic
+
   Member Functions:
       - run()
           - Gets trans from the monitor and predictor and passes them to score(),
@@ -38,6 +47,14 @@ package base_scoreboard_pkg;
     endfunction
 
     pure virtual task score(input TRANS_T actual, input TRANS_T expected, output bit passed);
+
+    virtual task pre_run();
+      //empty by default
+    endtask
+
+    virtual task post_run();
+      //empty by default
+    endtask
 
     task run();
       TRANS_T actual, expected;

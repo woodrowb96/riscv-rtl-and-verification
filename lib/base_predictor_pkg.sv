@@ -13,6 +13,14 @@
           output and store the expected transaction in the output trans.
         - This function will run once per run() (pred.run() is being looped in the base_test)
 
+    Virtual tasks:
+        - pre_run()
+            - automatically runs once before the main base_test::run() loop starts
+            - by defualt its empty, but users can override this and add there own logic
+        - post_run()
+            - automatically runs once after the main base_test::run() loop ends
+            - by defualt its empty, but users can override this and add there own logic
+
   Member Functions:
     - run()
         - Calls predict(), then sends the predicted transaction to the scoreboard
@@ -37,6 +45,14 @@ package base_predictor_pkg;
     endfunction
 
     pure virtual task predict(output TRANS_T trans);
+
+    virtual task pre_run();
+      //empty by default
+    endtask
+
+    virtual task post_run();
+      //empty by default
+    endtask
 
     task run();
       TRANS_T trans;

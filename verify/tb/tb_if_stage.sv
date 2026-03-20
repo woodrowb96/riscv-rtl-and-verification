@@ -42,13 +42,13 @@ module tb_if_stage();
     test_oob_misaligned = new(intf, coverage, DEFAULT_TEST_MEM);
 
     /********* RUN TESTS ***********/
-    test_main.drv.reset();
+    // test_main.drv.reset();
     test_main.run(1000);
 
-    test_branch_corners.drv.reset();
+    // test_branch_corners.drv.reset();
     test_branch_corners.run(500);
 
-    test_oob_misaligned.drv.reset();
+    // test_oob_misaligned.drv.reset();
     test_oob_misaligned.run(250);
 
 

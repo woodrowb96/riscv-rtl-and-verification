@@ -7,6 +7,15 @@
           - Users use this function to write the DUT sampling logic.
           - Users sample the DUT into a transaction
           - This function will run once per run() (mon.run() is being looped in the base_test)
+
+    Virtual tasks:
+        - pre_run()
+            - automatically runs once before the main base_test::run() loop starts
+            - by defualt its empty, but users can override this and add there own logic
+        - post_run()
+            - automatically runs once after the main base_test::run() loop ends
+            - by defualt its empty, but users can override this and add there own logic
+
     Member Functions:
         - run()
             - Calls monitor to read a trans from the DUT, passes the trans to the scoreboard, increments num_transactions
@@ -46,6 +55,14 @@ package base_monitor_pkg;
     endfunction
 
     pure virtual task monitor(output TRANS_T trans);
+
+    virtual task pre_run();
+      //empty by default
+    endtask
+
+    virtual task post_run();
+      //empty by default
+    endtask
 
     task run();
       TRANS_T trans;

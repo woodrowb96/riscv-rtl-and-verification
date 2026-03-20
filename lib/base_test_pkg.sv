@@ -20,6 +20,12 @@
                   - mon.run() and pred.run() are not called at the same time as the other .run() functions.
                   - we wait until after the first drive transaction has been driven
                     into the DUT to start monitoring and predicting
+          - pre_run()
+                - runs once before the main run loop
+                - forks each components pre_run() function and waits for them all to return
+          - post_run()
+                - runs once after the main run loop
+                - forks each components post_run() function and waits for them all to return
           - print_results(string msg = "")
                 - print total number of tests ran and total number of failed tests
 */
@@ -50,6 +56,8 @@ package base_test_pkg;
     endfunction
 
     task run(int num_tests = -1);
+      pre_run();
+
       fork begin
 
         //run the tests
@@ -81,7 +89,30 @@ package base_test_pkg;
         disable fork; //(only disables whats in this main fork-join block)
 
       end join
+
+      post_run();
     endtask
+
+    task pre_run();
+      fork begin
+        gen.pre_run();
+        drv.pre_run();
+        mon.pre_run();
+        pred.pre_run();
+        scb.pre_run();
+      end join
+    endtask
+
+    task post_run();
+      fork begin
+        gen.post_run();
+        drv.post_run();
+        mon.post_run();
+        pred.post_run();
+        scb.post_run();
+      end join
+    endtask
+
 
     function void print_results(string msg = "");
       scb.print_results(this.tag, msg);

@@ -10,29 +10,28 @@ package tb_if_stage_driver_pkg;
       this.vif = vif;
     endfunction
 
-    //perform the active low, synchronous reset
-    task reset();
-      //don't use .cb_drv for the reset assertion,
-      //we want to drive directly onto the interface before the 1st clk edge
+
+    //assert and hold the reset signal to prepare the DUT for testing
+    //   - NOTE: We dont deassert the reset. We want to hold the DUT in the
+    //           reset state until testing starts. This is to make sure the PC
+    //           doesnt start incrementing before the first drive. We will
+    //           deasert the reset during drive()
+    task pre_run();
       vif.reset_n       <= 0;
       vif.branch        <= 0;
       vif.branch_target <= 0;
       @(posedge vif.clk);
+    endtask
 
-      //NOTE: This is a bit of a weird way to reset. I don't deassert the reset
-      //      signal here and leave it to drive to bring us out of reset.
-      //      The problem with deasserting here is that the PC will start
-      //      incrementing on the first clk of the drive before any of the
-      //      .cb_drv signals actually get driven in. So basically the first
-      //      transaction will happen at pc = 4, not pc = 0. We want testing
-      //      to start at pc = 0, so we will hold the reset until testing
-      //      actually starts.
-      //
-      //      The main problem this causes is the reference model is getting
-      //      out of sync with the rtl. So one option is making modifications
-      //      to the library architecture (add a base_predictor that runs
-      //      concurrently and runs the ref_model off the interface) but for
-      //      now I'm gonna continue with verification with the reset like this.
+    //After the test has run assert and hold the reaset. We want to leave the
+    //DUT in the reset state, so the PC doesnt increment between tests.
+    //(This isnt too big of a deal because we reset during pre_run(), but well
+    // do it just to make sure PC isnt incrementing when we dont want it too)
+    task post_run();
+      vif.reset_n       <= 0;
+      vif.branch        <= 0;
+      vif.branch_target <= 0;
+      @(posedge vif.clk);
     endtask
 
     //NOTE:
