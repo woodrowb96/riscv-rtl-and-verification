@@ -14,7 +14,8 @@ See [`verify/`](../verify/) for example implementations written using the librar
 
 ## Architecture
 
-<img width="1768" height="772" alt="diagram" src="https://github.com/user-attachments/assets/3e51f2a6-ee10-47ff-819a-a61489cbdc1b" />
+<img width="1500" height="1000" alt="block_diagram" src="https://github.com/user-attachments/assets/9ead8f98-b576-437e-a7c5-33a862dc020b" />
+
 
 ## Classes
 
