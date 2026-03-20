@@ -4,6 +4,7 @@ lib/base_generator_pkg.sv
 lib/base_driver_pkg.sv
 lib/base_monitor_pkg.sv
 lib/base_scoreboard_pkg.sv
+lib/base_predictor_pkg.sv
 lib/base_test_pkg.sv
 
 # RTL
@@ -24,5 +25,6 @@ verify/generator/tb_alu_generator_pkg.sv
 verify/ref_model/alu_ref_model_pkg.sv
 verify/driver/tb_alu_driver_pkg.sv
 verify/monitor/tb_alu_monitor_pkg.sv
+verify/predictor/tb_alu_predictor_pkg.sv
 verify/scoreboard/tb_alu_scoreboard_pkg.sv
 verify/tests/tb_alu_tests_pkg.sv

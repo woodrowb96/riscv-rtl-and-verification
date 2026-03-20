@@ -4,6 +4,7 @@ lib/base_generator_pkg.sv
 lib/base_driver_pkg.sv
 lib/base_monitor_pkg.sv
 lib/base_scoreboard_pkg.sv
+lib/base_predictor_pkg.sv
 lib/base_test_pkg.sv
 
 #RTL
@@ -19,5 +20,6 @@ verify/generator/tb_lut_ram_generator_pkg.sv
 verify/ref_model/lut_ram_ref_model_pkg.sv
 verify/driver/tb_lut_ram_driver_pkg.sv
 verify/monitor/tb_lut_ram_monitor_pkg.sv
+verify/predictor/tb_lut_ram_predictor_pkg.sv
 verify/scoreboard/tb_lut_ram_scoreboard_pkg.sv
 verify/tests/tb_lut_ram_tests_pkg.sv

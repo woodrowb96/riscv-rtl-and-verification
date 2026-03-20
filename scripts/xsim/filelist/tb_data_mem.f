@@ -4,6 +4,7 @@ lib/base_generator_pkg.sv
 lib/base_driver_pkg.sv
 lib/base_monitor_pkg.sv
 lib/base_scoreboard_pkg.sv
+lib/base_predictor_pkg.sv
 lib/base_test_pkg.sv
 
 # RTL
@@ -26,5 +27,6 @@ verify/coverage/tb_data_mem_coverage_pkg.sv
 verify/generator/tb_data_mem_generator_pkg.sv
 verify/driver/tb_data_mem_driver_pkg.sv
 verify/monitor/tb_data_mem_monitor_pkg.sv
+verify/predictor/tb_data_mem_predictor_pkg.sv
 verify/scoreboard/tb_data_mem_scoreboard_pkg.sv
 verify/tests/tb_data_mem_tests_pkg.sv

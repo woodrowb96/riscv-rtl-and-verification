@@ -6,18 +6,20 @@ package tb_alu_tests_pkg;
   import tb_alu_monitor_pkg::*;
   import tb_alu_scoreboard_pkg::*;
   import tb_alu_coverage_pkg::*;
+  import tb_alu_predictor_pkg::*;
 
   /*=============================== BASE TEST ==================================*/
   virtual class alu_base_test #(type GEN_T) extends base_test #(
-      alu_trans, GEN_T, alu_driver, alu_monitor, alu_scoreboard);
+      alu_trans, GEN_T, alu_driver, alu_monitor, alu_predictor, alu_scoreboard);
 
     protected function new(virtual alu_intf vif, alu_coverage coverage, string tag = "ALU_BASE_TEST");
       super.new(tag);
 
-      gen = new(gen_to_drv_mbx);
-      drv = new(vif, "ALU_DRV", gen_to_drv_mbx);
-      mon = new(vif, "ALU_MON", mon_to_scb_mbx);
-      scb = new(coverage, "ALU_SCB", mon_to_scb_mbx);
+      gen  = new(gen_to_drv_mbx);
+      drv  = new(vif, "ALU_DRV", gen_to_drv_mbx);
+      mon  = new(vif, "ALU_MON", mon_to_scb_mbx);
+      pred = new(vif, "ALU_PRED", pred_to_scb_mbx);
+      scb  = new(coverage, "ALU_SCB", mon_to_scb_mbx, pred_to_scb_mbx);
     endfunction
   endclass
 

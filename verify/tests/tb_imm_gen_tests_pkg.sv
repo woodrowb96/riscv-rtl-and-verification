@@ -6,18 +6,20 @@ package tb_imm_gen_tests_pkg;
   import tb_imm_gen_monitor_pkg::*;
   import tb_imm_gen_scoreboard_pkg::*;
   import tb_imm_gen_coverage_pkg::*;
+  import tb_imm_gen_predictor_pkg::*;
 
   /*=============================== BASE TEST ==================================*/
   virtual class imm_gen_base_test #(type GEN_T) extends base_test #(
-      imm_gen_trans, GEN_T, imm_gen_driver, imm_gen_monitor, imm_gen_scoreboard);
+      imm_gen_trans, GEN_T, imm_gen_driver, imm_gen_monitor, imm_gen_predictor, imm_gen_scoreboard);
 
     protected function new(virtual imm_gen_intf vif, tb_imm_gen_coverage coverage, string tag = "IMM_GEN_BASE_TEST");
       super.new(tag);
 
-      gen = new(gen_to_drv_mbx);
-      drv = new(vif, "IMM_GEN_DRV", gen_to_drv_mbx);
-      mon = new(vif, "IMM_GEN_MON", mon_to_scb_mbx);
-      scb = new(coverage, "IMM_GEN_SCB", mon_to_scb_mbx);
+      gen  = new(gen_to_drv_mbx);
+      drv  = new(vif, "IMM_GEN_DRV", gen_to_drv_mbx);
+      mon  = new(vif, "IMM_GEN_MON", mon_to_scb_mbx);
+      pred = new(vif, "IMM_GEN_PRED", pred_to_scb_mbx);
+      scb  = new(coverage, "IMM_GEN_SCB", mon_to_scb_mbx, pred_to_scb_mbx);
     endfunction
   endclass
 

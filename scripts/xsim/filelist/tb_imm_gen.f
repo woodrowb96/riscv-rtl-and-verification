@@ -4,6 +4,7 @@ lib/base_generator_pkg.sv
 lib/base_driver_pkg.sv
 lib/base_monitor_pkg.sv
 lib/base_scoreboard_pkg.sv
+lib/base_predictor_pkg.sv
 lib/base_test_pkg.sv
 
 #RTL
@@ -23,5 +24,6 @@ verify/coverage/tb_imm_gen_coverage_pkg.sv
 verify/generator/tb_imm_gen_generator_pkg.sv
 verify/driver/tb_imm_gen_driver_pkg.sv
 verify/monitor/tb_imm_gen_monitor_pkg.sv
+verify/predictor/tb_imm_gen_predictor_pkg.sv
 verify/scoreboard/tb_imm_gen_scoreboard_pkg.sv
 verify/tests/tb_imm_gen_tests_pkg.sv

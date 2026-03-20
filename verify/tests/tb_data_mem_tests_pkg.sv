@@ -6,18 +6,20 @@ package tb_data_mem_tests_pkg;
   import tb_data_mem_monitor_pkg::*;
   import tb_data_mem_scoreboard_pkg::*;
   import tb_data_mem_coverage_pkg::*;
+  import tb_data_mem_predictor_pkg::*;
 
   /*=============================== BASE TEST ==================================*/
   virtual class data_mem_base_test #(type GEN_T) extends base_test #(
-      data_mem_trans, GEN_T, data_mem_driver, data_mem_monitor, data_mem_scoreboard);
+      data_mem_trans, GEN_T, data_mem_driver, data_mem_monitor, data_mem_predictor, data_mem_scoreboard);
 
     protected function new(virtual data_mem_intf vif, tb_data_mem_coverage coverage, string tag = "DATA_MEM_BASE_TEST");
       super.new(tag);
 
-      gen = new(gen_to_drv_mbx);
-      drv = new(vif, "DATA_MEM_DRV", gen_to_drv_mbx);
-      mon = new(vif, "DATA_MEM_MON", mon_to_scb_mbx);
-      scb = new(coverage, "DATA_MEM_SCB", mon_to_scb_mbx);
+      gen  = new(gen_to_drv_mbx);
+      drv  = new(vif, "DATA_MEM_DRV", gen_to_drv_mbx);
+      mon  = new(vif, "DATA_MEM_MON", mon_to_scb_mbx);
+      pred = new(vif, "DATA_MEM_PRED", pred_to_scb_mbx);
+      scb  = new(coverage, "DATA_MEM_SCB", mon_to_scb_mbx, pred_to_scb_mbx);
     endfunction
   endclass
 

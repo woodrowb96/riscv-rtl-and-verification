@@ -4,6 +4,7 @@ lib/base_generator_pkg.sv
 lib/base_driver_pkg.sv
 lib/base_monitor_pkg.sv
 lib/base_scoreboard_pkg.sv
+lib/base_predictor_pkg.sv
 lib/base_test_pkg.sv
 
 #RTL
@@ -20,5 +21,6 @@ verify/generator/tb_reg_file_generator_pkg.sv
 verify/ref_model/reg_file_ref_model_pkg.sv
 verify/driver/tb_reg_file_driver_pkg.sv
 verify/monitor/tb_reg_file_monitor_pkg.sv
+verify/predictor/tb_reg_file_predictor_pkg.sv
 verify/scoreboard/tb_reg_file_scoreboard_pkg.sv
 verify/tests/tb_reg_file_tests_pkg.sv

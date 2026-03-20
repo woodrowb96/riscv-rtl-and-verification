@@ -1,35 +1,22 @@
 package tb_if_stage_scoreboard_pkg;
   import base_scoreboard_pkg::*;
   import tb_if_stage_transaction_pkg::*;
-  import if_stage_ref_model_pkg::*;
   import tb_if_stage_coverage_pkg::*;
-  import rv32i_config_pkg::*;
 
   class if_stage_scoreboard extends base_scoreboard #(if_stage_trans);
-    if_stage_ref_model ref_if_stage;
 
     tb_if_stage_coverage coverage;    //we are collecting coverage in this component
 
     function new(tb_if_stage_coverage coverage,
-                 string program_file,
                  string tag,
-                 mailbox_t mon_to_scb_mbx
+                 mailbox_t mon_to_scb_mbx,
+                 mailbox_t pred_to_scb_mbx
     );
-      super.new(tag, mon_to_scb_mbx);
+      super.new(tag, mon_to_scb_mbx, pred_to_scb_mbx);
       this.coverage = coverage;
-      ref_if_stage = new(program_file);
     endfunction
 
-    task score(input if_stage_trans actual, output bit passed);
-      //build the expected DUT inputs
-      if_stage_trans expected = new();
-      expected.branch        = actual.branch;
-      expected.branch_target = actual.branch_target;
-
-      //calc expected DUT output
-      expected.pc   = ref_if_stage.pc;
-      expected.inst = ref_if_stage.fetch_inst();
-
+    task score(input if_stage_trans actual, input if_stage_trans expected, output bit passed);
       //test
       passed = actual.compare(expected);
 
@@ -40,9 +27,6 @@ package tb_if_stage_scoreboard_pkg;
       else begin
         print_fail(actual, expected);
       end
-
-      //update the ref_model
-      ref_if_stage.update(actual);
     endtask
   endclass
 

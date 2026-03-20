@@ -2,7 +2,7 @@
   Base scoreboard class for the verification library.
 
   Pure Virtual Functions:
-    - score(input TRANS_T actual, output bit passed)
+    - score(input TRANS_T actual, input TRANS_T expected, output bit passed)
         - User defined interface into the run() function
         - Users use this function to score each test
         - This function will run once per run() (scb.run() is being looped in the base_test)
@@ -11,7 +11,8 @@
             - 0 if test failed
   Member Functions:
       - run()
-          - Gets trans from the monitor mailbox and passes it to score(), increments num_tests, increments num_fails if test failed
+          - Gets trans from the monitor and predictor and passes them to score(),
+            increments num_tests, increments num_fails if test failed.
           - Called and looped in the base_test
       - print_fail(TRANS_T actual, TRANS_T expected, string msg = "")
           - Prints an error and the values of an actual and expected transaction
@@ -23,25 +24,28 @@ package base_scoreboard_pkg;
   virtual class base_scoreboard #(parameter type TRANS_T);
     typedef mailbox #(TRANS_T) mailbox_t;
     mailbox_t mon_to_scb_mbx;
+    mailbox_t pred_to_scb_mbx;
 
     int num_tests = 0;
     int num_fails = 0;
 
     string tag;
 
-    protected function new(string tag, mailbox_t mon_to_scb_mbx);
+    protected function new(string tag, mailbox_t mon_to_scb_mbx, mailbox_t pred_to_scb_mbx);
       this.tag = tag;
       this.mon_to_scb_mbx = mon_to_scb_mbx;
+      this.pred_to_scb_mbx = pred_to_scb_mbx;
     endfunction
 
-    pure virtual task score(input TRANS_T actual, output bit passed);
+    pure virtual task score(input TRANS_T actual, input TRANS_T expected, output bit passed);
 
     task run();
-      TRANS_T actual;
+      TRANS_T actual, expected;
       bit passed;
 
       mon_to_scb_mbx.get(actual);
-      score(actual, passed);
+      pred_to_scb_mbx.get(expected);
+      score(actual, expected, passed);
 
       if(!passed) begin
         num_fails++;

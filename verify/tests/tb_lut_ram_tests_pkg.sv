@@ -6,6 +6,7 @@ package tb_lut_ram_tests_pkg;
   import tb_lut_ram_monitor_pkg::*;
   import tb_lut_ram_scoreboard_pkg::*;
   import tb_lut_ram_coverage_pkg::*;
+  import tb_lut_ram_predictor_pkg::*;
 
   /*=============================== BASE TEST ==================================*/
   virtual class lut_ram_base_test #(
@@ -17,6 +18,7 @@ package tb_lut_ram_tests_pkg;
       GEN_T,
       lut_ram_driver     #(LUT_WIDTH, LUT_DEPTH),
       lut_ram_monitor    #(LUT_WIDTH, LUT_DEPTH),
+      lut_ram_predictor  #(LUT_WIDTH, LUT_DEPTH),
       lut_ram_scoreboard #(LUT_WIDTH, LUT_DEPTH)
   );
 
@@ -27,10 +29,11 @@ package tb_lut_ram_tests_pkg;
     );
       super.new(tag);
 
-      gen = new(gen_to_drv_mbx);
-      drv = new(vif, "LUT_RAM_DRV", gen_to_drv_mbx);
-      mon = new(vif, "LUT_RAM_MON", mon_to_scb_mbx);
-      scb = new(coverage, "LUT_RAM_SCB", mon_to_scb_mbx);
+      gen  = new(gen_to_drv_mbx);
+      drv  = new(vif, "LUT_RAM_DRV", gen_to_drv_mbx);
+      mon  = new(vif, "LUT_RAM_MON", mon_to_scb_mbx);
+      pred = new(vif, "LUT_RAM_PRED", pred_to_scb_mbx);
+      scb  = new(coverage, "LUT_RAM_SCB", mon_to_scb_mbx, pred_to_scb_mbx);
     endfunction
   endclass
 

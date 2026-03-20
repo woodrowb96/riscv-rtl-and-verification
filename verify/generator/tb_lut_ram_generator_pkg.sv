@@ -114,7 +114,7 @@ package tb_lut_ram_generator_pkg;
       randcase
 
         //corner addresses
-        1: begin
+        2: begin
           trans_corner_addr_t trans_corner_addr = new();
 
           assert(trans_corner_addr.randomize()) else

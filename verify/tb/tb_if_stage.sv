@@ -49,7 +49,7 @@ module tb_if_stage();
     test_branch_corners.run(500);
 
     test_oob_misaligned.drv.reset();
-    test_oob_misaligned.run(100);
+    test_oob_misaligned.run(250);
 
 
     /********* PRINT RESULTS ***********/

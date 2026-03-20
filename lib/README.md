@@ -3,7 +3,7 @@
 A reusable verification library for writing class-based concurrent SystemVerilog testbenches.
 
 This library provides users a set of reusable base classes they can use to implement
-transactions, generators, drivers, monitors, scoreboards and tests.
+transactions, generators, drivers, monitors, predictors, scoreboards and tests.
 
 Testbench components run as concurrent testing loops forked by the `base_test` class.
 Interprocess communication and data passing is done through a series of mailboxes.
@@ -21,7 +21,7 @@ See [`verify/`](../verify/) for example implementations written using the librar
 Users are provided the following virtual base classes to implement their tests:
 
 - **base_test:**
-    - Bundles a generator, driver, monitor and scoreboard and orchestrates concurrent testing.
+    - Bundles a generator, driver, monitor, predictor and scoreboard and orchestrates concurrent testing.
     - Users are provided the built-in `base_test::run(int num_tests)` function which they can call to start the concurrent test loop.
     - Users can interface into the `run()` function through a set of pure virtual functions
         which they use to implement test and DUT-specific logic.
@@ -41,8 +41,13 @@ Users are provided the following virtual base classes to implement their tests:
     - Samples DUT inputs and outputs to construct a single transaction snapshot sent to the scoreboard.
     - Users are provided the pure virtual `base_monitor::monitor()` function which
         they can use to implement DUT-specific monitoring logic.
+- **base_predictor:**
+    - Sample the DUT inputs and use them to predict the expected outputs, then sends the expected transaction to the scoreboard.
+    - Users are provided the pure virtual `base_predictor::predict()` function which
+        they can use to implement DUT-specific prediction logic.
 - **base_scoreboard:**
-    - Scores each transaction for correctness.
+    - Compares actual transactions (from the monitor) against expected transactions (from the predictor)
+        and scores each for correctness.
     - Users are provided the pure virtual `base_scoreboard::score()` function which
         they can use to implement test-specific scoring.
 

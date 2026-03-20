@@ -4,6 +4,7 @@ lib/base_generator_pkg.sv
 lib/base_driver_pkg.sv
 lib/base_monitor_pkg.sv
 lib/base_scoreboard_pkg.sv
+lib/base_predictor_pkg.sv
 lib/base_test_pkg.sv
 
 # RTL
@@ -23,5 +24,6 @@ verify/ref_model/if_stage_ref_model_pkg.sv
 verify/generator/tb_if_stage_generator_pkg.sv
 verify/driver/tb_if_stage_driver_pkg.sv
 verify/monitor/tb_if_stage_monitor_pkg.sv
+verify/predictor/tb_if_stage_predictor_pkg.sv
 verify/scoreboard/tb_if_stage_scoreboard_pkg.sv
 verify/tests/tb_if_stage_tests_pkg.sv

@@ -6,11 +6,12 @@ package tb_if_stage_tests_pkg;
   import tb_if_stage_generator_pkg::*;
   import tb_if_stage_scoreboard_pkg::*;
   import tb_if_stage_coverage_pkg::*;
+  import tb_if_stage_predictor_pkg::*;
 
   /*=============================== BASE TEST ==================================*/
 
   virtual class if_stage_base_test #(type GEN_T) extends base_test #(
-    if_stage_trans, GEN_T, if_stage_driver, if_stage_monitor, if_stage_scoreboard);
+    if_stage_trans, GEN_T, if_stage_driver, if_stage_monitor, if_stage_predictor, if_stage_scoreboard);
 
     protected function new(virtual if_stage_intf vif,
                            tb_if_stage_coverage coverage,
@@ -18,10 +19,11 @@ package tb_if_stage_tests_pkg;
                            string tag = "IF_STAGE_BASE_TEST"
     );
       super.new(tag);
-      gen = new(gen_to_drv_mbx);
-      drv = new(vif, "IF_STAGE_DRV", gen_to_drv_mbx);
-      mon = new(vif, "IF_STAGE_MON", mon_to_scb_mbx);
-      scb = new(coverage, program_file, "IF_STAGE_SCB", mon_to_scb_mbx);
+      gen  = new(gen_to_drv_mbx);
+      drv  = new(vif, "IF_STAGE_DRV", gen_to_drv_mbx);
+      mon  = new(vif, "IF_STAGE_MON", mon_to_scb_mbx);
+      pred = new(vif, program_file, "IF_STAGE_PRED", pred_to_scb_mbx);
+      scb  = new(coverage, "IF_STAGE_SCB", mon_to_scb_mbx, pred_to_scb_mbx);
     endfunction
   endclass
 

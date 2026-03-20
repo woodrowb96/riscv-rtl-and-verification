@@ -42,7 +42,7 @@ module tb_lut_ram();
     test_default = new(intf, coverage);
 
     //run tests
-    test_default.run(1000);
+    test_default.run(1500);
 
     //print results
     test_default.print_results();
