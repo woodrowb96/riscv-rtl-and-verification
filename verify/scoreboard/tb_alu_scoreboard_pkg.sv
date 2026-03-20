@@ -15,9 +15,8 @@ package tb_alu_scoreboard_pkg;
       ref_alu = new();
     endfunction
 
-    function bit score(input alu_trans actual);
+    task score(input alu_trans actual, output bit passed);
       alu_out_t expected_out;
-      bit passed = 1;
 
       //Copy DUT inputs into the expected
       alu_trans expected = new();
@@ -40,9 +39,7 @@ package tb_alu_scoreboard_pkg;
       else begin
         print_fail(actual, expected);
       end
-
-      return passed;
-    endfunction
+    endtask
 
   endclass
 

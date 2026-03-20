@@ -20,9 +20,7 @@ package tb_if_stage_scoreboard_pkg;
       ref_if_stage = new(program_file);
     endfunction
 
-    function bit score(input if_stage_trans actual);
-      bit passed = 1;
-
+    task score(input if_stage_trans actual, output bit passed);
       //build the expected DUT inputs
       if_stage_trans expected = new();
       expected.branch        = actual.branch;
@@ -45,9 +43,7 @@ package tb_if_stage_scoreboard_pkg;
 
       //update the ref_model
       ref_if_stage.update(actual);
-
-      return passed;
-    endfunction
+    endtask
   endclass
 
 endpackage

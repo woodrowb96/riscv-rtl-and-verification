@@ -2,11 +2,11 @@
   Base scoreboard class for the verification library.
 
   Pure Virtual Functions:
-    - bit score()
+    - score(input TRANS_T actual, output bit passed)
         - User defined interface into the run() function
         - Users use this function to score each test
         - This function will run once per run() (scb.run() is being looped in the base_test)
-        - RETURN:
+        - Users modify bit passed to indicate the result:
             - 1 if test passed
             - 0 if test failed
   Member Functions:
@@ -17,11 +17,6 @@
           - Prints an error and the values of an actual and expected transaction
       - print_results(string tag = this.tag, string msg = "")
           - Prints the current results (num_tests run and num_fails)
-
-    NOTE: score() is currently a function. So if a user needs a time-consuming operation
-          they are not currently able to use it. For now im choosing to keep it as a function
-          to simplify the interface, but in the future if I encounter a scenario where I need
-          time-consuming ops ill convert it to a task with output arguments.
 */
 package base_scoreboard_pkg;
 
@@ -39,13 +34,16 @@ package base_scoreboard_pkg;
       this.mon_to_scb_mbx = mon_to_scb_mbx;
     endfunction
 
-    pure virtual function bit score(input TRANS_T actual);
+    pure virtual task score(input TRANS_T actual, output bit passed);
 
     task run();
       TRANS_T actual;
-      mon_to_scb_mbx.get(actual);
+      bit passed;
 
-      if(!score(actual)) begin
+      mon_to_scb_mbx.get(actual);
+      score(actual, passed);
+
+      if(!passed) begin
         num_fails++;
       end
 

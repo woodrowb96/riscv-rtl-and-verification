@@ -23,9 +23,7 @@ package tb_lut_ram_scoreboard_pkg;
       ref_lut_ram = new();
     endfunction
 
-    function bit score(input lut_ram_trans #(LUT_WIDTH, LUT_DEPTH) actual);
-      bit passed = 1;
-
+    task score(input lut_ram_trans #(LUT_WIDTH, LUT_DEPTH) actual, output bit passed);
       //copy DUT inputs into the expected
       lut_ram_trans #(LUT_WIDTH, LUT_DEPTH) expected = new();
       expected.wr_en   = actual.wr_en;
@@ -49,9 +47,7 @@ package tb_lut_ram_scoreboard_pkg;
 
       //update ref model for next cycle
       ref_lut_ram.update(actual);
-
-      return passed;
-    endfunction
+    endtask
   endclass
 
 endpackage

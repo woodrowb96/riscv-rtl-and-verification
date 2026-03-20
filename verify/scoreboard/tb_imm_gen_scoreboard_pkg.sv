@@ -15,9 +15,7 @@ package tb_imm_gen_scoreboard_pkg;
       ref_imm_gen = new();
     endfunction
 
-    function bit score(input imm_gen_trans actual);
-      bit passed = 1;
-
+    task score(input imm_gen_trans actual, output bit passed);
       //copy DUT inputs into the expected
       imm_gen_trans expected = new();
       expected.inst = actual.inst;
@@ -35,9 +33,7 @@ package tb_imm_gen_scoreboard_pkg;
       else begin
         print_fail(actual, expected);
       end
-
-      return passed;
-    endfunction
+    endtask
   endclass
 
 endpackage

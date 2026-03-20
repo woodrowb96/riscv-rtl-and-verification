@@ -19,9 +19,7 @@ package tb_inst_mem_scoreboard_pkg;
       ref_inst_mem = new(program_file);
     endfunction
 
-    function bit score(input inst_mem_trans actual);
-      bit passed = 1;
-
+    task score(input inst_mem_trans actual, output bit passed);
       //copy DUT inputs into the expected
       inst_mem_trans expected = new();
       expected.inst_addr = actual.inst_addr;
@@ -39,9 +37,7 @@ package tb_inst_mem_scoreboard_pkg;
       else begin
         print_fail(actual, expected);
       end
-
-      return passed;
-    endfunction
+    endtask
 
   endclass
 

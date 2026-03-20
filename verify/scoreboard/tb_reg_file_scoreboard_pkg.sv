@@ -15,9 +15,7 @@ package tb_reg_file_scoreboard_pkg;
       ref_reg_file = new();
     endfunction
 
-    function bit score(input reg_file_trans actual);
-      bit passed = 1;
-
+    task score(input reg_file_trans actual, output bit passed);
       //copy DUT inputs into the expected
       reg_file_trans expected = new();
       expected.wr_en    = actual.wr_en;
@@ -43,9 +41,7 @@ package tb_reg_file_scoreboard_pkg;
 
       //update ref model for next cycle
       ref_reg_file.update(actual);
-
-      return passed;
-    endfunction
+    endtask
   endclass
 
 endpackage

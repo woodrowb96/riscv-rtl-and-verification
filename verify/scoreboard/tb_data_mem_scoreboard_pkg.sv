@@ -15,9 +15,7 @@ package tb_data_mem_scoreboard_pkg;
       ref_data_mem = new();
     endfunction
 
-    function bit score(input data_mem_trans actual);
-      bit passed = 1;
-
+    task score(input data_mem_trans actual, output bit passed);
       //copy DUT inputs into the expected
       data_mem_trans expected = new();
       expected.wr_sel  = actual.wr_sel;
@@ -40,9 +38,7 @@ package tb_data_mem_scoreboard_pkg;
 
       //update ref model for next cycle
       ref_data_mem.update(actual);
-
-      return passed;
-    endfunction
+    endtask
   endclass
 
 endpackage
