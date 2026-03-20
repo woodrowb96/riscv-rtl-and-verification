@@ -26,8 +26,8 @@ Users are provided the following virtual base classes to implement their tests:
     - Users can interface into the `run()` function through a set of pure virtual functions
         which they use to implement test and DUT-specific logic.
     - Users are provided `pre_run()` and `post_run()` virtual tasks in each component.
-      Base_test will call each components `pre_run()` and `post_run()` tasks once either immediatly before
-      or immediatly after `base_test::run()`.
+      These are called concurrently across all components immediately before and after the
+      main test loop within `base_test::run()`.
 - **base_transaction:**
     - Collection of DUT signals sent between components.
 - **base_generator:**

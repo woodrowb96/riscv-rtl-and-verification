@@ -13,10 +13,10 @@
     Virtual tasks:
         - pre_run()
             - automatically runs once before the main base_test::run() loop starts
-            - by defualt its empty, but users can override this and add there own logic
+            - by default its empty, but users can override this and add their own logic
         - post_run()
             - automatically runs once after the main base_test::run() loop ends
-            - by defualt its empty, but users can override this and add there own logic
+            - by default its empty, but users can override this and add their own logic
 
   Member Functions:
       - run()

@@ -94,23 +94,23 @@ package base_test_pkg;
     endtask
 
     task pre_run();
-      fork begin
+      fork
         gen.pre_run();
         drv.pre_run();
         mon.pre_run();
         pred.pre_run();
         scb.pre_run();
-      end join
+      join
     endtask
 
     task post_run();
-      fork begin
+      fork
         gen.post_run();
         drv.post_run();
         mon.post_run();
         pred.post_run();
         scb.post_run();
-      end join
+      join
     endtask
 
 
