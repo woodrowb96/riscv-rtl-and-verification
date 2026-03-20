@@ -1,13 +1,14 @@
 /*
   NOTE: reset coverage
-    - I dont currently cover any reset functionality. I am going to modify the
-    base verification library (see ../../lib/) to make handling resets accross components
-    easier. Im going to finish the if_stage without reset coverage, then modify the
-    library, then come back and add reset coverage (and any additional tests) to the 
+    - I don't currently cover any reset functionality. I am going to modify the
+    base verification library (see ../../lib/) to make handling resets across components
+    easier. I'm going to finish the if_stage without reset coverage, then modify the
+    library, then come back and add reset coverage (and any additional tests) to the
     if_stage verification.
 */
 package tb_if_stage_coverage_pkg;
   import tb_if_stage_transaction_pkg::*;
+  import rv32i_defs_pkg::*;
   import rv32i_config_pkg::*;
   import verify_const_pkg::*;
 
@@ -19,7 +20,7 @@ package tb_if_stage_coverage_pkg;
       this.cg = new();
     endfunction
 
-    function sample(if_stage_trans trans);
+    function void sample(if_stage_trans trans);
       this.trans = trans;
       cg.sample();
     endfunction
@@ -32,8 +33,11 @@ package tb_if_stage_coverage_pkg;
       branch: coverpoint trans.branch {
         bins taken     = {1};
         bins not_taken = {0};
+      }
 
-        //transition bins:
+      //These should get ignored in crosses, but Vivado is crossing them so
+      //I'll just split them out
+      branch_transitions: coverpoint trans.branch {
         bins back_to_back_take          = (1[*2]);
         bins back_to_back_not_take      = (0[*2]);
         bins take_not_taken_taken       = (1 => 0 => 1);
@@ -41,7 +45,7 @@ package tb_if_stage_coverage_pkg;
       }
 
       //We want to branch to the following corner addresses in memory
-      //(we will cover the branch distance from pc in a seperate coverpoint)
+      //(we will cover the branch distance from pc in a separate coverpoint)
       branch_target: coverpoint trans.branch_target
         iff(trans.branch) { //only cover on branch takens
           bins first_addr          = {INST_MEM_FIRST_ADDR};
@@ -90,9 +94,13 @@ package tb_if_stage_coverage_pkg;
       }
 
       //We want to both branch and not branch from each corner.
-      //  -NOTE: if pc is the last_addr and we dont take the branch the
+      //  -NOTE: if pc is the last_addr and we don't take the branch the
       //         rtl will silently wrap to the start of memory
-      pc_x_branch: cross pc, branch;
+      pc_x_branch: cross pc, branch {
+        //Not branching when we are at the last_addr will take us out of
+        //bounds. We will ignore it for now and cover OOB PC coverage separately
+        ignore_bins last_addr_x_not_taken = binsof(pc.last_addr) && binsof(branch.not_taken);
+      }
 
 
       /**************** INST COVERAGE *******************/
@@ -105,33 +113,62 @@ package tb_if_stage_coverage_pkg;
 
       /*************** MISALIGNED BRANCH COVERAGE **********************/
 
-      //This shouldnt happen durring normal operation, but the rtl silently
-      //rounds this down to be word aligned, so well cover it. Also in the
+      //This shouldn't happen during normal operation, but the rtl silently
+      //rounds this down to be word aligned, so we'll cover it. Also in the
       //future when exceptions get implemented this will throw an exception
       misaligned_branch: coverpoint (trans.branch_target[1:0] != 2'b00)
         iff(trans.branch) { //only cover on actual branches
           bins hit = {1};
       }
 
-      //Im not going to cover misaligned PC's. The only way PC can get
-      //misaligned is through a branch (every PC + 4 after a misaligned branch
-      //will also be misaligned) so covering misaligned PC is a bit
-      //redundent on its own.
+      //The only way to get to a misaligned PC is through a misaligned branch
+      //(Every PC + 4 after the misaligned branch will also be misaligned).
+      //So we are not going to cover hitting misaligned PC addresses by
+      //themselves.
+      //
+      //What is worth covering is incrementing (so not taking a branch) from
+      //a misaligned PC (So PC_misaligned + 4). This stresses the PC + 4 logic
+      //and makes sure it handles the silent rounding down the misaligned byte_offset properly.
+      increment_misaligned_pc: coverpoint (
+        (trans.pc[1:0] != 2'b00) &&  //make sure the current PC is misaligned
+        (!trans.branch)              //make sure we aren't branching (so doing PC + 4 instead)
+      ){
+        bins hit = {1};
+      }
+
 
       /********** OUT OF BOUNDS ACCESS COVERAGE ************/
       //out of bound access will eventually throw an ACCESS FAULT exception,
       //but for now the rtl silently wraps the addresses to the start of
       //memory.
 
-      //cover branching out of bounds
-      out_of_bound_branch: coverpoint (trans.branch_target > INST_MEM_LAST_ADDR)
+      //PC can either increment (pc + 4) into the out of bounds, or it can
+      //branch into out of bounds. We need to cover both scenarios.
+      branch_to_oob_pc: coverpoint (trans.branch_target > INST_MEM_LAST_ADDR)
         iff(trans.branch) {
           bins hit = {1};
       }
-
-      //cover pc when its pointing out of bounds
-      out_of_bound_pc: coverpoint (trans.pc > INST_MEM_LAST_ADDR) {
+      increment_to_oob_pc: coverpoint (
+        (trans.pc == INST_MEM_LAST_ADDR) &&  //if we are at the last address
+        (!trans.branch)                      //and we don't branch then we will increment OOB
+      ) {
           bins hit = {1};
+      }
+
+      //We want to branch oob with a misaligned branch_target.
+      //(This will stress both wrapping of addresses and rounding down of
+      //misaligned byte_offset logic at the same time)
+      misaligned_branch_x_branch_to_oob_pc: cross misaligned_branch, branch_to_oob_pc;
+
+      //We want to increment a misaligned PC OOB
+      //(This makes sure the PC + 4 logic handles both the wrapping of
+      //addresses and the dropping of misaligned byte_offsets at the same time)
+      increment_misaligned_pc_to_oob: coverpoint (
+        (trans.pc[1:0] != 2'b00)                           &&  //if the current PC is misaligned
+        ({trans.pc[XLEN-1:2],2'b00} == INST_MEM_LAST_ADDR) &&  //and it points to the last addr (ignoring the byte_offset)
+        (!trans.branch)                                        //and we don't branch, then we will be incrementing a misaligned PC OOB
+      ) {
+        bins hit = {1};
       }
     endgroup
 

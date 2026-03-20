@@ -29,19 +29,33 @@ module tb_if_stage();
   tb_if_stage_coverage  coverage;
 
   /********** TESTING ********************/
-  if_stage_default_test test_default;
+  //See the test and generator packages for full details
+  if_stage_main_test           test_main;             //fully random branch_targets
+  if_stage_branch_corners_test test_branch_corners;   //branch_targets hit corner addresses
+  if_stage_oob_misaligned_test test_oob_misaligned;   //test misaligned and OOB PC/branch_targets
 
   initial begin
     coverage = new();
 
-    test_default = new(intf, coverage, DEFAULT_TEST_MEM);
+    test_main           = new(intf, coverage, DEFAULT_TEST_MEM);
+    test_branch_corners = new(intf, coverage, DEFAULT_TEST_MEM);
+    test_oob_misaligned = new(intf, coverage, DEFAULT_TEST_MEM);
 
-    //run tests
-    test_default.drv.reset();
-    test_default.run(1000);
+    /********* RUN TESTS ***********/
+    test_main.drv.reset();
+    test_main.run(1000);
 
-    //print results
-    test_default.print_results();
+    test_branch_corners.drv.reset();
+    test_branch_corners.run(500);
+
+    test_oob_misaligned.drv.reset();
+    test_oob_misaligned.run(100);
+
+
+    /********* PRINT RESULTS ***********/
+    test_main.print_results();
+    test_branch_corners.print_results();
+    test_oob_misaligned.print_results();
 
     $stop(1);
   end

@@ -3,6 +3,7 @@ package tb_if_stage_scoreboard_pkg;
   import tb_if_stage_transaction_pkg::*;
   import if_stage_ref_model_pkg::*;
   import tb_if_stage_coverage_pkg::*;
+  import rv32i_config_pkg::*;
 
   class if_stage_scoreboard extends base_scoreboard #(if_stage_trans);
     if_stage_ref_model ref_if_stage;

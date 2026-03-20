@@ -17,7 +17,7 @@ package tb_if_stage_monitor_pkg;
       trans.branch        = vif.cb_mon.branch;
       trans.branch_target = vif.cb_mon.branch_target;
       //sample DUT output
-      trans.pc            = vif.cb_mon.pc;    //pc is a syncrounous signal
+      trans.pc            = vif.cb_mon.pc;    //pc is a synchronous signal
       trans.inst          = vif.cb_mon.inst;  //inst is a combinatorial output of u_inst_mem
     endtask
   endclass

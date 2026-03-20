@@ -1,7 +1,7 @@
 import rv32i_defs_pkg::*;
 
 interface if_stage_intf (input logic clk);
-  //DUT reset (syncronous)
+  //DUT reset (synchronous)
   logic reset_n;
   //DUT control
   logic branch;
@@ -13,7 +13,7 @@ interface if_stage_intf (input logic clk);
 
   clocking cb_drv @(posedge clk);
     default output #1;
-    output branch, branch_target, reset_n;
+    output branch, branch_target;
   endclocking
 
   clocking cb_mon @(posedge clk);

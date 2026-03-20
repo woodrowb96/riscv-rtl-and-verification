@@ -10,16 +10,16 @@ package tb_if_stage_driver_pkg;
       this.vif = vif;
     endfunction
 
-    //perform the active low, syncronous reset
+    //perform the active low, synchronous reset
     task reset();
-      //dont use .cb_drv for the reset assertion,
+      //don't use .cb_drv for the reset assertion,
       //we want to drive directly onto the interface before the 1st clk edge
       vif.reset_n       <= 0;
       vif.branch        <= 0;
       vif.branch_target <= 0;
       @(posedge vif.clk);
 
-      //NOTE: This is a bit of a weird way to reset. I dont deassert the reset
+      //NOTE: This is a bit of a weird way to reset. I don't deassert the reset
       //      signal here and leave it to drive to bring us out of reset.
       //      The problem with deasserting here is that the PC will start
       //      incrementing on the first clk of the drive before any of the
@@ -32,12 +32,18 @@ package tb_if_stage_driver_pkg;
       //      out of sync with the rtl. So one option is making modifications
       //      to the library architecture (add a base_predictor that runs
       //      concurrently and runs the ref_model off the interface) but for
-      //      now im gonna continue with verification with the reset like this.
+      //      now I'm gonna continue with verification with the reset like this.
     endtask
 
+    //NOTE:
+    //  - I don't drive the reset through the clocking block. There are issues
+    //  driving the same signal from multiple sources (and the sim treats
+    //  a direct drive and a drive through the CB as separate). So we have
+    //  driver conflicts on the reset signal, if it's driven from two separate
+    //  sources.
     task drive(input if_stage_trans trans);
       @(vif.cb_drv)
-      vif.cb_drv.reset_n       <= 1;  //make sure reset is deasserted
+      vif.reset_n              <= 1;
       vif.cb_drv.branch        <= trans.branch;
       vif.cb_drv.branch_target <= trans.branch_target;
     endtask

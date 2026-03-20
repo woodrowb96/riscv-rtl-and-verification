@@ -16,8 +16,8 @@ rtl/if_stage.sv
 verify/common/verify_const_pkg.sv
 verify/common/verify_config_pkg.sv
 verify/interface/if_stage_intf.sv
-verify/coverage/tb_if_stage_coverage_pkg.sv
 verify/transaction/tb_if_stage_transaction_pkg.sv
+verify/coverage/tb_if_stage_coverage_pkg.sv
 verify/ref_model/inst_mem_ref_model_pkg.sv
 verify/ref_model/if_stage_ref_model_pkg.sv
 verify/generator/tb_if_stage_generator_pkg.sv
