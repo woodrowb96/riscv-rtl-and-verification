@@ -86,7 +86,10 @@ package base_test_pkg;
 
     int timeout;
 
-    bit test_running = 0;   //test doesnt start running until run() is called
+    bit test_running = 0; //test doesnt start running until run() is called
+
+    //We use this in test() to delay the start of monitor and prediction until after the drive has started
+    bit drv_started = 0;
 
     GEN_T  gen;
     DRV_T  drv;
@@ -166,17 +169,22 @@ package base_test_pkg;
           else               while(!gen.finished) gen.run();  //or finished flag is set
 
           //Driver
-          forever drv.run();
+          begin
+            drv_started = 0;   //make sure this is deaserted (reset_aware_test loops this task)
+            drv.run();         //do the first drive
+            drv_started = 1;   //tell monitor and predictor they can start
+            forever drv.run(); //continue the rest of the drives
+          end
 
           //Monitor
           begin
-            wait(drv.drv_started); //wait until the first drv.run call has finished to start
+            wait(drv_started); //wait until the first drv.run call has finished to start
             forever mon.run();
           end
 
           //Predictor
           begin
-            wait(drv.drv_started); //wait until the first drv.run call has finished to start
+            wait(drv_started); //wait until the first drv.run call has finished to start
             forever pred.run();
           end
 

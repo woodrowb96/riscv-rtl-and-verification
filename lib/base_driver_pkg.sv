@@ -28,9 +28,6 @@ package base_driver_pkg;
 
     string tag;
 
-    //used by base_test to call base_monitor::run() only after the first drive has happened
-    bit drv_started = 0;
-
     protected function new(string tag, mailbox_t gen_to_drv_mbx);
       this.tag = tag;
       this.gen_to_drv_mbx = gen_to_drv_mbx;
@@ -50,7 +47,6 @@ package base_driver_pkg;
       TRANS_T trans;
       gen_to_drv_mbx.get(trans);
       drive(trans);
-      drv_started = 1;  //make sure drv_started is set after the first drive
     endtask
   endclass
 
