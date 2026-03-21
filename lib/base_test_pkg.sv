@@ -8,6 +8,15 @@
                 3. Do any additional wiring for custom child level stuff (events, custom mailboxes ...)
 
     Optional Usage:
+          - Mid-test Reset Injection:
+                - Users are provided the virtual inject_reset() task that they can use
+                  to implement mid-test reset injection into their tests.
+
+                - inject_reset() is forked off concurrently at the start of testing
+
+                - There is no additional setup needed to add reset_injection into the
+                  test besides overriding the virtual inject_reset() task.
+
           - Mid-Test Reset Detection:
                 - If users plan on resetting the DUT during the middle of testing, then
                   they need to define their own base_reset_detector class and hook it
@@ -35,6 +44,10 @@
         - This is an optional task that users will use to implement their logic to
           handle a mid test reset.
         - See "Mid-Test Reset Detection" above for more details.
+
+      inject_reset() [OPTIONAL]:
+        - Users use this task to implement mid-test reset injection logic.
+        - See "Mid-Test Reset Injection" above for more details.
 
     Member Functions:
           - run(int num_tests = -1)
@@ -89,10 +102,18 @@ package base_test_pkg;
       pred_to_scb_mbx = new();
     endfunction
 
+    /*==================== VIRTUAL TASKS ================================*/
+
     virtual task handle_reset();
       //Empty, users will define their own reset handling if needed
       //  - Users will need to define reset_handling per component
       //  - Users will need to define how their tests call each components reset handling
+    endtask
+
+    virtual task inject_reset();
+      //Empty by default
+      //  - Users will need to implement their own reset injection logic if
+      //    they need it.
     endtask
 
 
@@ -103,12 +124,20 @@ package base_test_pkg;
       pre_run();
 
       test_running = 1;
-      if(rst_detect != null) begin     //If we have reset detection, then
-        reset_aware_test(num_tests);   //We need to wrap the test in some extra infrastructure
-      end
-      else begin                       //If there is no reset detection, then
-        test(num_tests);               //we just run the test directly
-      end
+      fork begin
+        fork
+          inject_reset();              //fork off optional reset injection, then move onto testing
+        join_none
+
+        if(rst_detect != null) begin   //If we have reset detection, then
+          reset_aware_test(num_tests); //We need to wrap the test in some extra infrastructure
+        end
+        else begin                     //If there is no reset detection, then
+          test(num_tests);             //we just run the test directly
+        end
+
+        disable fork;                  //cleanup the inject_reset fork
+      end join
       test_running = 0;
 
       post_run();
@@ -122,31 +151,32 @@ package base_test_pkg;
     endfunction
 
 
-    /*====================== TEST =============================*/
+    /*=========================== TEST ====================================*/
     //The main testing loop.
 
     protected task test(int num_tests);
       fork begin
 
         fork
-        //Fork each component, join when the generator stops running
+        //Fork each component
+        //Join when the generator stops generating new sequences
 
-          //Generator: runs until we generate num_tests or the finished flag is set
-          if(num_tests >= 0) repeat(num_tests)    gen.run();
-          else               while(!gen.finished) gen.run();
+          //Generator
+          if(num_tests >= 0) repeat(num_tests)    gen.run();  //run till we gen the num_tests
+          else               while(!gen.finished) gen.run();  //or finished flag is set
 
           //Driver
           forever drv.run();
 
-          //Monitor: doesnt start until after the driver starts
+          //Monitor
           begin
-            wait(drv.drv_started);
+            wait(drv.drv_started); //wait until the first drv.run call has finished to start
             forever mon.run();
           end
 
-          //Predictor: doesnt start until after the driver starts
+          //Predictor
           begin
-            wait(drv.drv_started);
+            wait(drv.drv_started); //wait until the first drv.run call has finished to start
             forever pred.run();
           end
 
