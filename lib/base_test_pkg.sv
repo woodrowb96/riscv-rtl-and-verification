@@ -97,7 +97,7 @@ package base_test_pkg;
     PRED_T pred;
     SCB_T  scb;
 
-    protected function new(string tag, int timeout = 1000000);
+    protected function new(string tag, int timeout = 100000);
       this.tag = tag;
       this.timeout = timeout;
       gen_to_drv_mbx  = new();

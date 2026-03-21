@@ -26,6 +26,12 @@
 */
 package base_reset_detector_pkg;
   virtual class base_reset_detector;
+    string tag;
+
+    function new(string tag);
+      this.tag = tag;
+    endfunction
+
     pure virtual task detect_reset_assert();
     pure virtual task detect_reset_deassert();
   endclass
