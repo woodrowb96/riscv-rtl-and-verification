@@ -4,4 +4,4 @@ transcript
 .claude
 *.pb
 *.log
-lib/base_reset_detector_pkg.sv
+docs/
