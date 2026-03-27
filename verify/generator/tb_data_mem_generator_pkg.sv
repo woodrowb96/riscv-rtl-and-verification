@@ -85,7 +85,8 @@ package tb_data_mem_generator_pkg;
       end
     endfunction
 
-    task gen_trans(output data_mem_trans trans);
+    task run();
+      data_mem_trans trans;
 
       //We want to randomly choose a transaction that hits either
       //the corner addresses, previously written addresses, or the full range of addresses
@@ -96,7 +97,7 @@ package tb_data_mem_generator_pkg;
           data_mem_trans_corner_addr trans_corner_addr = new();
 
           assert(trans_corner_addr.randomize()) else
-            $fatal(1, "TB_DATA_MEM_GENERATOR: gen_trans() randomization failed, corners addresses");
+            $fatal(1, "TB_DATA_MEM_GENERATOR: randomization failed, corners addresses");
 
           trans = trans_corner_addr;
         end
@@ -106,7 +107,7 @@ package tb_data_mem_generator_pkg;
           data_mem_trans_prev_written trans_prev_written = new(prev_written_addr);
 
           assert(trans_prev_written.randomize()) else
-            $fatal(1, "TB_DATA_MEM_GENERATOR: gen_trans() randomization failed, prev_written");
+            $fatal(1, "TB_DATA_MEM_GENERATOR: randomization failed, prev_written");
 
           trans = trans_prev_written;
         end
@@ -116,7 +117,7 @@ package tb_data_mem_generator_pkg;
           data_mem_trans_base_constraints trans_full_range = new();
 
           assert(trans_full_range.randomize()) else
-            $fatal(1, "TB_DATA_MEM_GENERATOR: gen_trans() randomization failed, full_range");
+            $fatal(1, "TB_DATA_MEM_GENERATOR: randomization failed, full_range");
 
           trans = trans_full_range;
         end
@@ -124,6 +125,8 @@ package tb_data_mem_generator_pkg;
 
       //update previously written addresses
       update_prev_written_addr(trans);
+
+      gen_to_drv_mbx.put(trans);
     endtask
   endclass
 

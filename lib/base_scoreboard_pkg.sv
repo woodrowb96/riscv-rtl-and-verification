@@ -1,14 +1,15 @@
 /*
   Base scoreboard class for the verification library.
 
-  Pure Virtual Functions:
-    - score(input TRANS_T actual, input TRANS_T expected, output bit passed)
-        - User defined interface into the run() function
-        - Users use this function to score each test
-        - This function will run once per run() (scb.run() is being looped in the base_test)
-        - Users modify bit passed to indicate the result:
-            - 1 if test passed
-            - 0 if test failed
+  Pure Virtual Tasks:
+    - run()
+        - User defined interface into the main testing loop (initiated by base_test::run(num_tests))
+        - Users use this task to score the expected transactions (sent from the predictor)
+          agains the actual transaction (sent from the monitor)
+        - Users can increment the base_scoreboard::num_fails to keep track of the number of failed tests.
+        - By default base_scoreboard::num_tests is incremented automatically each time
+          base_scoreboard::run() is called (so we assume only 1 test is scored per run() call)
+        - This function will run once per run() (base_drive::drv() is being looped in the testing loop)
 
     Virtual tasks:
         - pre_run()
@@ -17,12 +18,13 @@
         - post_run()
             - automatically runs once after the main base_test::run() loop ends
             - by default its empty, but users can override this and add their own logic
+        - scb()
+            - Wrapper around base_scoreboard::run().
+            - Called and looped in the main testing loop.
+            - By default this task will increment num_tests after calling run(),
+              but users can overload this function and implement any if needed
 
   Member Functions:
-      - run()
-          - Gets trans from the monitor and predictor and passes them to score(),
-            increments num_tests, increments num_fails if test failed.
-          - Called and looped in the base_test
       - print_fail(TRANS_T actual, TRANS_T expected, string msg = "")
           - Prints an error and the values of an actual and expected transaction
       - print_results(string tag = this.tag, string msg = "")
@@ -46,7 +48,7 @@ package base_scoreboard_pkg;
       this.pred_to_scb_mbx = pred_to_scb_mbx;
     endfunction
 
-    pure virtual task score(input TRANS_T actual, input TRANS_T expected, output bit passed);
+    pure virtual task run();
 
     virtual task pre_run();
       //empty by default
@@ -56,18 +58,8 @@ package base_scoreboard_pkg;
       //empty by default
     endtask
 
-    task run();
-      TRANS_T actual, expected;
-      bit passed;
-
-      mon_to_scb_mbx.get(actual);
-      pred_to_scb_mbx.get(expected);
-      score(actual, expected, passed);
-
-      if(!passed) begin
-        num_fails++;
-      end
-
+    virtual task scb();
+      run();
       num_tests++;
     endtask
 

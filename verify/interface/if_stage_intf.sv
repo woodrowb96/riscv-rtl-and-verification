@@ -11,14 +11,16 @@ interface if_stage_intf (input logic clk);
   word_t pc;
   word_t inst;
 
+  bit valid; //sim only
+
   clocking cb_drv @(posedge clk);
     default output #1;
-    output branch, branch_target;
+    output branch, branch_target, valid;
   endclocking
 
   clocking cb_mon @(posedge clk);
     default input #1step;
-    input branch, branch_target, pc, inst;
+    input branch, branch_target, pc, inst, valid;
   endclocking
 
   function void print(string msg = "");

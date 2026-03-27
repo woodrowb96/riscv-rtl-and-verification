@@ -8,7 +8,7 @@ package tb_lut_ram_scoreboard_pkg;
     parameter int LUT_DEPTH = 256
   ) extends base_scoreboard #(lut_ram_trans #(LUT_WIDTH, LUT_DEPTH));
 
-    tb_lut_ram_coverage #(LUT_WIDTH, LUT_DEPTH) coverage;   //we are collecting coverage in this component
+    tb_lut_ram_coverage #(LUT_WIDTH, LUT_DEPTH) coverage;   //we are collecting coverage
 
     function new(
       tb_lut_ram_coverage #(LUT_WIDTH, LUT_DEPTH) coverage,
@@ -20,9 +20,14 @@ package tb_lut_ram_scoreboard_pkg;
       this.coverage = coverage;
     endfunction
 
-    task score(input lut_ram_trans #(LUT_WIDTH, LUT_DEPTH) actual,
-              input lut_ram_trans #(LUT_WIDTH, LUT_DEPTH) expected,
-              output bit passed);
+    task run();
+      lut_ram_trans #(LUT_WIDTH, LUT_DEPTH) actual, expected;
+
+      bit passed = 0;
+
+      mon_to_scb_mbx.get(actual);
+      pred_to_scb_mbx.get(expected);
+
       //test
       passed = expected.compare(actual);
 
@@ -32,8 +37,10 @@ package tb_lut_ram_scoreboard_pkg;
       end
       else begin
         print_fail(actual, expected);
+        num_fails++;
       end
     endtask
+
   endclass
 
 endpackage

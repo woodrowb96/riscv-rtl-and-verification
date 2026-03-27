@@ -7,11 +7,10 @@
   to the scoreboard.
 
   Pure Virtual Functions:
-    - predict(output TRANS_T trans)
-        - User defined interface into the run() function
-        - Users use this function to sample the DUT input, then predict the expected
-          output and store the expected transaction in the output trans.
-        - This function will run once per run() (pred.run() is being looped in the base_test)
+    - run()
+        - User defined interface into the main testing loop (initiated by base_test::run(num_tests))
+        - Users use this function to logic needed to sample DUT inputs and predict expected output
+        - This function will run once per run() (base_drive::drv() is being looped in the testing loop)
 
     Virtual tasks:
         - pre_run()
@@ -20,16 +19,11 @@
         - post_run()
             - automatically runs once after the main base_test::run() loop ends
             - by default its empty, but users can override this and add their own logic
-
-  Member Functions:
-    - run()
-        - Calls predict(), then sends the predicted transaction to the scoreboard
-        - Called and looped in the base_test
-
-  NOTE:
-    - base_predictor::run() is not called at the VERY START of the BASE_TEST::run() loop,
-      it is called AFTER THE FIRST DRIVE transaction has been driven into the DUT.
-    - See the note in base_monitor_pkg.sv for a deeper explanation.
+        - pred()
+            - Wrapper around base_predictor::run().
+            - Called and looped in the main testing loop.
+            - By default there is no additional wrapping logic around base_predictor::run(),
+              but users can overload this function and implement any if needed
 */
 package base_predictor_pkg;
 
@@ -44,7 +38,7 @@ package base_predictor_pkg;
       this.pred_to_scb_mbx = pred_to_scb_mbx;
     endfunction
 
-    pure virtual task predict(output TRANS_T trans);
+    pure virtual task run();
 
     virtual task pre_run();
       //empty by default
@@ -54,10 +48,8 @@ package base_predictor_pkg;
       //empty by default
     endtask
 
-    task run();
-      TRANS_T trans;
-      predict(trans);
-      pred_to_scb_mbx.put(trans);
+    virtual task pred();
+      run();
     endtask
   endclass
 

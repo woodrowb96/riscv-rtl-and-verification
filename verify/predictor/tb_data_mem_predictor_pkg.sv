@@ -17,19 +17,26 @@ package tb_data_mem_predictor_pkg;
       ref_data_mem = new();
     endfunction
 
-    task predict(output data_mem_trans trans);
-      @(vif.cb_mon);
-      //sample the DUT inputs
-      trans = new();
-      trans.wr_sel  = vif.cb_mon.wr_sel;
-      trans.addr    = vif.cb_mon.addr;
-      trans.wr_data = vif.cb_mon.wr_data;
+    task run();
+      data_mem_trans trans;
 
-      //predict the expected DUT output
-      trans.rd_data = ref_data_mem.read(trans.addr);
+      @(vif.cb_mon)
+      if(vif.cb_mon.valid) begin
+        trans = new();
+        //sample the DUT inputs
+        trans.wr_sel  = vif.cb_mon.wr_sel;
+        trans.addr    = vif.cb_mon.addr;
+        trans.wr_data = vif.cb_mon.wr_data;
 
-      //update the ref model
-      ref_data_mem.update(trans);
+        //predict the expected DUT output
+        trans.rd_data = ref_data_mem.read(trans.addr);
+
+        //update the ref model
+        ref_data_mem.update(trans);
+
+        //send the transaction to the scoreboard
+        pred_to_scb_mbx.put(trans);
+      end
     endtask
   endclass
 

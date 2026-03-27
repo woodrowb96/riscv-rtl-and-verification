@@ -12,7 +12,14 @@ package tb_data_mem_scoreboard_pkg;
       this.coverage = coverage;
     endfunction
 
-    task score(input data_mem_trans actual, input data_mem_trans expected, output bit passed);
+    task run();
+      data_mem_trans actual, expected;
+
+      bit passed = 0;
+
+      mon_to_scb_mbx.get(actual);
+      pred_to_scb_mbx.get(expected);
+
       //test
       passed = expected.compare(actual);
 
@@ -22,6 +29,7 @@ package tb_data_mem_scoreboard_pkg;
       end
       else begin
         print_fail(actual, expected);
+        num_fails++;
       end
     endtask
   endclass

@@ -25,7 +25,7 @@ package tb_lut_ram_generator_pkg;
     localparam longint unsigned ALL_ZEROS = {LUT_WIDTH{1'b0}};
     localparam longint unsigned ALL_ONES = {LUT_WIDTH{1'b1}};
 
-    //NOTE:The base lut_ram_trans already constrains 
+    //NOTE:The base lut_ram_trans already constrains
     //addresses to the legal range i.e {[0:LUT_DEPTH-1]}
 
     //hit the corners, but also get some full range values too
@@ -87,7 +87,7 @@ package tb_lut_ram_generator_pkg;
     typedef lut_ram_trans_corner_addr       #(LUT_WIDTH, LUT_DEPTH) trans_corner_addr_t;
 
     //use a dynamic queue to keep track of previously written addresses
-    //  - Note: I init with 0, so the solver never tries to solve a 
+    //  - Note: I init with 0, so the solver never tries to solve a
     //          constraint with an empty queue in it
     addr_t prev_written_addr [$] = {0};
 
@@ -105,9 +105,8 @@ package tb_lut_ram_generator_pkg;
       end
     endfunction
 
-    /*=================== GEN_TRANS() =================*/
-
-    task gen_trans(output trans_base_t trans);
+    task run();
+      trans_base_t trans;
 
       //Randomly choose the type of address we want
       //All trans will have the same wr_data weights (see lut_ram_trans_weighted_wr_data above)
@@ -118,7 +117,7 @@ package tb_lut_ram_generator_pkg;
           trans_corner_addr_t trans_corner_addr = new();
 
           assert(trans_corner_addr.randomize()) else
-            $fatal(1, "TB_LUT_RAM_GENERATOR: gen_trans() randomization failed, corner_addr");
+            $fatal(1, "TB_LUT_RAM_GENERATOR: randomization failed, corner_addr");
 
           trans = trans_corner_addr;
         end
@@ -128,7 +127,7 @@ package tb_lut_ram_generator_pkg;
           trans_prev_written_addr_t trans_prev_written_addr = new(prev_written_addr);
 
           assert(trans_prev_written_addr.randomize()) else
-            $fatal(1, "TB_LUT_RAM_GENERATOR: gen_trans() randomization failed, prev_written_addr");
+            $fatal(1, "TB_LUT_RAM_GENERATOR: randomization failed, prev_written_addr");
 
           trans = trans_prev_written_addr;
         end
@@ -138,7 +137,7 @@ package tb_lut_ram_generator_pkg;
           trans_full_addr_range_t trans_full_addr_range = new();
 
           assert(trans_full_addr_range.randomize()) else
-            $fatal(1, "TB_LUT_RAM_GENERATOR: gen_trans() randomization failed, full_range_addr");
+            $fatal(1, "TB_LUT_RAM_GENERATOR: randomization failed, full_range_addr");
 
           trans = trans_full_addr_range;
         end
@@ -146,6 +145,8 @@ package tb_lut_ram_generator_pkg;
 
       //update the previously writtens
       update_prev_written_addr(trans);
+
+      gen_to_drv_mbx.put(trans);
     endtask
   endclass
 

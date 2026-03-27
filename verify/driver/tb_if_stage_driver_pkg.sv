@@ -15,23 +15,21 @@ package tb_if_stage_driver_pkg;
     //   - NOTE: We dont deassert the reset. We want to hold the DUT in the
     //           reset state until testing starts. This is to make sure the PC
     //           doesnt start incrementing before the first drive. We will
-    //           deasert the reset during drive()
+    //           deassert the reset during run()
     task pre_run();
       vif.reset_n       <= 0;
       vif.branch        <= 0;
       vif.branch_target <= 0;
       @(posedge vif.clk);
+      vif.cb_drv.valid <= 0;
     endtask
 
-    //After the test has run assert and hold the reaset. We want to leave the
+    //After the test has run assert and hold the reset. We want to leave the
     //DUT in the reset state, so the PC doesnt increment between tests.
-    //(This isnt too big of a deal because we reset during pre_run(), but well
-    // do it just to make sure PC isnt incrementing when we dont want it too)
     task post_run();
-      vif.reset_n       <= 0;
-      vif.branch        <= 0;
-      vif.branch_target <= 0;
-      @(posedge vif.clk);
+      @(vif.cb_drv)
+      vif.reset_n      <= 0;
+      vif.cb_drv.valid <= 0;
     endtask
 
     //NOTE:
@@ -40,11 +38,19 @@ package tb_if_stage_driver_pkg;
     //  a direct drive and a drive through the CB as separate). So we have
     //  driver conflicts on the reset signal, if it's driven from two separate
     //  sources.
-    task drive(input if_stage_trans trans);
+    task run();
+      if_stage_trans trans;
+
       @(vif.cb_drv)
-      vif.reset_n              <= 1;
-      vif.cb_drv.branch        <= trans.branch;
-      vif.cb_drv.branch_target <= trans.branch_target;
+      if(gen_to_drv_mbx.try_get(trans)) begin
+        vif.reset_n              <= 1;
+        vif.cb_drv.valid         <= 1;
+        vif.cb_drv.branch        <= trans.branch;
+        vif.cb_drv.branch_target <= trans.branch_target;
+      end
+      else begin
+        vif.cb_drv.valid <= 0;
+      end
     endtask
   endclass
 

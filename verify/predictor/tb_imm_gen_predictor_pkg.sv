@@ -17,14 +17,21 @@ package tb_imm_gen_predictor_pkg;
       ref_imm_gen = new();
     endfunction
 
-    task predict(output imm_gen_trans trans);
-      @(vif.cb_mon);
-      //sample the DUT input
-      trans = new();
-      trans.inst = vif.cb_mon.inst;
+    task run();
+      imm_gen_trans trans;
 
-      //predict the expected DUT output
-      trans.imm = ref_imm_gen.compute(trans.inst);
+      @(vif.cb_mon)
+      if(vif.cb_mon.valid) begin
+        trans = new();
+        //sample the DUT input
+        trans.inst = vif.cb_mon.inst;
+
+        //predict the expected DUT output
+        trans.imm = ref_imm_gen.compute(trans.inst);
+
+        //send the transaction to the scoreboard
+        pred_to_scb_mbx.put(trans);
+      end
     endtask
   endclass
 

@@ -18,13 +18,32 @@ package tb_lut_ram_driver_pkg;
       this.vif = vif;
     endfunction
 
-    task drive(input lut_ram_trans #(LUT_WIDTH, LUT_DEPTH) trans);
+    task pre_run();
       @(vif.cb_drv)
-      vif.cb_drv.wr_en   <= trans.wr_en;
-      vif.cb_drv.wr_addr <= trans.wr_addr;
-      vif.cb_drv.rd_addr <= trans.rd_addr;
-      vif.cb_drv.wr_data <= trans.wr_data;
+      vif.cb_drv.valid <= 0;
     endtask
+
+    task run();
+      lut_ram_trans #(LUT_WIDTH, LUT_DEPTH) trans;
+
+      @(vif.cb_drv)
+      if(gen_to_drv_mbx.try_get(trans)) begin
+        vif.cb_drv.valid   <= 1;
+        vif.cb_drv.wr_en   <= trans.wr_en;
+        vif.cb_drv.wr_addr <= trans.wr_addr;
+        vif.cb_drv.rd_addr <= trans.rd_addr;
+        vif.cb_drv.wr_data <= trans.wr_data;
+      end
+      else begin
+        vif.cb_drv.valid <= 0;
+      end
+    endtask
+
+    task post_run();
+      @(vif.cb_drv)
+      vif.cb_drv.valid <= 0;
+    endtask
+
   endclass
 
 endpackage

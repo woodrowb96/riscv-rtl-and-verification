@@ -28,7 +28,8 @@ package tb_reg_file_generator_pkg;
       super.new("REG_FILE_DEFAULT_GEN", gen_to_drv_mbx);
     endfunction
 
-    task gen_trans(output reg_file_trans trans);
+    task run();
+      reg_file_trans trans;
 
       //Generate with a bias towards corner wr_data values, but also generate
       //fully random wr_data values too
@@ -39,7 +40,7 @@ package tb_reg_file_generator_pkg;
           reg_file_trans_corners trans_corners = new();
 
           assert(trans_corners.randomize()) else
-            $fatal(1, "TB_REG_FILE_GENERATOR: gen_trans() randomization failed, corners");
+            $fatal(1, "TB_REG_FILE_GENERATOR: randomization failed, corners");
 
           trans = trans_corners;
         end
@@ -49,11 +50,13 @@ package tb_reg_file_generator_pkg;
           reg_file_trans trans_full_range = new();
 
           assert(trans_full_range.randomize()) else
-            $fatal(1, "TB_REG_FILE_GENERATOR: gen_trans() randomization failed, full range");
+            $fatal(1, "TB_REG_FILE_GENERATOR: randomization failed, full range");
 
           trans = trans_full_range;
         end
       endcase
+
+      gen_to_drv_mbx.put(trans);
     endtask
 
   endclass

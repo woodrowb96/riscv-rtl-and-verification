@@ -18,19 +18,26 @@ package tb_if_stage_predictor_pkg;
       ref_if_stage = new(program_file);
     endfunction
 
-    task predict(output if_stage_trans trans);
-      @(vif.cb_mon);
-      //sample the DUT input
-      trans = new();
-      trans.branch        = vif.cb_mon.branch;
-      trans.branch_target = vif.cb_mon.branch_target;
+    task run();
+      if_stage_trans trans;
 
-      //predict the expected DUT output
-      trans.pc   = ref_if_stage.pc;
-      trans.inst = ref_if_stage.fetch_inst();
+      @(vif.cb_mon)
+      if(vif.cb_mon.valid) begin
+        trans = new();
+        //sample the DUT input
+        trans.branch        = vif.cb_mon.branch;
+        trans.branch_target = vif.cb_mon.branch_target;
 
-      //update the ref_model
-      ref_if_stage.update(trans);
+        //predict the expected DUT output
+        trans.pc   = ref_if_stage.pc;
+        trans.inst = ref_if_stage.fetch_inst();
+
+        //update the ref_model
+        ref_if_stage.update(trans);
+
+        //send the transaction to the scoreboard
+        pred_to_scb_mbx.put(trans);
+      end
     endtask
   endclass
 

@@ -15,13 +15,19 @@ package tb_inst_mem_monitor_pkg;
     //    We are syncing sampling to the clk through the cb_mon block, so
     //    the output we are reading corresponds to the inputs driven at the
     //    previous clk (with cb_drv in the driver)
-    task monitor(output inst_mem_trans trans);
-      @(vif.cb_mon);
-      trans = new();
-      //sample DUT input
-      trans.inst_addr = vif.cb_mon.inst_addr;
-      //sample DUT output
-      trans.inst = vif.cb_mon.inst;
+    task run();
+      inst_mem_trans trans;
+
+      @(vif.cb_mon)
+      if(vif.cb_mon.valid) begin
+        trans = new();
+        //sample DUT input
+        trans.inst_addr = vif.cb_mon.inst_addr;
+        //sample DUT output
+        trans.inst = vif.cb_mon.inst;
+        //send the transaction to the scoreboard
+        mon_to_scb_mbx.put(trans);
+      end
     endtask
   endclass
 

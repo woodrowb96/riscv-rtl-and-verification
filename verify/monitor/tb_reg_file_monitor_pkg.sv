@@ -10,23 +10,24 @@ package tb_reg_file_monitor_pkg;
       this.vif = vif;
     endfunction
 
-    //NOTE:
-    //  - DUT output is purely combinatorial
-    //    We use the clocking block to sync reads out.
-    //    This also ensures the DUT inputs had time to propagate to the
-    //    outputs
-    task monitor(output reg_file_trans trans);
-      @(vif.cb_mon);
-      trans = new();
-      //sample DUT input
-      trans.wr_en    = vif.cb_mon.wr_en;
-      trans.wr_reg   = vif.cb_mon.wr_reg;
-      trans.wr_data  = vif.cb_mon.wr_data;
-      trans.rd_reg_1 = vif.cb_mon.rd_reg_1;
-      trans.rd_reg_2 = vif.cb_mon.rd_reg_2;
-      //sample DUT output
-      trans.rd_data_1 = vif.cb_mon.rd_data_1;
-      trans.rd_data_2 = vif.cb_mon.rd_data_2;
+    task run();
+      reg_file_trans trans;
+
+      @(vif.cb_mon)
+      if(vif.cb_mon.valid) begin
+        trans = new();
+        //sample DUT input
+        trans.wr_en    = vif.cb_mon.wr_en;
+        trans.wr_reg   = vif.cb_mon.wr_reg;
+        trans.wr_data  = vif.cb_mon.wr_data;
+        trans.rd_reg_1 = vif.cb_mon.rd_reg_1;
+        trans.rd_reg_2 = vif.cb_mon.rd_reg_2;
+        //sample DUT output
+        trans.rd_data_1 = vif.cb_mon.rd_data_1;
+        trans.rd_data_2 = vif.cb_mon.rd_data_2;
+        //send the transactions to the scoreboard
+        mon_to_scb_mbx.put(trans);
+      end
     endtask
   endclass
 

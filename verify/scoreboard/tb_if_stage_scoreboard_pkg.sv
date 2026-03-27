@@ -16,7 +16,14 @@ package tb_if_stage_scoreboard_pkg;
       this.coverage = coverage;
     endfunction
 
-    task score(input if_stage_trans actual, input if_stage_trans expected, output bit passed);
+    task run();
+      if_stage_trans actual, expected;
+
+      bit passed = 0;
+
+      mon_to_scb_mbx.get(actual);
+      pred_to_scb_mbx.get(expected);
+
       //test
       passed = actual.compare(expected);
 
@@ -26,6 +33,7 @@ package tb_if_stage_scoreboard_pkg;
       end
       else begin
         print_fail(actual, expected);
+        num_fails++;
       end
     endtask
   endclass

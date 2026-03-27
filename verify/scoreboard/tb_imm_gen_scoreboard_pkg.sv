@@ -12,7 +12,14 @@ package tb_imm_gen_scoreboard_pkg;
       this.coverage = coverage;
     endfunction
 
-    task score(input imm_gen_trans actual, input imm_gen_trans expected, output bit passed);
+    task run();
+      imm_gen_trans actual, expected;
+
+      bit passed = 0;
+
+      mon_to_scb_mbx.get(actual);
+      pred_to_scb_mbx.get(expected);
+
       //test
       passed = expected.compare(actual);
 
@@ -22,6 +29,7 @@ package tb_imm_gen_scoreboard_pkg;
       end
       else begin
         print_fail(actual, expected);
+        num_fails++;
       end
     endtask
   endclass

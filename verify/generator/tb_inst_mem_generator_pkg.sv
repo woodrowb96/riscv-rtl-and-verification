@@ -44,13 +44,15 @@ package tb_inst_mem_generator_pkg;
 
     //use randcase to either gen a transaction that hits the corner addresses
     //or one that hits the full address range
-    task gen_trans(output inst_mem_trans trans);
+    task run();
+      inst_mem_trans trans;
+
       randcase
         1: begin
           inst_mem_trans_corner_addr trans_corner_addr = new();
 
           assert(trans_corner_addr.randomize()) else
-            $fatal(1, "[%s]: gen_trans() randomization failed, trans_corner_addr", tag);
+            $fatal(1, "[%s]: randomization failed, trans_corner_addr", tag);
 
           trans = trans_corner_addr;
         end
@@ -58,11 +60,13 @@ package tb_inst_mem_generator_pkg;
           inst_mem_trans trans_full_addr_range = new();
 
           assert(trans_full_addr_range.randomize()) else
-            $fatal(1, "[%s]: gen_trans() randomization failed, trans_full_addr_range", tag);
+            $fatal(1, "[%s]: randomization failed, trans_full_addr_range", tag);
 
           trans = trans_full_addr_range;
         end
       endcase
+
+      gen_to_drv_mbx.put(trans);
     endtask
   endclass
 
@@ -77,13 +81,16 @@ package tb_inst_mem_generator_pkg;
       super.new("INST_MEM_MISALIGNED_GEN", gen_to_drv_mbx);
     endfunction
 
-    task gen_trans(output inst_mem_trans trans);
+    task run();
+      inst_mem_trans trans;
       inst_mem_trans_misaligned trans_misaligned = new();
 
       assert(trans_misaligned.randomize()) else
-        $fatal(1, "[%s]: gen_trans() randomization failed", tag);
+        $fatal(1, "[%s]: randomization failed", tag);
 
       trans = trans_misaligned;
+
+      gen_to_drv_mbx.put(trans);
     endtask
   endclass
 
@@ -98,13 +105,16 @@ package tb_inst_mem_generator_pkg;
       super.new("INST_MEM_OOB_GEN", gen_to_drv_mbx);
     endfunction
 
-    task gen_trans(output inst_mem_trans trans);
+    task run();
+      inst_mem_trans trans;
       inst_mem_trans_oob trans_oob = new();
 
       assert(trans_oob.randomize()) else
-        $fatal(1, "[%s]: gen_trans() randomization failed", tag);
+        $fatal(1, "[%s]: randomization failed", tag);
 
       trans = trans_oob;
+
+      gen_to_drv_mbx.put(trans);
     endtask
   endclass
 

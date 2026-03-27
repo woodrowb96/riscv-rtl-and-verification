@@ -41,7 +41,7 @@ module tb_reg_file();
     test_default = new(intf, coverage);
 
     //run tests
-    test_default.run(1500);
+    test_default.run(2000);
 
     //print results
     test_default.print_results();

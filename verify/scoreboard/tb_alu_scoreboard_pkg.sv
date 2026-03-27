@@ -12,7 +12,14 @@ package tb_alu_scoreboard_pkg;
       this.coverage = coverage;
     endfunction
 
-    task score(input alu_trans actual, input alu_trans expected, output bit passed);
+    task run();
+      alu_trans actual, expected;
+
+      bit passed = 0;
+
+      mon_to_scb_mbx.get(actual);
+      pred_to_scb_mbx.get(expected);
+
       //test
       passed = expected.compare(actual);
 
@@ -21,6 +28,7 @@ package tb_alu_scoreboard_pkg;
         coverage.sample(actual);  //only collect coverage on passing transactions
       end
       else begin
+        num_fails++;
         print_fail(actual, expected);
       end
     endtask

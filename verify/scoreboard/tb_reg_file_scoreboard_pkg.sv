@@ -12,18 +12,27 @@ package tb_reg_file_scoreboard_pkg;
       this.coverage = coverage;
     endfunction
 
-    task score(input reg_file_trans actual, input reg_file_trans expected, output bit passed);
+    task run();
+      reg_file_trans actual, expected;
+
+      bit passed = 0;
+
+      mon_to_scb_mbx.get(actual);
+      pred_to_scb_mbx.get(expected);
+
       //test
       passed = expected.compare(actual);
 
       //handle pass/fail
       if(passed) begin
-        coverage.sample(actual);  //collect coverage on ONLY passing transactions
+        coverage.sample(actual);  //only collect coverage on passing transactions
       end
       else begin
         print_fail(actual, expected);
+        num_fails++;
       end
     endtask
+
   endclass
 
 endpackage

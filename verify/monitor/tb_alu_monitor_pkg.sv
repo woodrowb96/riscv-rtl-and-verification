@@ -11,14 +11,19 @@ package tb_alu_monitor_pkg;
     //    block ensures we are sampling slightly before the next drives get
     //    driven. It also gives the previous drives inputs time to propagate
     //    to the outputs for sampling.
-    task monitor(output alu_trans trans);
-      @(vif.cb_mon);
-      trans = new();
-      trans.alu_op = vif.cb_mon.alu_op;
-      trans.in_a = vif.cb_mon.in_a;
-      trans.in_b = vif.cb_mon.in_b;
-      trans.result = vif.cb_mon.result;
-      trans.zero = vif.cb_mon.zero;
+    task run();
+      alu_trans trans;
+
+      @(vif.cb_mon)
+      if(vif.cb_mon.valid) begin //make sure its a valid trans, we only want to send valid trans to the scb
+        trans = new();
+        trans.alu_op = vif.cb_mon.alu_op;
+        trans.in_a = vif.cb_mon.in_a;
+        trans.in_b = vif.cb_mon.in_b;
+        trans.result = vif.cb_mon.result;
+        trans.zero = vif.cb_mon.zero;
+        mon_to_scb_mbx.put(trans);
+      end
     endtask
 
     function new(virtual alu_intf vif, string tag, mailbox_t mon_to_scb_mbx);

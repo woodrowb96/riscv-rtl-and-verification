@@ -4,12 +4,14 @@
     This class is used to generate transaction for a specific test.
 
     Pure Virtual tasks:
-        - gen_trans(output TRANS_T trans)
-            - User defined interface into the run() function
+        - run()
+            - User defined interface into the main testing loop (initiated by base_test::run(num_tests))
             - Users use this function to write their transaction generation logic
-            - This function will run once per run() (gen.run() is being looped in the base_test)
+            - By default this function will run once per iteration of the main testing loop
             - Users can set the finished flag to 1 to signal to base_test that the
               generation of transactions is done.
+            - The base_test::run(num_tests) testing loop will run until either
+              gen.num_transactions == num_tests or until the finished flag is set.
 
     Virtual tasks:
         - pre_run()
@@ -18,12 +20,11 @@
         - post_run()
             - automatically runs once after the main base_test::run() loop ends
             - by default its empty, but users can override this and add their own logic
-
-    Member Functions:
-        - run()
-            - Calls gen_trans(), sends generated trans to the driver, keeps track of the
-              num_transactions generated.
-            - Called and looped in the base_test
+        - gen()
+            - wrapper around the base_generator::run()
+            - Called and looped when users call base_test::run(num_tests)
+            - By default it will increment num_transactions after each base_generator::run() call
+            - Users can override the default behavior and implement their own wrapping logic
 
     WARNING:
       The base_test.run() function uses this class to determine when to end the test.
@@ -45,6 +46,8 @@ package base_generator_pkg;
 
     int finished = 0;
 
+    //this is incremented once per each call of run
+    //(By default the lib assumes one transaction is gennerated per run() call)
     int num_transactions = 0;
 
     protected function new(string tag, mailbox_t gen_to_drv_mbx);
@@ -52,7 +55,7 @@ package base_generator_pkg;
       this.gen_to_drv_mbx = gen_to_drv_mbx;
     endfunction
 
-    pure virtual task gen_trans(output TRANS_T trans);
+    pure virtual task run();
 
     virtual task pre_run();
       //empty by default
@@ -62,11 +65,9 @@ package base_generator_pkg;
       //empty by default
     endtask
 
-    task run();
-      TRANS_T trans;
-      gen_trans(trans);
+    virtual task gen();
+      run();
       num_transactions++;
-      gen_to_drv_mbx.put(trans);
     endtask
   endclass
 

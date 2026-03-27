@@ -103,7 +103,8 @@ package tb_alu_generator_pkg;
       super.new("ALU_DEFAULT_GEN", gen_to_drv_mbx);
     endfunction
 
-    task gen_trans(output alu_trans trans);
+    task run();
+      alu_trans trans;
 
       randcase
         //logical operations
@@ -111,7 +112,7 @@ package tb_alu_generator_pkg;
           alu_trans_logical_ops trans_logical = new();
 
           assert(trans_logical.randomize()) else
-            $fatal(1, "[%s]: gen_trans() randomization failed, logical trans", tag);
+            $fatal(1, "[%s]: randomization failed, logical trans", tag);
 
           trans = trans_logical;
         end
@@ -121,7 +122,7 @@ package tb_alu_generator_pkg;
           alu_trans_add_op trans_add = new();
 
           assert(trans_add.randomize()) else
-            $fatal(1, "[%s]: gen_trans() randomization failed, add trans", tag);
+            $fatal(1, "[%s]: randomization failed, add trans", tag);
 
           trans = trans_add;
         end
@@ -131,11 +132,13 @@ package tb_alu_generator_pkg;
           alu_trans_sub_op trans_sub = new();
 
           assert(trans_sub.randomize()) else
-            $fatal(1, "[%s]: gen_trans() randomization failed, sub trans", tag);
+            $fatal(1, "[%s]: randomization failed, sub trans", tag);
 
           trans = trans_sub;
         end
       endcase
+
+      gen_to_drv_mbx.put(trans);
     endtask
 
   endclass
@@ -160,8 +163,8 @@ package tb_alu_generator_pkg;
       super.new("ALU_ADD_CORNER_WALK_GEN", gen_to_drv_mbx);
     endfunction
 
-    task gen_trans(output alu_trans trans);
-      trans = new();
+    task run();
+      alu_trans trans = new();
 
       //if we have walked through all corner combos set finished
       if (i >= corners.size()) begin
@@ -181,6 +184,8 @@ package tb_alu_generator_pkg;
         j = 0;
         i++;
       end
+
+      gen_to_drv_mbx.put(trans);
     endtask
 
   endclass
@@ -208,8 +213,8 @@ package tb_alu_generator_pkg;
       super.new("ALU_SUB_CORNER_WALK_GEN", gen_to_drv_mbx);
     endfunction
 
-    task gen_trans(output alu_trans trans);
-      trans = new();
+    task run();
+      alu_trans trans = new();
 
       //if we have walked through all corner combos set finished
       if (i >= corners.size()) begin
@@ -229,6 +234,8 @@ package tb_alu_generator_pkg;
         j = 0;
         i++;
       end
+
+      gen_to_drv_mbx.put(trans);
     endtask
 
   endclass
@@ -243,13 +250,13 @@ package tb_alu_generator_pkg;
       super.new("ALU_INVALID_OP_GEN", gen_to_drv_mbx);
     endfunction
 
-    task gen_trans(output alu_trans trans);
+    task run();
       alu_trans_invalid_op trans_invalid = new();
 
       assert(trans_invalid.randomize()) else
-        $fatal(1, "[%s]: gen_trans() randomization failed", tag);
+        $fatal(1, "[%s]: randomization failed", tag);
 
-      trans = trans_invalid;
+      gen_to_drv_mbx.put(trans_invalid);
     endtask
 
   endclass

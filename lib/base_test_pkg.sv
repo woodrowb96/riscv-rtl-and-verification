@@ -54,12 +54,9 @@
                 - run the test
                 - Tests will run until:
                     - The number of transactions generated == num_tests OR
-                    - gen.finished is set (if users dont specify a num_tests) OR
+                      gen.finished is set (if users dont specify a num_tests) AND
+                    - The number of transactions scored == num transactions generated
                     - we timeout
-                - NOTE:
-                  - mon.run() and pred.run() are not called at the same time as the other .run() functions.
-                  - we wait until after the first drive transaction has been driven
-                    into the DUT to start monitoring and predicting
           - pre_run()
                 - runs once before the main run loop
                 - forks each components pre_run() function and waits for them all to return
@@ -88,16 +85,13 @@ package base_test_pkg;
 
     bit test_running = 0; //test doesnt start running until run() is called
 
-    //We use this in test() to delay the start of monitor and prediction until after the drive has started
-    bit drv_started = 0;
-
     GEN_T  gen;
     DRV_T  drv;
     MON_T  mon;
     PRED_T pred;
     SCB_T  scb;
 
-    protected function new(string tag, int timeout = 100000);
+    protected function new(string tag, int timeout = 10000000);
       this.tag = tag;
       this.timeout = timeout;
       gen_to_drv_mbx  = new();
@@ -157,47 +151,27 @@ package base_test_pkg;
     /*=========================== TEST ====================================*/
     //The main testing loop.
 
-    protected task test(int num_tests);
+    protected task test(int num_tests = -1);
       fork begin
 
         fork
-        //Fork each component
-        //Join when the generator stops generating new sequences
+          if(num_tests >= 0) while(gen.num_transactions < num_tests) gen.gen();
+          else               while(!gen.finished)                    gen.gen();
+          forever drv.drv();
+          forever mon.mon();
+          forever pred.pred();
+          forever scb.scb();
 
-          //Generator
-          if(num_tests >= 0) repeat(num_tests)    gen.run();  //run till we gen the num_tests
-          else               while(!gen.finished) gen.run();  //or finished flag is set
-
-          //Driver
-          begin
-            drv_started = 0;   //make sure this is deaserted (reset_aware_test loops this task)
-            drv.run();         //do the first drive
-            drv_started = 1;   //tell monitor and predictor they can start
-            forever drv.run(); //continue the rest of the drives
-          end
-
-          //Monitor
-          begin
-            wait(drv_started); //wait until the first drv.run call has finished to start
-            forever mon.run();
-          end
-
-          //Predictor
-          begin
-            wait(drv_started); //wait until the first drv.run call has finished to start
-            forever pred.run();
-          end
-
-          //Scoreboard
-          forever scb.run();
-
-          #timeout $fatal(1, "[%s]: Timeout during base_test.run(), scb.num_tests=%0d", tag, scb.num_tests);
+          #timeout $fatal(1, "[%s]: Timeout during base_test.run(), scb.num_tests=%0d, gen.num_transactions=%0d, gen.finished=%0d, gen_to_drv_mbx=%0d",
+                          tag, scb.num_tests, gen.num_transactions, gen.finished, gen_to_drv_mbx.num());
         join_any
 
+        //Drain: wait for the scoreboard to score all generated transactions
         fork
-          //Wait until we score all the tests OR we timeout
           wait(scb.num_tests == gen.num_transactions);
-          #timeout $fatal(1, "[%s]: Timeout waiting for scoreboard, scb.num_tests=%0d",tag, scb.num_tests);
+
+          #timeout $fatal(1, "[%s]: Timeout waiting for scoreboard drain, scb.num_tests=%0d, gen.num_transactions=%0d",
+                          tag, scb.num_tests, gen.num_transactions);
         join_any
 
         disable fork;
@@ -207,7 +181,7 @@ package base_test_pkg;
     /*======================  RESET_AWARE_TEST ======================*/
     //Run the test with some extra infrastructure to handle mid-test resetting
 
-    protected task reset_aware_test(int num_tests);
+    protected task reset_aware_test(int num_tests = -1);
       while(test_running) begin          //Repeat the following until the test is done:
 
         fork begin                               //Fork testing and reset_detection to run concurrently

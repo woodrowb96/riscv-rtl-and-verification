@@ -84,15 +84,18 @@ package tb_if_stage_generator_pkg;
       super.new("IF_STAGE_MAIN_TEST_GEN", gen_to_drv_mbx);
     endfunction
 
-    task gen_trans(output if_stage_trans trans);
+    task run();
+      if_stage_trans trans;
       if_stage_trans_main_test trans_main = new(prev_pc);
 
       assert(trans_main.randomize()) else
-        $fatal("[%s] gen_trans(): randomization failed", tag);
+        $fatal("[%s] randomization failed", tag);
 
       //update generator state
       update_state(trans_main);
       trans = trans_main;
+
+      gen_to_drv_mbx.put(trans);
     endtask
 
   endclass
@@ -131,15 +134,18 @@ package tb_if_stage_generator_pkg;
       super.new("IF_STAGE_BRANCH_CORNERS_GEN", gen_to_drv_mbx);
     endfunction
 
-    task gen_trans(output if_stage_trans trans);
+    task run();
+      if_stage_trans trans;
       if_stage_trans_branch_corners trans_corners = new(prev_pc);
 
       assert(trans_corners.randomize()) else
-        $fatal("[%s] gen_trans(): randomization failed", tag);
+        $fatal("[%s] randomization failed", tag);
 
       //update generator state
       update_state(trans_corners);
       trans = trans_corners;
+
+      gen_to_drv_mbx.put(trans);
     endtask
 
   endclass
@@ -206,14 +212,17 @@ package tb_if_stage_generator_pkg;
       super.new("IF_STAGE_OOB_MISALIGNED_GEN", gen_to_drv_mbx);
     endfunction
 
-    task gen_trans(output if_stage_trans trans);
+    task run();
+      if_stage_trans trans;
       if_stage_trans_misaligned_oob trans_oob = new(prev_pc);
 
       assert(trans_oob.randomize()) else
-        $fatal(1, "[%s]: gen_trans() randomization failed, OOB/Misaligned trans", tag);
+        $fatal(1, "[%s]: randomization failed, OOB/Misaligned trans", tag);
 
       update_state(trans_oob);
       trans = trans_oob;
+
+      gen_to_drv_mbx.put(trans);
     endtask
   endclass
 

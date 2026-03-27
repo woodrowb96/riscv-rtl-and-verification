@@ -10,13 +10,30 @@ package tb_alu_driver_pkg;
       this.vif = vif;
     endfunction
 
-    task drive(input alu_trans trans);
+    task pre_run();
       @(vif.cb_drv)
-      vif.cb_drv.alu_op <= trans.alu_op;
-      vif.cb_drv.in_a <= trans.in_a;
-      vif.cb_drv.in_b <= trans.in_b;
+      vif.cb_drv.valid <= 0;
     endtask
 
+    task run();
+      alu_trans trans;
+
+      @(vif.cb_drv)
+      if(gen_to_drv_mbx.try_get(trans)) begin
+        vif.cb_drv.valid <= 1;
+        vif.cb_drv.alu_op <= trans.alu_op;
+        vif.cb_drv.in_a <= trans.in_a;
+        vif.cb_drv.in_b <= trans.in_b;
+      end
+      else begin
+        vif.cb_drv.valid <= 0;
+      end
+    endtask
+
+    task post_run();
+      @(vif.cb_drv)
+      vif.cb_drv.valid <= 0;
+    endtask
   endclass
 
 endpackage

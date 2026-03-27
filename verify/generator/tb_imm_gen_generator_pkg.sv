@@ -144,7 +144,8 @@ package tb_imm_gen_generator_pkg;
       super.new("IMM_GEN_DEFAULT_GEN", gen_to_drv_mbx);
     endfunction
 
-    task gen_trans(output imm_gen_trans trans);
+    task run();
+      imm_gen_trans trans;
 
       //We use the randcase to choose which format type to generate.
       //Each format type has its own corner constraints.
@@ -154,7 +155,7 @@ package tb_imm_gen_generator_pkg;
           imm_gen_trans trans_base = new();
 
           assert(trans_base.randomize()) else
-            $fatal(1, "[TB_IMM_GEN_GENERATOR]: gen_trans() randomization failed, base trans");
+            $fatal(1, "[TB_IMM_GEN_GENERATOR]: randomization failed, base trans");
 
           trans = trans_base;
         end
@@ -163,7 +164,7 @@ package tb_imm_gen_generator_pkg;
           imm_gen_trans_i_type_corners trans_i = new();
 
           assert(trans_i.randomize()) else
-            $fatal(1, "[TB_IMM_GEN_GENERATOR]: gen_trans() randomization failed, I-type trans");
+            $fatal(1, "[TB_IMM_GEN_GENERATOR]: randomization failed, I-type trans");
 
           trans = trans_i;
         end
@@ -172,7 +173,7 @@ package tb_imm_gen_generator_pkg;
           imm_gen_trans_s_type_corners trans_s = new();
 
           assert(trans_s.randomize()) else
-            $fatal(1, "[TB_IMM_GEN_GENERATOR]: gen_trans() randomization failed, S-type trans");
+            $fatal(1, "[TB_IMM_GEN_GENERATOR]: randomization failed, S-type trans");
 
           trans = trans_s;
         end
@@ -181,7 +182,7 @@ package tb_imm_gen_generator_pkg;
           imm_gen_trans_b_type_corners trans_b = new();
 
           assert(trans_b.randomize()) else
-            $fatal(1, "[TB_IMM_GEN_GENERATOR]: gen_trans() randomization failed, B-type trans");
+            $fatal(1, "[TB_IMM_GEN_GENERATOR]: randomization failed, B-type trans");
 
           trans = trans_b;
         end
@@ -190,7 +191,7 @@ package tb_imm_gen_generator_pkg;
           imm_gen_trans_u_type_corners trans_u = new();
 
           assert(trans_u.randomize()) else
-            $fatal(1, "[TB_IMM_GEN_GENERATOR]: gen_trans() randomization failed, U-type trans");
+            $fatal(1, "[TB_IMM_GEN_GENERATOR]: randomization failed, U-type trans");
 
           trans = trans_u;
         end
@@ -199,11 +200,13 @@ package tb_imm_gen_generator_pkg;
           imm_gen_trans_j_type_corners trans_j = new();
 
           assert(trans_j.randomize()) else
-            $fatal(1, "[TB_IMM_GEN_GENERATOR]: gen_trans() randomization failed, J-type trans");
+            $fatal(1, "[TB_IMM_GEN_GENERATOR]: randomization failed, J-type trans");
 
           trans = trans_j;
         end
       endcase
+
+      gen_to_drv_mbx.put(trans);
     endtask
 
   endclass

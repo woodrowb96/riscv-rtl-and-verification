@@ -22,20 +22,28 @@ package tb_lut_ram_predictor_pkg;
       ref_lut_ram = new();
     endfunction
 
-    task predict(output lut_ram_trans #(LUT_WIDTH, LUT_DEPTH) trans);
-      @(vif.cb_mon);
-      //sample the DUT inputs
-      trans = new();
-      trans.wr_en   = vif.cb_mon.wr_en;
-      trans.wr_addr = vif.cb_mon.wr_addr;
-      trans.rd_addr = vif.cb_mon.rd_addr;
-      trans.wr_data = vif.cb_mon.wr_data;
+    task run();
+      lut_ram_trans #(LUT_WIDTH, LUT_DEPTH) trans;
 
-      //predict the expected DUT output
-      trans.rd_data = ref_lut_ram.read(trans.rd_addr);
+      @(vif.cb_mon)
+      if(vif.cb_mon.valid) begin
+        trans = new();
 
-      //update the ref model
-      ref_lut_ram.update(trans);
+        //sample the DUT inputs
+        trans.wr_en   = vif.cb_mon.wr_en;
+        trans.wr_addr = vif.cb_mon.wr_addr;
+        trans.rd_addr = vif.cb_mon.rd_addr;
+        trans.wr_data = vif.cb_mon.wr_data;
+
+        //predict the expected DUT output
+        trans.rd_data = ref_lut_ram.read(trans.rd_addr);
+
+        //update the ref model
+        ref_lut_ram.update(trans);
+
+        //send the transaction to the scoreboard
+        pred_to_scb_mbx.put(trans);
+      end
     endtask
   endclass
 

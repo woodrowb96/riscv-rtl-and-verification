@@ -18,14 +18,21 @@ package tb_inst_mem_predictor_pkg;
       ref_inst_mem = new(program_file);
     endfunction
 
-    task predict(output inst_mem_trans trans);
-      @(vif.cb_mon);
-      //sample the DUT input
-      trans = new();
-      trans.inst_addr = vif.cb_mon.inst_addr;
+    task run();
+      inst_mem_trans trans;
 
-      //predict the expected DUT output
-      trans.inst = ref_inst_mem.read(trans.inst_addr);
+      @(vif.cb_mon)
+      if(vif.cb_mon.valid) begin
+        trans = new();
+        //sample the DUT input
+        trans.inst_addr = vif.cb_mon.inst_addr;
+
+        //predict the expected DUT output
+        trans.inst = ref_inst_mem.read(trans.inst_addr);
+
+        //send the transaction to the scoreboard
+        pred_to_scb_mbx.put(trans);
+      end
     endtask
   endclass
 

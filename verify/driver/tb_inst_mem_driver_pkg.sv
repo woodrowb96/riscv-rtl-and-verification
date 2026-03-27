@@ -10,9 +10,27 @@ package tb_inst_mem_driver_pkg;
       this.vif = vif;
     endfunction
 
-    task drive(input inst_mem_trans trans);
+    task pre_run();
       @(vif.cb_drv)
-      vif.cb_drv.inst_addr <= trans.inst_addr;
+      vif.cb_drv.valid <= 0;
+    endtask
+
+    task run();
+      inst_mem_trans trans;
+
+      @(vif.cb_drv)
+      if(gen_to_drv_mbx.try_get(trans)) begin
+        vif.cb_drv.valid     <= 1;
+        vif.cb_drv.inst_addr <= trans.inst_addr;
+      end
+      else begin
+        vif.cb_drv.valid <= 0;
+      end
+    endtask
+
+    task post_run();
+      @(vif.cb_drv)
+      vif.cb_drv.valid <= 0;
     endtask
   endclass
 
