@@ -67,7 +67,7 @@
                 - print total number of tests ran and total number of failed tests
 */
 package base_test_pkg;
-  import base_reset_detector_pkg::*;
+  import base_reset_pkg::*;
 
   virtual class base_test #(parameter type TRANS_T, GEN_T, DRV_T, MON_T, PRED_T, SCB_T);
     typedef mailbox #(TRANS_T) mailbox_t;
@@ -75,15 +75,15 @@ package base_test_pkg;
     mailbox_t mon_to_scb_mbx;
     mailbox_t pred_to_scb_mbx;
 
-    //Users need to define their own reset_detector and hook it up manually
-    //if they need mid-test reset detection/handling.
-    base_reset_detector rst_detect = null;
-
     string tag;
 
     int timeout;
 
     bit test_running = 0; //test doesnt start running until run() is called
+
+    //If users need mid-test reseting they need to extend the base_reset, then
+    //hook it up manually to base_test::rst();
+    base_reset rst = null;
 
     GEN_T  gen;
     DRV_T  drv;
@@ -94,7 +94,7 @@ package base_test_pkg;
     protected function new(string tag, int timeout = 10000000);
       this.tag = tag;
       this.timeout = timeout;
-      gen_to_drv_mbx  = new();
+      gen_to_drv_mbx  = new(1);
       mon_to_scb_mbx  = new();
       pred_to_scb_mbx = new();
     endfunction
@@ -107,13 +107,6 @@ package base_test_pkg;
       //  - Users will need to define how their tests call each components reset handling
     endtask
 
-    virtual task inject_reset();
-      //Empty by default
-      //  - Users will need to implement their own reset injection logic if
-      //    they need it.
-    endtask
-
-
     /*========================== RUN =================================*/
     //Users call this to start testing
 
@@ -121,20 +114,12 @@ package base_test_pkg;
       pre_run();
 
       test_running = 1;
-      fork begin
-        fork
-          inject_reset();              //fork off optional reset injection, then move onto testing
-        join_none
-
-        if(rst_detect != null) begin   //If we have reset detection, then
-          reset_aware_test(num_tests); //We need to wrap the test in some extra infrastructure
-        end
-        else begin                     //If there is no reset detection, then
-          test(num_tests);             //we just run the test directly
-        end
-
-        disable fork;                  //cleanup the inject_reset fork
-      end join
+      if(rst != null) begin   //If we have reset detection, then
+        reset_aware_test(num_tests); //We need to wrap the test in some extra infrastructure
+      end
+      else begin                     //If there is no reset detection, then
+        test(num_tests);             //we just run the test directly
+      end
       test_running = 0;
 
       post_run();
@@ -168,7 +153,7 @@ package base_test_pkg;
 
         //Drain: wait for the scoreboard to score all generated transactions
         fork
-          wait(scb.num_tests == gen.num_transactions);
+          wait(scb.num_tests >= gen.num_transactions);
 
           #timeout $fatal(1, "[%s]: Timeout waiting for scoreboard drain, scb.num_tests=%0d, gen.num_transactions=%0d",
                           tag, scb.num_tests, gen.num_transactions);
@@ -176,6 +161,11 @@ package base_test_pkg;
 
         disable fork;
       end join
+
+      if(scb.num_tests > gen.num_transactions) begin
+        $fatal(1, "[%s]: scb scored too many tests!, scb.num_tests=%0d, gen.num_transactions=%0d",
+                          tag, scb.num_tests, gen.num_transactions);
+      end
     endtask
 
     /*======================  RESET_AWARE_TEST ======================*/
@@ -191,7 +181,7 @@ package base_test_pkg;
               test_running = 0;
             end
             begin
-              rst_detect.detect_reset_assert();  //If we detect a reset first -> then test is still running
+              rst.rst_assert();                  //If we assert a reset first -> then test is still running
             end
           join_any
           disable fork;                          //Regardless of which it is, kill all running concurrent processes
@@ -199,9 +189,7 @@ package base_test_pkg;
 
         if(test_running) begin                   //If test is still running, then a reset was detected
           handle_reset();                        //handle the reset
-          rst_detect.detect_reset_deassert();    //block until the reset is deasserted
         end
-
       end                               //Repeat until the test is done running
     endtask
 
@@ -210,6 +198,7 @@ package base_test_pkg;
 
     protected task pre_run();
       fork
+        if(rst != null) rst.pre_run();
         gen.pre_run();
         drv.pre_run();
         mon.pre_run();
@@ -220,6 +209,7 @@ package base_test_pkg;
 
     protected task post_run();
       fork
+        if(rst != null) rst.post_run();
         gen.post_run();
         drv.post_run();
         mon.post_run();

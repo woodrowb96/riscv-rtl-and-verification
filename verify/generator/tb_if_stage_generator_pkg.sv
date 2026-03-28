@@ -89,7 +89,7 @@ package tb_if_stage_generator_pkg;
       if_stage_trans_main_test trans_main = new(prev_pc);
 
       assert(trans_main.randomize()) else
-        $fatal("[%s] randomization failed", tag);
+        $fatal(1, "[%s] randomization failed", tag);
 
       //update generator state
       update_state(trans_main);
@@ -139,7 +139,7 @@ package tb_if_stage_generator_pkg;
       if_stage_trans_branch_corners trans_corners = new(prev_pc);
 
       assert(trans_corners.randomize()) else
-        $fatal("[%s] randomization failed", tag);
+        $fatal(1, "[%s] randomization failed", tag);
 
       //update generator state
       update_state(trans_corners);

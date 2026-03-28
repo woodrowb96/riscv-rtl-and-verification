@@ -14,7 +14,7 @@ package tb_if_stage_monitor_pkg;
       if_stage_trans trans;
 
       @(vif.cb_mon)
-      if(vif.cb_mon.valid) begin
+      if(vif.cb_mon.valid && vif.cb_mon.reset_n) begin
         trans = new();
         //sample DUT input
         trans.branch        = vif.cb_mon.branch;

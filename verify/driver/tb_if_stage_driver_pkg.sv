@@ -17,18 +17,16 @@ package tb_if_stage_driver_pkg;
     //           doesnt start incrementing before the first drive. We will
     //           deassert the reset during run()
     task pre_run();
-      vif.reset_n       <= 0;
-      vif.branch        <= 0;
-      vif.branch_target <= 0;
-      @(posedge vif.clk);
+      @(vif.cb_drv);
+      vif.cb_drv.branch        <= 0;
+      vif.cb_drv.branch_target <= 0;
       vif.cb_drv.valid <= 0;
     endtask
 
     //After the test has run assert and hold the reset. We want to leave the
     //DUT in the reset state, so the PC doesnt increment between tests.
     task post_run();
-      @(vif.cb_drv)
-      vif.reset_n      <= 0;
+      @(vif.cb_drv);
       vif.cb_drv.valid <= 0;
     endtask
 
@@ -43,7 +41,6 @@ package tb_if_stage_driver_pkg;
 
       @(vif.cb_drv)
       if(gen_to_drv_mbx.try_get(trans)) begin
-        vif.reset_n              <= 1;
         vif.cb_drv.valid         <= 1;
         vif.cb_drv.branch        <= trans.branch;
         vif.cb_drv.branch_target <= trans.branch_target;

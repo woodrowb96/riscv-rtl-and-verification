@@ -15,12 +15,12 @@ interface if_stage_intf (input logic clk);
 
   clocking cb_drv @(posedge clk);
     default output #1;
-    output branch, branch_target, valid;
+    output branch, branch_target, valid, reset_n;
   endclocking
 
   clocking cb_mon @(posedge clk);
     default input #1step;
-    input branch, branch_target, pc, inst, valid;
+    input branch, branch_target, pc, inst, valid, reset_n;
   endclocking
 
   function void print(string msg = "");

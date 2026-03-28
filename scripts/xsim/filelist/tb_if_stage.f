@@ -5,7 +5,7 @@ lib/base_driver_pkg.sv
 lib/base_monitor_pkg.sv
 lib/base_scoreboard_pkg.sv
 lib/base_predictor_pkg.sv
-lib/base_reset_detector_pkg.sv
+lib/base_reset_pkg.sv
 lib/base_test_pkg.sv
 
 # RTL
