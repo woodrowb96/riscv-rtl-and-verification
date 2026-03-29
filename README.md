@@ -13,7 +13,7 @@ Each RTL module is being developed alongside a full coverage-driven class-based,
 - Directed and constrained-random tests (written with my custom verification library)
 
 To aid in verification I have also developed a class-based concurrent verification
-library (located in `lib/`), providing a reusable base class infrastructure (transaction, generator, driver, monitor, scoreboard, test) for writing module-specific directed and constrained-random tests. 
+library (located in `lib/`), providing a reusable base class infrastructure (transaction, generator, driver, monitor, predictor, scoreboard, optional mid-test resetting, test) for writing module-specific directed and constrained-random tests.
 See [lib/README.md](lib/) for more details.
 
 Note: I am actively developing this project.
@@ -28,7 +28,9 @@ Note: I am actively developing this project.
 │   ├── lut_ram.sv      # Generic parameterized LUT-RAM
 │   ├── data_mem.sv     # Byte-addressable data memory
 │   ├── inst_mem.sv     # Read-only instruction memory (ROM)
-│   └── imm_gen.sv      # Immediate generation unit
+│   ├── imm_gen.sv      # Immediate generation unit
+│   ├── if_stage.sv     # Instruction fetch stage
+│   └── data_path.sv    # Data path module
 │
 ├── lib/                # Class-based concurrent verification library
 │
@@ -66,6 +68,7 @@ I've currently implemented and verified the following modules with 100% coverage
 - Data Memory
 - Instruction Memory
 - Immediate Generator
+- IF Stage (in progress)
 
 ## Verification
 
@@ -91,9 +94,12 @@ Test components:
 - **Driver** — Drives generated transactions into the DUT (typically done through interface clocking blocks)
 - **Monitor** — Monitors the DUT I/O ports to sample a single transaction (also typically through interface clocking blocks)
 - **Predictor** — Samples the DUT inputs and uses them to predict the expected output using a reference model.
-- **Scoreboard** — Scores the acual transactions from the monitor against the expected transactions from the predictor, tracks total pass/fails, adds passing transactions to functional coverage
+- **Scoreboard** — Scores the actual transactions from the monitor against the expected transactions from the predictor, tracks total pass/fails, adds passing transactions to functional coverage
 
 Each testbench contains one or more tests, each targeting a different part of coverage.
+
+Tests can optionally integrate mid-test reset injection to verify that the DUT correctly
+recovers from resets during normal operation.
 
 Tests are implemented using the custom verification library (see [lib/README.md](lib/) for details).
 
