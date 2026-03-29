@@ -1,29 +1,29 @@
 /*
-  Base predictor class for the verification library.
+    Base predictor class for the verification library.
 
-  This class is basically the mirror of the base_monitor. Base_monitor monitors the DUT
-  I/O and sends  the actual transaction to the scoreboard. Base_predictor monitors just
-  the DUT Input and then predicts the expected output and sends the expected transaction
-  to the scoreboard.
+    This class is the mirror of the base_monitor. Base_monitor monitors the DUT
+    I/O and sends the actual transaction to the scoreboard. Base_predictor monitors
+    just the DUT inputs and predicts the expected output, then sends the expected
+    transaction to the scoreboard.
 
-  Pure Virtual Functions:
-    - run()
-        - User defined interface into the main testing loop (initiated by base_test::run(num_tests))
-        - Users use this function to logic needed to sample DUT inputs and predict expected output
-        - This function will run once per run() (base_drive::drv() is being looped in the testing loop)
+    Pure Virtual Tasks:
+        - run()
+            - User defined interface into the main testing loop (initiated by base_test::run(num_tests)).
+            - Users use this task to implement logic needed to sample DUT inputs and predict expected output.
+            - This task will run once per iteration of the main testing loop.
 
-    Virtual tasks:
+    Virtual Tasks:
         - pre_run()
-            - automatically runs once before the main base_test::run() loop starts
-            - by default its empty, but users can override this and add their own logic
+            - Automatically runs once before the main base_test::run() loop starts.
+            - Empty by default. Users can override this and add their own logic.
         - post_run()
-            - automatically runs once after the main base_test::run() loop ends
-            - by default its empty, but users can override this and add their own logic
+            - Automatically runs once after the main base_test::run() loop ends.
+            - Empty by default. Users can override this and add their own logic.
         - pred()
             - Wrapper around base_predictor::run().
             - Called and looped in the main testing loop.
             - By default there is no additional wrapping logic around base_predictor::run(),
-              but users can overload this function and implement any if needed
+              but users can override this and implement any if needed.
 */
 package base_predictor_pkg;
 

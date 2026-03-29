@@ -1,70 +1,70 @@
 /*
     Base test class for the verification library.
 
-    Usage:
-          - In your child tests new():
-                1. Call super.new() first (this creates the mailboxes)
-                2. Construct and assign gen, drv, mon, scb, pred (pass mailboxes from super)
-                3. Do any additional wiring for custom child level stuff (events, custom mailboxes ...)
+    Optional Functionality:
+          - Mid-test Resetting:
+                - Users can integrate mid-test resetting into their tests by
+                  extending the base_reset, constructing it in their child tests
+                  new() and hooking it up to the base_test::rst.
 
-    Optional Usage:
-          - Mid-test Reset Injection:
-                - Users are provided the virtual inject_reset() task that they can use
-                  to implement mid-test reset injection into their tests.
+                - When base_test::rst is set, base_test will automatically run the test with the
+                  additional infrastructure needed to be reset aware (base_test::rst_aware_test()).
 
-                - inject_reset() is forked off concurrently at the start of testing
+                - When a mid-test reset is detected base_test will kill all currently running
+                  concurrent processes. It will then call base_test::reset_recovery() which
+                  will flush the mailboxes and make sure the scoreboard and generator are in sync.
+                  It will then call base_test::handle_reset() which is where users can write
+                  their DUT/test specific reset handling.
 
-                - There is no additional setup needed to add reset_injection into the
-                  test besides overriding the virtual inject_reset() task.
-
-          - Mid-Test Reset Detection:
-                - If users plan on resetting the DUT during the middle of testing, then
-                  they need to define their own base_reset_detector class and hook it
-                  up directly to their tests.
-
-                - Users will also need to implement the handle_reset() task to implement
-                  their test/DUT specific reset handling.
-
-                - Users may need to implement reset handling tasks in each of
-                  their individual testing components, but that is left to the user
-                  to define and call themselves in base_test::handle_reset().
-
-                - When a mid-test reset assertion is detected (through the base_reset_detector)
-                  the base_test will terminate all active component threads
-                  (generate, drive, monitor, predict, score) then call the handle_reset() task.
-                  After handle_reset() returns base_test will block until a reset deassertion
-                  is detected (through base_reset_detector), then it will resume the main
-                  test loops and restart each components thread.
+               - For more details see:
+                    - base_test::rst_aware_test()
+                    - base_test::reset_recovery()
+                    - base_test::handle_reset()
+                    - base_reset_pkg.sv
 
 
-    Pure Virtual Functions: NONE
+    Pure Virtual Functions:
+      - NONE
 
-    Virtual Task:
+    Virtual Tasks:
+      reset_recovery() [OPTIONAL]:
+        - Called after a mid-test reset is detected. 
+        - By default flushes mailboxes, reconciles counters, then calls handle_reset().
+        - Users can override this if they need custom mailbox/counter handling.
+
       handle_reset() [OPTIONAL]:
-        - This is an optional task that users will use to implement their logic to
-          handle a mid test reset.
-        - See "Mid-Test Reset Detection" above for more details.
+        - Called at the end of reset_recovery().
+        - Users use this task to interface into reset_recovery() and implement their
+          test/DUT specific reset handling logic.
 
-      inject_reset() [OPTIONAL]:
-        - Users use this task to implement mid-test reset injection logic.
-        - See "Mid-Test Reset Injection" above for more details.
+      pre_run() / post_run():
+        - Runs once before/after the main testing loop.
+        - By default these tasks fork each component's pre/post_run() tasks and run them
+          concurrently.
+        - Users can override this behavior and implement their own custom test level
+          pre/post_run logic.
 
     Member Functions:
-          - run(int num_tests = -1)
-                - run the test
-                - Tests will run until:
-                    - The number of transactions generated == num_tests OR
-                      gen.finished is set (if users dont specify a num_tests) AND
-                    - The number of transactions scored == num transactions generated
-                    - we timeout
-          - pre_run()
-                - runs once before the main run loop
-                - forks each components pre_run() function and waits for them all to return
-          - post_run()
-                - runs once after the main run loop
-                - forks each components post_run() function and waits for them all to return
-          - print_results(string msg = "")
-                - print total number of tests ran and total number of failed tests
+      - run(int num_tests = -1)
+            - Users call this to start testing.
+            - Testing completes when all generated transactions have been scored.
+            - Generation stops when num_tests transactions have been generated,
+              or when gen.finished is set.
+
+        - print_results(string msg = "")
+              - print total number of tests ran and total number of failed tests
+
+    Protected Tasks:
+        - test(int num_tests = -1)
+              - The main testing loop.
+              - Forks all component's testing tasks (gen, drv, mon, pred, scb) concurrently.
+              - Waits for gen to finish
+              - Then waits until scb has scored all generated transactions.
+
+        - rst_aware_test(int num_tests = -1)
+              - Wraps test() with mid-test reset infrastructure needed to detect and
+                recover from mid-test resets.
+              - Only called when base_test::rst is set.
 */
 package base_test_pkg;
   import base_reset_pkg::*;
@@ -76,53 +76,106 @@ package base_test_pkg;
     mailbox_t pred_to_scb_mbx;
 
     string tag;
-
     int timeout;
+    bit test_running = 0; //test doesn't start running until run() is called
 
-    bit test_running = 0; //test doesnt start running until run() is called
 
-    //If users need mid-test reseting they need to extend the base_reset, then
-    //hook it up manually to base_test::rst();
-    base_reset rst = null;
-
+    /************ MANDATORY TESTING COMPONENTS ************************/
+    //  - Users must implement each of these components
+    //  - When written base_test extensions users need to set type params, then call new
+    //    for each component
+    //
+    //        class my_test extends base_test #(my_trans, my_gen, my_drv, my_mon, my_pred, my_scb);
+    //          function new(...);
+    //            super.new(tag);
+    //            gen  = new(gen_to_drv_mbx);
+    //            drv  = new(..., gen_to_drv_mbx);
+    //            mon  = new(..., mon_to_scb_mbx);
+    //            pred = new(..., pred_to_scb_mbx);
+    //            scb  = new(..., mon_to_scb_mbx, pred_to_scb_mbx);
+    //          endfunction
+    //        endclass
+    /******************************************************************/
     GEN_T  gen;
     DRV_T  drv;
     MON_T  mon;
     PRED_T pred;
     SCB_T  scb;
 
-    protected function new(string tag, int timeout = 10000000);
+
+    /**************** OPTIONAL TESTING COMPONENTS ************************/
+    //  -If users need any of the following components they need to make them
+    //  in their new() functions then connect them manually
+    //            my_reset my_rst = new(...);
+    //            rst = my_rst;
+    /********************************************************************/
+    base_reset rst = null;  //users can extend base_reset to implement mid-test resetting
+
+
+    /*========================= NEW ====================================*/
+
+    protected function new(string tag, int timeout = 1000000);
       this.tag = tag;
       this.timeout = timeout;
-      gen_to_drv_mbx  = new(1);
+      gen_to_drv_mbx  = new(1); //Bounded by 1. Mid-test reset handling only works correctly when the
+                                //generator can only generate one transaction at a time
       mon_to_scb_mbx  = new();
       pred_to_scb_mbx = new();
     endfunction
 
-    /*==================== VIRTUAL TASKS ================================*/
 
-    virtual task handle_reset();
-      //Empty, users will define their own reset handling if needed
-      //  - Users will need to define reset_handling per component
-      //  - Users will need to define how their tests call each components reset handling
+    /*======================= RESET HANDLING  ================================*/
+    //If users implement a base_reset for mid-test resetting, then we need to
+    //be able to recover from that. reset_recovery() is called after
+    //a mid-test reset is detected. By default this task will flush the
+    //mailboxes, reconcile gen.num_trans with scb.num_tests, then it will call
+    //the handle_reset() where users will implement their test/DUT specific
+    //reset handling. reset_recovery() is virtual so if users need more
+    //control they can implement their own version.
+
+    virtual task reset_recovery();
+      TRANS_T flush;                            //Flush everything that's in the mailboxes
+      while(mon_to_scb_mbx.try_get(flush));
+      while(pred_to_scb_mbx.try_get(flush));
+      while(gen_to_drv_mbx.try_get(flush));
+
+      gen.num_transactions = scb.num_tests;    //Reconcile the num_trans generated with the num_test scored
+                                               // - After a reset we should have generated exactly the
+                                               //   same amount of tests that were scored.
+
+      handle_reset();                          //Call the users handle_reset implementation
     endtask
 
-    /*========================== RUN =================================*/
-    //Users call this to start testing
+    virtual task handle_reset();
+      //Empty by default. Users can implement additional reset handling logic here.
+    endtask
 
-    task run(int num_tests = -1);
-      pre_run();
 
-      test_running = 1;
-      if(rst != null) begin   //If we have reset detection, then
-        reset_aware_test(num_tests); //We need to wrap the test in some extra infrastructure
-      end
-      else begin                     //If there is no reset detection, then
-        test(num_tests);             //we just run the test directly
-      end
-      test_running = 0;
+    /*=================== PRE_RUN and POST_RUN =========================*/
+    //By default pre_run and post_run fork each component's pre/post_run task
+    //to run concurrently, but these are virtual so users can override and do
+    //their own thing if needed.
 
-      post_run();
+    virtual task pre_run();
+      fork
+        if(rst != null) rst.pre_run();
+        gen.pre_run();
+        drv.pre_run();
+        mon.pre_run();
+        pred.pre_run();
+        scb.pre_run();
+      join
+    endtask
+
+    virtual task post_run();
+      fork
+        if(rst != null) rst.post_run();
+        gen.post_run();
+        drv.post_run();
+        mon.post_run();
+        pred.post_run();
+        scb.post_run();
+      join
     endtask
 
 
@@ -133,12 +186,33 @@ package base_test_pkg;
     endfunction
 
 
+    /*========================== RUN =================================*/
+    //Users call this to start testing
+
+    task run(int num_tests = -1);
+      pre_run();
+
+      test_running = 1;
+      if(rst != null) begin        //If we have mid-test resetting, then
+        rst_aware_test(num_tests); //we need to wrap the test in some extra infrastructure
+      end
+      else begin                   //If there is no reset detection, then
+        test(num_tests);           //we just run the test directly
+      end
+      test_running = 0;
+
+      post_run();
+    endtask
+
+
     /*=========================== TEST ====================================*/
     //The main testing loop.
+    //  - The testing loop will terminate AFTER BOTH num_test transactions
+    //    have been generated (or gen.finished is set) AND the scb has scored
+    //    each transaction generated by the gen
 
     protected task test(int num_tests = -1);
       fork begin
-
         fork
           if(num_tests >= 0) while(gen.num_transactions < num_tests) gen.gen();
           else               while(!gen.finished)                    gen.gen();
@@ -151,7 +225,6 @@ package base_test_pkg;
                           tag, scb.num_tests, gen.num_transactions, gen.finished, gen_to_drv_mbx.num());
         join_any
 
-        //Drain: wait for the scoreboard to score all generated transactions
         fork
           wait(scb.num_tests >= gen.num_transactions);
 
@@ -159,63 +232,40 @@ package base_test_pkg;
                           tag, scb.num_tests, gen.num_transactions);
         join_any
 
-        disable fork;
+        disable fork; //terminate testing
       end join
 
+      //If we scored too many transactions then something went wrong
       if(scb.num_tests > gen.num_transactions) begin
         $fatal(1, "[%s]: scb scored too many tests!, scb.num_tests=%0d, gen.num_transactions=%0d",
                           tag, scb.num_tests, gen.num_transactions);
       end
     endtask
 
+
     /*======================  RESET_AWARE_TEST ======================*/
     //Run the test with some extra infrastructure to handle mid-test resetting
 
-    protected task reset_aware_test(int num_tests = -1);
-      while(test_running) begin          //Repeat the following until the test is done:
+    protected task rst_aware_test(int num_tests = -1);
+      while(test_running) begin   //Repeat the following until the test is done:
 
-        fork begin                               //Fork testing and reset_detection to run concurrently
+        fork begin                      //Fork the main testing loop and the resetting to run concurrently
           fork
             begin
-              test(num_tests);                   //If test returns first -> then testing is done
+              test(num_tests);          //If test returns first -> then testing is done
               test_running = 0;
             end
             begin
-              rst.rst_assert();                  //If we assert a reset first -> then test is still running
+              rst.rst();                //If we asserted a reset first -> then test is still running
             end
           join_any
-          disable fork;                          //Regardless of which it is, kill all running concurrent processes
+          disable fork;                 //Regardless of which it is, kill all currently running forks
         end join
 
-        if(test_running) begin                   //If test is still running, then a reset was detected
-          handle_reset();                        //handle the reset
+        if(test_running) begin          //If test is still running, then a reset was detected
+          reset_recovery();             //handle the reset
         end
-      end                               //Repeat until the test is done running
-    endtask
-
-
-    /*=================== PRE_RUN and POST_RUN =========================*/
-
-    protected task pre_run();
-      fork
-        if(rst != null) rst.pre_run();
-        gen.pre_run();
-        drv.pre_run();
-        mon.pre_run();
-        pred.pre_run();
-        scb.pre_run();
-      join
-    endtask
-
-    protected task post_run();
-      fork
-        if(rst != null) rst.post_run();
-        gen.post_run();
-        drv.post_run();
-        mon.post_run();
-        pred.post_run();
-        scb.post_run();
-      join
+      end                       //Repeat until the test is done running
     endtask
   endclass
 

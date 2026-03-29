@@ -30,7 +30,7 @@ package tb_if_stage_tests_pkg;
       vif.cb_drv.reset_n <= 0;
     endtask
 
-    task rst_assert();
+    task run();
       @(vif.cb_drv)
       vif.cb_drv.reset_n <= 1;
 
@@ -69,15 +69,7 @@ package tb_if_stage_tests_pkg;
     endfunction
 
     task handle_reset();
-      if_stage_trans flush;
-      $display("HANDLE_RESET CALLED, scb.num_tests=%0d, gen.num_transactions=%0d",
-        scb.num_tests, gen.num_transactions);
-      while(mon_to_scb_mbx.try_get(flush));
-      while(pred_to_scb_mbx.try_get(flush));
-      while(gen_to_drv_mbx.try_get(flush));
-
-      gen.num_transactions = scb.num_tests;
-
+      $display("RESET DETECTED");
       gen.reset_state();
       pred.ref_if_stage.reset();
     endtask
@@ -99,7 +91,7 @@ package tb_if_stage_tests_pkg;
   //hit the branch_target corners
   class if_stage_branch_corners_test extends if_stage_base_test #(if_stage_branch_corners_gen);
     function new(virtual if_stage_intf vif, tb_if_stage_coverage coverage, string program_file);
-      super.new(vif, coverage, program_file, "IF_STAGE)_BRANCH_CORNERS_TEST");
+      super.new(vif, coverage, program_file, "IF_STAGE_BRANCH_CORNERS_TEST");
     endfunction
   endclass
 

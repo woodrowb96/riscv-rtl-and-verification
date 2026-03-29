@@ -27,6 +27,8 @@ package tb_if_stage_driver_pkg;
     //DUT in the reset state, so the PC doesnt increment between tests.
     task post_run();
       @(vif.cb_drv);
+      vif.cb_drv.branch        <= 0;
+      vif.cb_drv.branch_target <= 0;
       vif.cb_drv.valid <= 0;
     endtask
 

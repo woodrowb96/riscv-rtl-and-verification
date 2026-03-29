@@ -1,24 +1,24 @@
 /*
     Base monitor class for the verification library.
 
-    Pure Virtual Functions:
+    Pure Virtual Tasks:
         - run()
-            - User defined interface into the main testing loop (initiated by base_test::run(num_tests))
-            - Users use this function to write DUT monitoring logic
-            - This function will run once per run() (base_drive::drv() is being looped in the testing loop)
+            - User defined interface into the main testing loop (initiated by base_test::run(num_tests)).
+            - Users use this task to write DUT monitoring logic.
+            - This task will run once per iteration of the main testing loop.
 
-    Virtual tasks:
+    Virtual Tasks:
         - pre_run()
-            - automatically runs once before the main base_test::run() loop starts
-            - by default its empty, but users can override this and add their own logic
+            - Automatically runs once before the main base_test::run() loop starts.
+            - Empty by default. Users can override this and add their own logic.
         - post_run()
-            - automatically runs once after the main base_test::run() loop ends
-            - by default its empty, but users can override this and add their own logic
+            - Automatically runs once after the main base_test::run() loop ends.
+            - Empty by default. Users can override this and add their own logic.
         - mon()
             - Wrapper around base_monitor::run().
             - Called and looped in the main testing loop.
             - By default there is no additional wrapping logic around base_monitor::run(),
-              but users can overload this function and implement any if needed
+              but users can override this and implement any if needed.
 */
 package base_monitor_pkg;
 

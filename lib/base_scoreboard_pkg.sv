@@ -1,34 +1,34 @@
 /*
-  Base scoreboard class for the verification library.
+    Base scoreboard class for the verification library.
 
-  Pure Virtual Tasks:
-    - run()
-        - User defined interface into the main testing loop (initiated by base_test::run(num_tests))
-        - Users use this task to score the expected transactions (sent from the predictor)
-          agains the actual transaction (sent from the monitor)
-        - Users can increment the base_scoreboard::num_fails to keep track of the number of failed tests.
-        - By default base_scoreboard::num_tests is incremented automatically each time
-          base_scoreboard::run() is called (so we assume only 1 test is scored per run() call)
-        - This function will run once per run() (base_drive::drv() is being looped in the testing loop)
+    Pure Virtual Tasks:
+        - run()
+            - User defined interface into the main testing loop (initiated by base_test::run(num_tests)).
+            - Users use this task to score the expected transactions (sent from the predictor)
+              against the actual transaction (sent from the monitor).
+            - Users can increment base_scoreboard::num_fails to keep track of the number of failed tests.
+            - By default base_scoreboard::num_tests is incremented automatically each time
+              base_scoreboard::run() is called (so we assume only 1 test is scored per run() call).
+            - This task will run once per iteration of the main testing loop.
 
-    Virtual tasks:
+    Virtual Tasks:
         - pre_run()
-            - automatically runs once before the main base_test::run() loop starts
-            - by default its empty, but users can override this and add their own logic
+            - Automatically runs once before the main base_test::run() loop starts.
+            - Empty by default. Users can override this and add their own logic.
         - post_run()
-            - automatically runs once after the main base_test::run() loop ends
-            - by default its empty, but users can override this and add their own logic
+            - Automatically runs once after the main base_test::run() loop ends.
+            - Empty by default. Users can override this and add their own logic.
         - scb()
             - Wrapper around base_scoreboard::run().
             - Called and looped in the main testing loop.
             - By default this task will increment num_tests after calling run(),
-              but users can overload this function and implement any if needed
+              but users can override this and implement any if needed.
 
-  Member Functions:
-      - print_fail(TRANS_T actual, TRANS_T expected, string msg = "")
-          - Prints an error and the values of an actual and expected transaction
-      - print_results(string tag = this.tag, string msg = "")
-          - Prints the current results (num_tests run and num_fails)
+    Member Functions:
+        - print_fail(TRANS_T actual, TRANS_T expected, string msg = "")
+            - Prints an error and the values of an actual and expected transaction.
+        - print_results(string tag = this.tag, string msg = "")
+            - Prints the current results (num_tests run and num_fails).
 */
 package base_scoreboard_pkg;
 
