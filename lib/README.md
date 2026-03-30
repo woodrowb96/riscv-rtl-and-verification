@@ -66,7 +66,9 @@ reset-aware infrastructure built into `base_test`.
 
 - **base_reset:**
     - Users use this class to implement reset injection logic.
-    - Users use the pure virtual `run()` task to implement their mid-test reset aware logic.
+    - Users implement two pure virtual tasks:
+        - `assert_rst()` — Implement reset assertion logic.
+        - `deassert_rst()` — Implement reset deassertion logic.
     - This class is optional, so users need to hook it up manually to the `base_test::rst`
       member variable when constructing their tests (see [`verify/tests/tb_if_stage_tests_pkg.sv`](../verify/tests/tb_if_stage_tests_pkg.sv)
       for more details).
@@ -76,11 +78,11 @@ reset-aware infrastructure built into `base_test`.
       automatically run the `base_test::rst_aware_test()` version of the main testing loop.
     - `base_test::rst_aware_test()` has additional infrastructure to detect a reset,
        recover from a reset and then resume testing after a reset.
-    - When `base_reset::run()` asserts a mid-test reset, `base_test` will
+    - When `base_reset::assert_rst()` returns, `base_test` will:
         - Kill all currently running testing components.
         - Flush everything currently sitting in the mailboxes.
         - Call the user defined `base_test::handle_reset()` task.
-        - Once the reset has been handled it will then restart the testing components
-          and resume testing.
+        - Call `base_reset::deassert_rst()` and block until it returns.
+        - Once reset has been deasserted, restart the testing components and resume testing.
 
 See the source files for full API and implementation details.

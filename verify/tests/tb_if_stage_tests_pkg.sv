@@ -30,8 +30,8 @@ package tb_if_stage_tests_pkg;
       vif.cb_drv.reset_n <= 0;
     endtask
 
-    task run();
-      @(vif.cb_drv)
+    task assert_rst();
+      @(vif.cb_drv)                     //make sure reset is deasserted
       vif.cb_drv.reset_n <= 1;
 
       if(count < 3) begin
@@ -43,6 +43,14 @@ package tb_if_stage_tests_pkg;
         wait(0);
       end
     endtask;
+
+    task deassert_rst();
+      //Nothing we dont use this task to deasert the reset
+      //The if_stages pc will start incrementing on the first clk cycle after
+      //rst is deasserted. To make sure re resetart testing at pc = 0, not pc = 4
+      //we will just let this task fall through and use the start of
+      //rst_assert to deassert the reset.
+    endtask
   endclass
 
   /*=============================== BASE TEST ==================================*/

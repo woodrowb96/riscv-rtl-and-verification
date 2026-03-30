@@ -8,13 +8,18 @@
                   new() and hooking it up to the base_test::rst.
 
                 - When base_test::rst is set, base_test will automatically run the test with the
-                  additional infrastructure needed to be reset aware (base_test::rst_aware_test()).
+                  additional infrastructure needed to be reset aware.
+                  (see base_test::rst_aware_test())
 
-                - When a mid-test reset is detected base_test will kill all currently running
-                  concurrent processes. It will then call base_test::reset_recovery() which
-                  will flush the mailboxes and make sure the scoreboard and generator are in sync.
-                  It will then call base_test::handle_reset() which is where users can write
-                  their DUT/test specific reset handling.
+                - When a mid-test reset is detected base_test will in order:
+                    - Kill all currently running concurrent processes.
+                    - Call base_test::reset_recovery() which will
+                       - Flush the mailboxes
+                       - Make sure the scoreboard and generator are in sync
+                       - Call base_test::handle_reset(), which is where users can write
+                         their DUT/test specific reset handling.
+                    - Call rst.deassert_rst(), which will block until the rst has been deasserted
+                    - Once reset has been deasserted base_test will then resume the normal testing loop
 
                - For more details see:
                     - base_test::rst_aware_test()
@@ -256,7 +261,7 @@ package base_test_pkg;
               test_running = 0;
             end
             begin
-              rst.rst();                //If we asserted a reset first -> then test is still running
+              rst.assert_rst();         //If we asserted a reset first -> then test is still running
             end
           join_any
           disable fork;                 //Regardless of which it is, kill all currently running forks
@@ -264,6 +269,7 @@ package base_test_pkg;
 
         if(test_running) begin          //If test is still running, then a reset was detected
           reset_recovery();             //handle the reset
+          rst.deassert_rst();           //block until we deassert the reset, then loop around and resume testing
         end
       end                       //Repeat until the test is done running
     endtask
