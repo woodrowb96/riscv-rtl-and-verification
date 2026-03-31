@@ -78,6 +78,7 @@ package tb_if_stage_generator_pkg;
     }
   endclass
 
+  //GENERATOR
   class if_stage_main_test_gen extends if_stage_base_gen;
 
     function new(mailbox_t gen_to_drv_mbx);
@@ -127,7 +128,8 @@ package tb_if_stage_generator_pkg;
       };
     }
   endclass
-  
+
+  //GENERATOR
   class if_stage_branch_corners_gen extends if_stage_base_gen;
 
     function new(mailbox_t gen_to_drv_mbx);
@@ -206,6 +208,7 @@ package tb_if_stage_generator_pkg;
     }
   endclass
 
+  //GENERATOR
   class if_stage_oob_misaligned_gen extends if_stage_base_gen;
 
     function new(mailbox_t gen_to_drv_mbx);

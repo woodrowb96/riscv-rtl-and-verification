@@ -24,6 +24,7 @@ package tb_if_stage_predictor_pkg;
       @(vif.cb_mon)
       if(vif.cb_mon.valid && vif.cb_mon.reset_n) begin
         trans = new();
+
         //sample the DUT input
         trans.branch        = vif.cb_mon.branch;
         trans.branch_target = vif.cb_mon.branch_target;

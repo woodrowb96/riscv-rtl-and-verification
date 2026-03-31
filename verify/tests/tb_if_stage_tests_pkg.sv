@@ -10,16 +10,25 @@ package tb_if_stage_tests_pkg;
   import tb_if_stage_predictor_pkg::*;
 
   /*============================ RESET ================================*/
+
+  //This is the base reset class that most tests will use. This class will
+  //just reset the DUT before and after testing, but will not assert any reset
+  //mid-testing.
   class if_stage_base_reset extends base_reset;
     virtual if_stage_intf vif;
-
-    int count = 0;
 
     function new(virtual if_stage_intf vif, string tag = "IF_STAGE_BASE_RESET");
       super.new(tag);
       this.vif = vif;
     endfunction
 
+    //NOTE:
+    //  - PC will start incrementing as soon as reset is deaserted. If we
+    //  deasserted the reset in pre_run, the PC would start incrementing
+    //  before the first transaction of testing is driven. This means testing
+    //  would start at PC = 4, not PC = 0. To make sure we dont start
+    //  incrementing early, we wait to deassert the reset until the first clk
+    //  of testing (see assert_rst())
     task pre_run();
       @(vif.cb_drv);
       vif.cb_drv.reset_n <= 0;
@@ -31,25 +40,13 @@ package tb_if_stage_tests_pkg;
     endtask
 
     task assert_rst();
-      @(vif.cb_drv)                     //make sure reset is deasserted
+      @(vif.cb_drv)              //Bring the DUT out of reset at the start of testing
       vif.cb_drv.reset_n <= 1;
-
-      if(count < 3) begin
-        repeat(10) @(vif.cb_drv);
-        vif.cb_drv.reset_n <= 0;
-        count++;
-      end
-      else begin
-        wait(0);
-      end
+      wait(0);                   //then block the rest of testing, we dont want any mid-test resets
     endtask;
 
     task deassert_rst();
-      //Nothing we dont use this task to deasert the reset
-      //The if_stages pc will start incrementing on the first clk cycle after
-      //rst is deasserted. To make sure re resetart testing at pc = 0, not pc = 4
-      //we will just let this task fall through and use the start of
-      //rst_assert to deassert the reset.
+      //Empty we dont assert any mid-test resets so we dont need to deassert any
     endtask
   endclass
 
@@ -78,8 +75,8 @@ package tb_if_stage_tests_pkg;
 
     task handle_reset();
       $display("RESET DETECTED");
-      gen.reset_state();
-      pred.ref_if_stage.reset();
+      gen.reset_state();            //Reset the generator state
+      pred.ref_if_stage.reset();    //Reset the ref_model
     endtask
 
   endclass

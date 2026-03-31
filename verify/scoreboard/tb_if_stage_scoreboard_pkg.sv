@@ -18,7 +18,6 @@ package tb_if_stage_scoreboard_pkg;
 
     task run();
       if_stage_trans actual, expected;
-
       bit passed = 0;
 
       mon_to_scb_mbx.get(actual);

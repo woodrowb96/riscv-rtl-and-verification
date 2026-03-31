@@ -1,10 +1,10 @@
 /*
-  NOTE: reset coverage
-    - I don't currently cover any reset functionality. I am going to modify the
-    base verification library (see ../../lib/) to make handling resets across components
-    easier. I'm going to finish the if_stage without reset coverage, then modify the
-    library, then come back and add reset coverage (and any additional tests) to the
-    if_stage verification.
+    Coverage for this module is collected manually through a sample() function.
+
+    COVERAGE SAMPLING ASSUMPTIONS:
+        - sample() is being called AFTER the DUT signals have been driven onto the DUT's input ports
+          and AFTER the combinatorial instruction has had time to propagate to the inst output.
+          but BEFORE the next pc has been clocked onto the current pc.
 */
 package tb_if_stage_coverage_pkg;
   import tb_if_stage_transaction_pkg::*;
