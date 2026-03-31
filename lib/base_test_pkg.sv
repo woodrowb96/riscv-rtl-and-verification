@@ -2,7 +2,7 @@
     Base test class for the verification library.
 
     Optional Functionality:
-          - Mid-test Resetting:
+          - Mid-test Reset Injection and Handling:
                 - Users can integrate mid-test resetting into their tests by
                   extending the base_reset, constructing it in their child tests
                   new() and hooking it up to the base_test::rst.
@@ -25,6 +25,26 @@
                     - base_test::rst_aware_test()
                     - base_test::reset_recovery()
                     - base_test::handle_reset()
+                    - base_reset_pkg.sv
+
+          - Mid-test Reset Monitoring:
+                - Users can write a dedicated reset monitor using base_reset::monitor_rst().
+
+                - When base_test::rst is set, base_test::run() will fork rst.monitor_rst()
+                  to run in parallel with the main testing loop.
+
+               - This task will run forever until the end of testing. It will not be killed
+                  and restarted like the other testing components are after a reset
+                  (see rst_aware_test()). This means users can monitor DUT resetting uninterrupted
+                  throughout the duration of testing.
+
+               - Reset monitoring through base_reset::monitor_rst() is intended to be
+                 passive. This is a place where users could for example collect reset dedicated
+                 coverage. Users are not intended to use this task to detect when a reset has
+                 happened and alert the main testing loop. base_test does that on its own independently.
+
+                - For more details see:
+                    - base_reset::monitor_rst()
                     - base_reset_pkg.sv
 
 
@@ -198,8 +218,14 @@ package base_test_pkg;
       pre_run();
 
       test_running = 1;
-      if(rst != null) begin        //If we have mid-test resetting, then
-        rst_aware_test(num_tests); //we need to wrap the test in some extra infrastructure
+      if(rst != null) begin               //If we have mid-test resetting, then
+        fork begin
+          fork
+            forever rst.monitor_rst();   //fork off the reset monitor
+            rst_aware_test(num_tests);   //fork off the rst_aware testing loop
+          join_any
+          disable fork;
+        end join
       end
       else begin                   //If there is no reset detection, then
         test(num_tests);           //we just run the test directly

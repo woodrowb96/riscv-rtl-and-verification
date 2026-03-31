@@ -1,12 +1,11 @@
 /*
     Base reset class for the verification library.
-
-    Users extend this class to implement mid-test resetting.
+    This class acts as both a driver and monitor for the DUT mid-test resetting.
 
     Pure Virtual Tasks:
         - assert_rst()
             - Users use this task to implement their mid-test reset assertion logic.
-            - During testing this task is forked off to run concurently with the main
+            - During testing this task is forked off to run concurrently with the main
               testing loop.
             - Users should write this task in such a way that it blocks when a reset
               is not being asserted and returns as soon as a reset is asserted.
@@ -26,6 +25,18 @@
             - See base_test::rst_aware_test() for more details.
 
     Virtual Tasks:
+        - monitor_rst()
+            - Users use this task to implement reset monitoring logic (e.g. reset coverage).
+            - This will get forked off to run in parallel with the main testing loop.
+            - This is being looped by base_test and will run forever concurrently with the
+              main testing loop.
+           - This task is not killed during a reset event and will just run forever until
+              the end of testing. This gives users a place to monitor the DUTs reset with
+              no interruptions.
+           - This task is intended to be a passive place where users can monitor the DUT
+              and for example collect reset coverage. This task is not used by the base_test
+              to detect when a reset has happened. base_test will do that on its own independently.
+
         - pre_run()
             - Automatically runs once before the main testing loop starts.
             - Empty by default. Users can override to set up pre-test reset logic.
@@ -83,6 +94,11 @@ package base_reset_pkg;
     pure virtual task assert_rst();
 
     pure virtual task deassert_rst();
+
+    virtual task monitor_rst();
+      //Empty by default.
+      wait(0);
+    endtask
 
     virtual task pre_run();
       //empty by default

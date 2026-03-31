@@ -65,7 +65,7 @@ The library supports optional mid-test reset injection through the `base_reset` 
 reset-aware infrastructure built into `base_test`.
 
 - **base_reset:**
-    - Users use this class to implement reset injection logic.
+    - Users use this class to implement reset injection and monitoring logic.
     - Users implement two pure virtual tasks:
         - `assert_rst()` — Implement reset assertion logic.
         - `deassert_rst()` — Implement reset deassertion logic.
@@ -84,5 +84,17 @@ reset-aware infrastructure built into `base_test`.
         - Call the user defined `base_test::handle_reset()` task.
         - Call `base_reset::deassert_rst()` and block until it returns.
         - Once reset has been deasserted, restart the testing components and resume testing.
+
+## Mid-Test Reset Monitoring
+
+The library supports optional mid-test reset monitoring through the `base_reset::monitor_rst()`
+virtual task.
+
+- If users implement and hook up a `base_reset` class then `base_test::run()` will
+automatically run the `base_reset::monitor_rst()` task in parallel with the main testing loop.
+
+- This task will run uninterrupted for the remainder of testing and gives users a place
+where they can monitor (to perhaps collect reset dedicated coverage) the DUT's reset signals 
+without interruptions.
 
 See the source files for full API and implementation details.
